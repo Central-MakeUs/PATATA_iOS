@@ -12,7 +12,7 @@ import GoogleSignIn
 struct PatataApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            LoginView()
                 .onOpenURL { url in
                     GIDSignIn.sharedInstance.handle(url)
                 }
