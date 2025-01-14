@@ -17,18 +17,8 @@ final class NetworkManager {
     
     func requestNetwork<T: DTO, R: Router>(dto: T.Type, router: R) async throws(APIError) -> T {
         do {
-            if let bodyData = router.body {
-                        let bodyString = String(data: bodyData, encoding: .utf8)
-                    }
-            
             let request = try router.asURLRequest()
-            
             let response = await getRequest(dto: dto, router: router, request: request)
-            
-            if let responseData = response.data {
-                        let responseString = String(data: responseData, encoding: .utf8)
-                    }
-            
             let result = try await getResponse(dto: dto, router: router, response: response)
             
             return result
