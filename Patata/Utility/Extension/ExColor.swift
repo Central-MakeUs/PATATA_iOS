@@ -25,9 +25,9 @@ extension Color {
 extension Color {
    // Blue colors
    static let blue10 = Color(hex: "E6F7FF")
-   static let blue20 = Color(hex: "BAE7FF")
-   static let blue50 = Color(hex: "91D5FF")
-   static let blue100 = Color(hex: "69C0FF")
+   static let blue20 = Color(hex: "B7E4FB")
+   static let blue50 = Color(hex: "6FC9F6")
+   static let blue100 = Color(hex: "20ACF2")
    
    // Navy colors
    static let navy20 = Color(hex: "405493")
