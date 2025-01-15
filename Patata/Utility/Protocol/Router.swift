@@ -28,7 +28,7 @@ protocol Router {
 extension Router {
     
     var baseURL: String {
-        return APIkey.baseURL
+        return APIKey.baseURL
     }
     
     var headers: HTTPHeaders {
