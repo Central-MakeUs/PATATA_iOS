@@ -14,3 +14,10 @@ extension View {
             .lineSpacing(style.lineHeight - style.fontSize)
     }
 }
+
+extension View {
+    func asButton(action: @escaping () -> Void ) -> some View {
+        modifier(ButtonModifier(action: action))
+    }
+}
+
