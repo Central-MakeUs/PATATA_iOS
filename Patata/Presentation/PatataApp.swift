@@ -11,16 +11,22 @@ import ComposableArchitecture
 
 @main
 struct PatataApp: App {
+    init() {
+        let appearance = UITabBarAppearance()
+        appearance.stackedLayoutAppearance.normal.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 4)
+        
+        UITabBar.appearance().standardAppearance = appearance
+        UITabBar.appearance().scrollEdgeAppearance = appearance
+    }
+    
     var body: some Scene {
         WindowGroup {
-            PatataMainView(store: Store(initialState: PatataMainFeature.State(), reducer: {
-                PatataMainFeature()
+            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(tabState: .home), reducer: {
+                TabCoordinator()
             }))
-//            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(), reducer: {
-//                TabCoordinator()
-//            }))//                .onOpenURL { url in
-//                    GIDSignIn.sharedInstance.handle(url)
-//                }
+            .onOpenURL { url in
+                GIDSignIn.sharedInstance.handle(url)
+            }
         }
     }
 }
