@@ -6,46 +6,18 @@
 //
 
 import SwiftUI
-
-// ["전체", "작가 추천", "스냅스팟", "시크한 야경", "싱그러운 자연"]
-// ["RecommendIcon", "RecommendIcon", "RecommendIcon", "RecommendIcon", "RecommendIcon"]
+import ComposableArchitecture
 
 struct PatataMainView: View {
-    let items = ["a", "b", "c"]
+    @Perception.Bindable var store: StoreOf<PatataMainFeature>
+    
     let spacing: CGFloat = 30
     let sideCardVisibleRatio: CGFloat = 0.18
     let scaleEffect: CGFloat = 1.05
     
-    @State var selectedIndex = 0
-    
-    var categoryItems = [
-        CategoryItem(
-            item: "전체",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "작가 추천",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "스냅스팟",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "시크한 야경",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "싱그러운 자연",
-            images: "RecommendIcon"
-        )
-    ]
-    
     @State private var contentOffsetX: CGFloat = 0
     @State private var cardWidth: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
-    
-    @State private var categorySelect: Bool = false
     
     @State private var currentIndex = 0 {
         didSet {
@@ -54,8 +26,10 @@ struct PatataMainView: View {
     }
     
     var body: some View {
-        contentView
-            .background(.gray20)
+        WithPerceptionTracking {
+            contentView
+                .background(.gray20)
+        }
     }
 }
 
@@ -66,54 +40,54 @@ extension PatataMainView {
             let screenHeight = geometry.size.height
             let sideCardWidth = screenWidth * sideCardVisibleRatio
             
-            ScrollView(.vertical) {
-                HStack {
-                    Text("patata")
-                        .foregroundStyle(.blue100)
-                        .textStyle(.headlineM)
-                        .padding(.leading, 15)
-                    Spacer()
-                }
-                paSearchBar
-                    .padding(.horizontal, 15)
-                
-                bestSpotBar
-                    .padding(.top, 25)
-                    .padding(.horizontal, 15)
-                
-                setSizeRecommendSpots(sideCardWidth: sideCardWidth)
-                    .shadow(radius: 4)
-                    .padding(.top, 30)
-                    .onAppear {
-                        cardWidth = screenWidth * 0.65
-                        contentHeight = screenHeight / 2.1
-                        
-                        let initialOffset = -(cardWidth + spacing)
-                        contentOffsetX = initialOffset
-                        
-                        print(screenHeight)
+            WithPerceptionTracking {
+                ScrollView(.vertical) {
+                    HStack {
+                        Text("patata")
+                            .foregroundStyle(.blue100)
+                            .textStyle(.headlineM)
+                            .padding(.leading, 15)
+                        Spacer()
                     }
-                
-                spotCategory
-                    .shadow(radius: 8)
-                    .padding(.horizontal, 15)
-                    .padding(.top, 35)
-                
-                categoryRecommendView
-                    .padding(.horizontal, 15)
-                    .padding(.top, 35)
-                
-                CategoryRecommendView()
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal, 15)
-                    .padding(.top, 15)
-                
-                moreButton
-                    .padding(.top, 8)
-                    .padding(.horizontal, 15)
+                    paSearchBar
+                        .padding(.horizontal, 15)
+                    
+                    bestSpotBar
+                        .padding(.top, 25)
+                        .padding(.horizontal, 15)
+                    
+                    setSizeRecommendSpots(sideCardWidth: sideCardWidth)
+                        .shadow(radius: 4)
+                        .padding(.top, 30)
+                        .onAppear {
+                            cardWidth = screenWidth * 0.65
+                            contentHeight = screenHeight / 2.1
+                            
+                            let initialOffset = -(cardWidth + spacing)
+                            contentOffsetX = initialOffset
+                        }
+                    
+                    spotCategory
+                        .shadow(radius: 8)
+                        .padding(.horizontal, 15)
+                        .padding(.top, 35)
+                    
+                    categoryRecommendView
+                        .padding(.horizontal, 15)
+                        .padding(.top, 35)
+                    
+                    CategoryRecommendView()
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .padding(.horizontal, 15)
+                        .padding(.top, 15)
+                    
+                    moreButton
+                        .padding(.top, 8)
+                        .padding(.horizontal, 15)
+                        .padding(.bottom, 10)
+                }
             }
-            
         }
     }
     
@@ -208,14 +182,14 @@ extension PatataMainView {
             
             ScrollView(.horizontal) {
                 HStack {
-                    ForEach(Array(categoryItems.enumerated()), id: \.element.id) { index, item in
-                        CategoryView(categoryItem: item, isSelected: selectedIndex == index) {
-                            selectedIndex = index
+                    ForEach(Array(store.categoryItems.enumerated()), id: \.element.id) { index, item in
+                        CategoryView(categoryItem: item, isSelected: store.selectedIndex == index) {
+                            store.send(.viewEvent(.selectCategory(index)))
                         }
                     }
                 }
             }
-            .scrollDisabled(true)
+            .scrollIndicators(.hidden)
         }
     }
     
@@ -242,9 +216,11 @@ extension PatataMainView {
         withAnimation(.linear(duration: 0.3)) {
             let baseOffset = -(cardWidth + spacing)
             
-            if currentIndex >= items.count {
-                contentOffsetX = baseOffset * CGFloat(items.count + 1)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            if currentIndex >= store.recommendItem.item.count {
+                contentOffsetX = baseOffset * CGFloat(store.recommendItem.item.count + 1)
+//                Task.sleep(for: .now() + 0.3)
+                Task {
+                    try? await Task.sleep(for: .milliseconds(300))
                     withAnimation(.none) {
                         contentOffsetX = baseOffset
                         currentIndex = 0
@@ -252,10 +228,11 @@ extension PatataMainView {
                 }
             } else if currentIndex < 0 {
                 contentOffsetX = 0
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                Task {
+                    try? await Task.sleep(for: .milliseconds(300))
                     withAnimation(.none) {
-                        contentOffsetX = baseOffset * CGFloat(items.count)
-                        currentIndex = items.count - 1
+                        contentOffsetX = baseOffset * CGFloat(store.recommendItem.item.count)
+                        currentIndex = store.recommendItem.item.count - 1
                     }
                 }
             } else {
@@ -268,11 +245,11 @@ extension PatataMainView {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
-                    ForEach(-1..<items.count + 1, id: \.self) { i in
-                        let adjustedIndex = i < 0 ? items.count - 1 : (i >= items.count ? 0 : i)
-                        let isCurrentIndex = adjustedIndex == (currentIndex % items.count)
+                    ForEach(-1..<store.recommendItem.item.count + 1, id: \.self) { i in
+                        let adjustedIndex = i < 0 ? store.recommendItem.item.count - 1 : (i >= store.recommendItem.item.count ? 0 : i)
+                        let isCurrentIndex = adjustedIndex == (currentIndex % store.recommendItem.item.count)
                         
-                        TodayRecommendView(string: items[adjustedIndex])
+                        TodayRecommendView(string: store.recommendItem.item[adjustedIndex])
                             .frame(width: cardWidth, height: contentHeight)
                             .scaleEffect(isCurrentIndex ? scaleEffect : 1.0)
                     }
@@ -301,4 +278,3 @@ extension PatataMainView {
         )
     }
 }
-
