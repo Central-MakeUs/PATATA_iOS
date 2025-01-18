@@ -12,6 +12,7 @@ import ComposableArchitecture
 @Reducer(state: .equatable)
 enum HomeScreen {
     case home(PatataMainFeature)
+    case search(SearchFeature)
 }
 
 @Reducer
@@ -25,6 +26,16 @@ struct HomeCoordinator {
     
     enum Action {
         case router(IdentifiedRouterActionOf<HomeScreen>)
+        case navigationAction(NavigationAction)
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case tappedSearch
+        }
+    }
+    
+    enum NavigationAction {
+        case pushSearch
     }
     
     var body: some ReducerOf<Self> {
@@ -36,6 +47,19 @@ extension HomeCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+                
+            case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSearch)))):
+                return .concatenate(
+                    .send(.delegate(.tappedSearch)),
+                    .send(.navigationAction(.pushSearch))
+                )
+                
+            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
+            case .navigationAction(.pushSearch):
+                state.routes.push(.search(SearchFeature.State()))
+                
             default:
                 break
             }

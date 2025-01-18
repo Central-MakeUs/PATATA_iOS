@@ -14,6 +14,7 @@ struct TabCoordinator {
     @ObservableState
     struct State: Equatable {
         var tabState: TabCase
+//        var isTabBarHidden: Bool = false
         
         var homeTabState = HomeCoordinator.State.initialState
     }
@@ -40,6 +41,9 @@ extension TabCoordinator {
             switch action {
             case let .bindingTab(tab):
                 state.tabState = tab
+                
+//            case .homeTabAction(.delegate(.tappedSearch)):
+//                state.isTabBarHidden = true
                 
             default:
                 break

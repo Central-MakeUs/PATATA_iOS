@@ -44,6 +44,11 @@ struct PatataMainFeature {
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case tappedSearch
+        }
     }
     
     enum ViewCycle {
@@ -52,6 +57,7 @@ struct PatataMainFeature {
     
     enum ViewEvent {
         case selectCategory(Int)
+        case tappedSearch
     }
     
     var body: some ReducerOf<Self> {
@@ -65,6 +71,9 @@ extension PatataMainFeature {
             switch action {
             case let .viewEvent(.selectCategory(index)):
                 state.selectedIndex = index
+                
+            case .viewEvent(.tappedSearch):
+                return .send(.delegate(.tappedSearch))
                 
             default:
                 break

@@ -1,0 +1,89 @@
+//
+//  PASearchBar.swift
+//  Patata
+//
+//  Created by 김진수 on 1/18/25.
+//
+
+import SwiftUI
+
+struct PASearchBar: View {
+    var realSearch: Bool
+    let placeHolder: String
+    var bindingText: Binding<String>?
+    let onSubmit: (() -> Void)?
+    let imageSubmit: (() -> Void)?
+        
+    init(
+        placeHolder: String,
+        bindingText: Binding<String>,
+        onSubmit: @escaping () -> Void,
+        imageSubmit: @escaping () -> Void
+    ) {
+        self.placeHolder = placeHolder
+        self.realSearch = true
+        self.bindingText = bindingText
+        self.onSubmit = onSubmit
+        self.imageSubmit = imageSubmit
+    }
+    
+    init(placeHolder: String) {
+        self.placeHolder = placeHolder
+        self.realSearch = false
+        self.bindingText = nil
+        self.onSubmit = nil
+        self.imageSubmit = nil
+    }
+    
+    var body: some View {
+        paSearchBar
+    }
+}
+
+extension PASearchBar {
+    private var paSearchBar: some View {
+        HStack {
+            if realSearch, let bindingText, let onSubmit, let imageSubmit {
+                TextField(
+                    "search",
+                    text: bindingText,
+                    prompt: Text(
+                        placeHolder
+                    ).foregroundColor(
+                        .textDisabled
+                    )
+                )
+                .onSubmit {
+                    onSubmit()
+                }
+                
+                Spacer()
+                
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.gray70)
+                    .asButton {
+                        imageSubmit()
+                    }
+                
+            } else {
+                Text(placeHolder)
+                    .foregroundStyle(.textDisabled)
+                    .textStyle(.bodyS)
+                
+                Spacer()
+                
+                Image(systemName: "magnifyingglass")
+                    .foregroundStyle(.gray70)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 15)
+        .background(
+            RoundedRectangle(cornerRadius: 25)
+                .strokeBorder(.gray30, lineWidth: 2)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 25))
+        )
+    }
+}

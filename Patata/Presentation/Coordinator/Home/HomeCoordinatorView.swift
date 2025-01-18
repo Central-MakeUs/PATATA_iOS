@@ -19,6 +19,11 @@ struct HomeCoordinatorView: View {
                 switch screen.case {
                 case let .home(store):
                     PatataMainView(store: store)
+                        .hideTabBar(false)
+                    
+                case let .search(store):
+                    SearchView(store: store)
+                        .hideTabBar(true)
                 }
             }
         }
@@ -30,11 +35,14 @@ extension HomeScreen.State: Identifiable {
         switch self {
         case .home:
             return ID.home
+        case .search:
+            return ID.search
         }
     }
     
     enum ID: Identifiable {
         case home
+        case search
         
         var id: ID {
             return self

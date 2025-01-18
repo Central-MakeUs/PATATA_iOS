@@ -49,8 +49,12 @@ extension PatataMainView {
                             .padding(.leading, 15)
                         Spacer()
                     }
-                    paSearchBar
+                    
+                    PASearchBar(placeHolder: "검색어를 입력하세요")
                         .padding(.horizontal, 15)
+                        .asButton {
+                            store.send(.viewEvent(.tappedSearch))
+                        }
                     
                     bestSpotBar
                         .padding(.top, 25)
@@ -89,29 +93,6 @@ extension PatataMainView {
                 }
             }
         }
-    }
-    
-    private var paSearchBar: some View {
-        HStack {
-            Text("검색어를 입력하세요")
-                .foregroundStyle(.textDisabled)
-                .textStyle(.bodyS)
-            
-            Spacer()
-            
-            Image(systemName: "magnifyingglass")
-                .foregroundStyle(.gray70)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
-        .padding(.vertical, 15)
-        .background(
-            RoundedRectangle(cornerRadius: 25)
-                .strokeBorder(.gray30, lineWidth: 2)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 25))
-        )
-        
     }
     
     private var bestSpotBar: some View {
