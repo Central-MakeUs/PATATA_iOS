@@ -12,7 +12,7 @@ struct CategoryView: View {
     let categoryItem: CategoryItem
     var isSelected: Bool
     
-    var onSelect: () -> Void
+    let onSelect: () -> Void
     
     var body: some View {
         contentView

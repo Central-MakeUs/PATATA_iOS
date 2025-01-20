@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct NavBackButton: View {
-    var tappedButton: () -> Void
+    let tappedButton: () -> Void
     
     var body: some View {
         contentView

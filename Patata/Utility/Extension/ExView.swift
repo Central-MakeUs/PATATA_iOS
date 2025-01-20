@@ -73,7 +73,31 @@ extension View {
 }
 
 extension View {
-    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, onDismiss: @escaping () -> Void, content: @escaping () -> SheetContent) -> some View {
-        self.modifier(BottomSheetModifier(isPresented: isPresented, onDismiss: onDismiss, content: content))
+    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, content: @escaping () -> SheetContent) -> some View {
+        self.modifier(BottomSheetModifier(sheetContent: content, isPresented: isPresented))
+    }
+}
+
+extension View {
+    func sizeState(size: Binding<CGSize>) -> some View {
+        self.modifier(SizeModifier(size: size))
+    }
+}
+
+extension View {
+    func cornerRadius(_ radius: CGFloat, corners: UIRectCorner) -> some View {
+        clipShape(RoundedCorner(radius: radius, corners: corners))
+    }
+}
+
+struct RoundedCorner: Shape {
+    var radius: CGFloat = .infinity
+    var corners: UIRectCorner = .allCorners
+
+    func path(in rect: CGRect) -> Path {
+        let path = UIBezierPath(roundedRect: rect,
+                               byRoundingCorners: corners,
+                               cornerRadii: CGSize(width: radius, height: radius))
+        return Path(path.cgPath)
     }
 }

@@ -18,6 +18,7 @@ struct SearchResultView: View {
     
 //    @Binding var spotItems: SpotItems
     @State var isPresent: Bool = false
+    @State var filter: String = "거리순"
     
     private let columns = [
         GridItem(.flexible(), spacing: 8),
@@ -29,19 +30,13 @@ struct SearchResultView: View {
         NavigationView {
             contentView
                 .navigationBarHidden(true)
-//                .presentBottomSheet(isPresented: $isPresent) {
-//                    print("dismiss")
-//                } content: {
-//                    Text("aa")
-//                }
-
-//                .sheet(isPresented: $isPresent) {
-//                    VStack {
-//                        Text("fuck")
-//                        Text("you")
-//                        Text("shit")
-//                    }
-//                }
+                .presentBottomSheet(isPresented: $isPresent) {
+                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
+                        isPresent = false
+                        filter = item
+                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
+                    }
+                }
 
             //        }
         }
@@ -60,8 +55,6 @@ extension SearchResultView {
                     .padding(.horizontal, 15)
                 
                 spotGridView
-//                    .padding(.top, 12)
-//                    .padding(.horizontal, 10)
             }
             .background(.gray10)
         }
@@ -107,7 +100,7 @@ extension SearchResultView {
             Spacer()
             
             HStack(spacing: 1) {
-                Text("거리순")
+                Text(filter)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
                     .asButton {
@@ -118,6 +111,10 @@ extension SearchResultView {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 18, height: 18)
+            }
+            .asButton {
+                print("tap")
+                isPresent = true
             }
         }
     }
