@@ -59,7 +59,7 @@ extension CategoryRecommendView {
                 .padding(.top, 1)
                 .padding(.bottom, 6)
             
-            saveCommentView
+            SaveCommentCountView(archiveCount: 117, commentCount: 117, imageSize: 12)
                 .padding(.bottom, 20)
             
             HStack {
@@ -71,27 +71,5 @@ extension CategoryRecommendView {
         }
     }
     
-    private var saveCommentView: some View {
-        HStack(spacing: 5) {
-            HStack(spacing: 1) {
-                Image("ArchiveInactive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 12)
-                
-                Text("117")
-            }
-            
-            HStack(spacing: 1) {
-                Image("CommentInactive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 12)
-                
-                Text("117")
-            }
-        }
-        .foregroundStyle(.textDisabled)
-        .textStyle(.captionS)
-    }
+    
 }

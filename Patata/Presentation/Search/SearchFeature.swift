@@ -14,6 +14,13 @@ struct SearchFeature {
     struct State: Equatable {
         var searchText: String = ""
         var searchResult: Bool = true
+        var viewState: ViewState = .search
+    }
+    
+    enum ViewState {
+        case loading
+        case search
+        case searchResult
     }
     
     enum Action {

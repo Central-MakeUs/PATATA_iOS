@@ -14,15 +14,24 @@ struct SearchView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            contentView
-                .navigationBarBackButtonHidden(true)
-                .background(
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            hideKeyboard()
-                        }
-                )
+            switch store.viewState {
+            case .loading:
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            case .search:
+                contentView
+                    .navigationBarBackButtonHidden(true)
+                    .background(
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                hideKeyboard()
+                            }
+                    )
+            case .searchResult:
+//                SearchResultView(store: store)
+                Text("fuck")
+            }
         }
     }
 }
@@ -44,7 +53,9 @@ extension SearchView {
     
     private var fakeNavgationBar: some View {
         HStack(spacing: 5) {
-            backButton
+            NavBackButton {
+                store.send(.viewEvent(.tappedBackButton))
+            }
 
             PASearchBar(placeHolder: "검색어를 입력하세요", bindingText: $store.searchText.sending(\.bindingSearchText)) {
                 hideKeyboard()
@@ -55,16 +66,6 @@ extension SearchView {
             }
 
         }
-    }
-    
-    private var backButton: some View {
-        Image("PreviousActive")
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(width: 24, height: 24)
-            .asButton {
-                store.send(.viewEvent(.tappedBackButton))
-            }
     }
     
     private var searchFailView: some View {

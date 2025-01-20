@@ -71,3 +71,9 @@ extension View {
     UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
   }
 }
+
+extension View {
+    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, onDismiss: @escaping () -> Void, content: @escaping () -> SheetContent) -> some View {
+        self.modifier(BottomSheetModifier(isPresented: isPresented, onDismiss: onDismiss, content: content))
+    }
+}
