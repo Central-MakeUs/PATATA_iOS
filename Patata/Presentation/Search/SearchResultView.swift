@@ -18,6 +18,7 @@ struct SearchResultView: View {
     
 //    @Binding var spotItems: SpotItems
     @State var isPresent: Bool = false
+    @State var isSaved: Bool = false
     @State var filter: String = "거리순"
     
     private let columns = [
@@ -147,6 +148,11 @@ extension SearchResultView {
                 .frame(maxWidth: .infinity)
                 .aspectRatio(1.0, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(alignment: .topTrailing) {
+                    SpotArchiveButton(height: 24, width: 24, isSaved: $isSaved)
+                        .padding(.trailing, 10)
+                        .padding(.top, 10)
+                }
             
             // 아래부터는 아이템 들어오면 데이터자리들
             Text("이촌 한강공원 철교")
