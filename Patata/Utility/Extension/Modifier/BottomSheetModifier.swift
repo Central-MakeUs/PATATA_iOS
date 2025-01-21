@@ -45,22 +45,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         .frame(width: 50, height: 4)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .padding(.top, 8)
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    if dragOffset + value.translation.height > 0 {
-                                        dragOffset += value.translation.height
-                                    }
-                                }
-                                .onEnded { value in
-                                    if value.translation.height > 0 {
-                                        isPresented = false
-                                    } else {
-                                        isPresented = true
-                                    }
-                                    dragOffset = 0
-                                }
-                        )
                     
                     sheetContent()
                         .fixedSize(horizontal: false, vertical: true)
@@ -70,11 +54,28 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                 .padding(.bottom, 30)
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            if dragOffset + value.translation.height > 0 {
+                                dragOffset += value.translation.height
+                            }
+                        }
+                        .onEnded { value in
+                            if value.translation.height > 0 {
+                                isPresented = false
+                            } else {
+                                isPresented = true
+                            }
+                            dragOffset = 0
+                        }
+                )
             }
             .sizeState(size: $bottomSheetSize)
             .offset(y: sheetOffset + dragOffset)
             .ignoresSafeArea(edges: .bottom)
             .animation(.easeInOut(duration: 0.25), value: isPresented)
+            
         }
         .frame(maxWidth: .infinity)
         
