@@ -27,7 +27,8 @@ struct PatataApp: App {
 //            .onOpenURL { url in
 //                GIDSignIn.sharedInstance.handle(url)
 //            }
-            SearchResultView()
+//            SearchResultView()
+            SpotCategoryView()
         }
     }
 }
