@@ -90,6 +90,9 @@ extension PatataMainView {
                         .padding(.top, 8)
                         .padding(.horizontal, 15)
                         .padding(.bottom, 10)
+                        .asButton {
+                            store.send(.viewEvent(.tappedAddButton))
+                        }
                 }
             }
         }

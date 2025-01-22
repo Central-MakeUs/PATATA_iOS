@@ -11,7 +11,7 @@ import ComposableArchitecture
 @Reducer
 struct SpotCategoryFeature {
     @ObservableState
-    struct State {
+    struct State: Equatable {
         let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운"]
         
         var selectedIndex: Int = 0
@@ -21,15 +21,21 @@ struct SpotCategoryFeature {
     
     enum Action {
         case viewEvent(ViewEvent)
+        case delegate(Delegate)
         
         // bindingAction
         case bindingIsPresent(Bool)
+        
+        enum Delegate {
+            case tappedNavBackButton
+        }
     }
     
     enum ViewEvent {
         case selectedMenu(Int)
         case openBottomSheet
-        case bottomSheetItemTapped(String)
+        case tappedBottomSheetItem(String)
+        case tappedNavBackButton
     }
     
     var body: some ReducerOf<Self> {
@@ -47,9 +53,12 @@ extension SpotCategoryFeature {
             case .viewEvent(.openBottomSheet):
                 state.isPresent = true
                 
-            case let .viewEvent(.bottomSheetItemTapped(filter)):
+            case let .viewEvent(.tappedBottomSheetItem(filter)):
                 state.filterText = filter
                 state.isPresent = false
+                
+            case .viewEvent(.tappedNavBackButton):
+                return .send(.delegate(.tappedNavBackButton))
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent

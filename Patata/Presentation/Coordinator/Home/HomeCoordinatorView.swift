@@ -24,6 +24,9 @@ struct HomeCoordinatorView: View {
                 case let .search(store):
                     SearchView(store: store)
                         .hideTabBar(true)
+                    
+                case let .category(store):
+                    SpotCategoryView(store: store)
                 }
             }
         }
@@ -37,12 +40,15 @@ extension HomeScreen.State: Identifiable {
             return ID.home
         case .search:
             return ID.search
+        case .category:
+            return ID.category
         }
     }
     
     enum ID: Identifiable {
         case home
         case search
+        case category
         
         var id: ID {
             return self

@@ -13,6 +13,7 @@ import ComposableArchitecture
 enum HomeScreen {
     case home(PatataMainFeature)
     case search(SearchFeature)
+    case category(SpotCategoryFeature)
 }
 
 @Reducer
@@ -54,7 +55,13 @@ extension HomeCoordinator {
                     .send(.navigationAction(.pushSearch))
                 )
                 
+            case .router(.routeAction(id: .home, action: .home(.delegate(.tappedAddButton)))):
+                state.routes.push(.category(SpotCategoryFeature.State()))
+                
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
                 
             case .navigationAction(.pushSearch):

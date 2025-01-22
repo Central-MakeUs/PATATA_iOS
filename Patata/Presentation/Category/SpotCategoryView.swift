@@ -27,7 +27,7 @@ struct SpotCategoryView: View {
                 .navigationBarBackButtonHidden(true)
                 .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
-                        store.send(.viewEvent(.bottomSheetItemTapped(item)))
+                        store.send(.viewEvent(.tappedBottomSheetItem(item)))
                         // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
@@ -65,7 +65,7 @@ extension SpotCategoryView {
         ZStack {
             HStack {
                 NavBackButton {
-                    print("back")
+                    store.send(.viewEvent(.tappedNavBackButton))
                 }
                 .padding(.leading, 15)
                 

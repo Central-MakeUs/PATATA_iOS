@@ -48,6 +48,7 @@ struct PatataMainFeature {
         
         enum Delegate {
             case tappedSearch
+            case tappedAddButton
         }
     }
     
@@ -58,6 +59,7 @@ struct PatataMainFeature {
     enum ViewEvent {
         case selectCategory(Int)
         case tappedSearch
+        case tappedAddButton
     }
     
     var body: some ReducerOf<Self> {
@@ -74,6 +76,9 @@ extension PatataMainFeature {
                 
             case .viewEvent(.tappedSearch):
                 return .send(.delegate(.tappedSearch))
+                
+            case .viewEvent(.tappedAddButton):
+                return .send(.delegate(.tappedAddButton))
                 
             default:
                 break
