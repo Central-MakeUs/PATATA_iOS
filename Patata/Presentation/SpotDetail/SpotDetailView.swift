@@ -6,24 +6,24 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 // 어떤 카테고리와 그 해당하는 이미지를 받아야됨
 
 struct SpotDetailView: View {
     
-    @State private var currentIndex = 0
-    @State private var saveIsTapped: Bool = false
-    @State private var commentText: String = ""
-    @State private var isPresent: Bool = false
+    @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
     var body: some View {
-        contentView
-            .navigationBarHidden(true)
-            .presentBottomSheet(isPresented: $isPresent) {
-                BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
-                    print("tap")
+        WithPerceptionTracking {
+            contentView
+                .navigationBarHidden(true)
+                .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
+                    BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
+                        store.send(.viewEvent(.bottomSheetClose))
+                    }
                 }
-            }
+        }
     }
 }
 
@@ -50,7 +50,7 @@ extension SpotDetailView {
                         .background(.blue100)
                     
                     ForEach(0..<5) { index in
-                        commentView(nick: "ddd", text: "dsfadffdsfadasfa\ndsfasdfasfadsfas", date: Date())
+                        commentView(nick: "ddd", text: "dsfadffdsfadasfa\ndsfasdfasfadsfas", date: Date(), user: true)
                             .background(.white)
                             .padding(.vertical, 12)
                         
@@ -106,14 +106,14 @@ extension SpotDetailView {
                     .padding(.trailing, 15)
                     .asButton {
                         hideKeyboard()
-                        isPresent = true
+                        store.send(.viewEvent(.bottomSheetOpen))
                     }
             }
         }
     }
     
     private var spotDetailImage: some View {
-        TabView(selection: $currentIndex) {
+        TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
             ForEach(0..<2) { index in
                 Rectangle()
                     .frame(maxWidth: .infinity)
@@ -127,7 +127,7 @@ extension SpotDetailView {
         .overlay(alignment: .bottom) {
             CustomPageIndicator(
                 numberOfPages: 2,
-                currentIndex: currentIndex
+                currentIndex: store.currentIndex
             )
             .padding(.bottom, 40)
         }
@@ -143,7 +143,7 @@ extension SpotDetailView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: $saveIsTapped) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: $store.saveIsTapped.sending(\.bindingSaveIsTapped)) {
                     hideKeyboard()
                 }
             }
@@ -226,13 +226,13 @@ extension SpotDetailView {
     private var commentTextField: some View {
         HStack {
             TextField(
-                "search",
-                text: $commentText,
+                "comment",
+                text: $store.commentText.sending(\.bindingCommentText),
                 prompt: Text("댓글을 입력하세요")
                     .foregroundColor(.textDisabled)
             )
             .onSubmit {
-                print("onSubmit")
+                hideKeyboard()
             }
             .textStyle(.bodyS)
             
@@ -241,7 +241,7 @@ extension SpotDetailView {
             Image("UploadInActive")
                 .foregroundStyle(.gray70)
                 .asButton {
-                    print("upload")
+                    hideKeyboard()
                 }
         }
         .frame(maxWidth: .infinity)
@@ -255,7 +255,7 @@ extension SpotDetailView {
 }
 
 extension SpotDetailView {
-    private func commentView(nick: String, text: String, date: Date) -> some View {
+    private func commentView(nick: String, text: String, date: Date, user: Bool) -> some View {
         VStack {
             HStack {
                 Text(nick)
@@ -263,6 +263,10 @@ extension SpotDetailView {
                     .foregroundStyle(.textSub)
                 
                 Spacer()
+                
+                Text("삭제하기")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textInfo)
             }
             .padding(.horizontal, 15)
             
