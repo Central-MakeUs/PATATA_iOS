@@ -28,9 +28,6 @@ extension TodayRecommendView {
            VStack(spacing: 10) {
                imageView
                    .padding(.top, 15)
-                   .asButton {
-                       print("a")
-                   }
                    
                HStack {
                    Text(string)

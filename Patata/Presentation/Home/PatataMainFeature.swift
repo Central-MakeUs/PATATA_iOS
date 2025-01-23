@@ -49,6 +49,7 @@ struct PatataMainFeature {
         enum Delegate {
             case tappedSearch
             case tappedAddButton
+            case tappedSpot // 보낼때 데이터도 같이
         }
     }
     
@@ -60,6 +61,7 @@ struct PatataMainFeature {
         case selectCategory(Int)
         case tappedSearch
         case tappedAddButton
+        case tappedSpot // 보낼때 데이터도 같이
     }
     
     var body: some ReducerOf<Self> {
@@ -79,6 +81,9 @@ extension PatataMainFeature {
                 
             case .viewEvent(.tappedAddButton):
                 return .send(.delegate(.tappedAddButton))
+                
+            case .viewEvent(.tappedSpot):
+                return .send(.delegate(.tappedSpot))
                 
             default:
                 break

@@ -11,7 +11,7 @@ import ComposableArchitecture
 @Reducer
 struct SpotDetailFeature {
     @ObservableState
-    struct State {
+    struct State: Equatable {
         // bindingState
         var currentIndex: Int = 0
         var saveIsTapped: Bool = false
@@ -50,7 +50,7 @@ extension SpotDetailFeature {
         Reduce { state, action in
             switch action {
             case .viewEvent(.tappedNavBackButton):
-                return .send(.viewEvent(.tappedNavBackButton))
+                return .send(.delegate(.tappedNavBackButton))
                 
             case .viewEvent(.bottomSheetOpen):
                 state.bottomSheetIsPresent = true

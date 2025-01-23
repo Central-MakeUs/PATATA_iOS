@@ -85,6 +85,9 @@ extension PatataMainView {
                         .clipShape(RoundedRectangle(cornerRadius: 10))
                         .padding(.horizontal, 15)
                         .padding(.top, 15)
+                        .onTapGesture {
+                            store.send(.viewEvent(.tappedSpot))
+                        }
                     
                     moreButton
                         .padding(.top, 8)
@@ -236,6 +239,9 @@ extension PatataMainView {
                         TodayRecommendView(string: store.recommendItem.item[adjustedIndex])
                             .frame(width: cardWidth, height: contentHeight)
                             .scaleEffect(isCurrentIndex ? scaleEffect : 1.0)
+                            .onTapGesture {
+                                store.send(.viewEvent(.tappedSpot))
+                            }
                     }
                 }
                 .offset(x: contentOffsetX)
