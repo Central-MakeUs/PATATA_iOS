@@ -21,17 +21,23 @@ struct SpotDetailFeature {
     
     enum Action {
         case viewEvent(ViewEvent)
+        case delegate(Delegate)
         
         // bindingAction
         case bindingCurrentIndex(Int)
         case bindingSaveIsTapped(Bool)
         case bindingCommentText(String)
         case bindingBottomSheetIsPresent(Bool)
+        
+        enum Delegate {
+            case tappedNavBackButton
+        }
     }
     
     enum ViewEvent {
         case bottomSheetOpen
         case bottomSheetClose
+        case tappedNavBackButton
     }
     
     var body: some ReducerOf<Self> {
@@ -43,6 +49,9 @@ extension SpotDetailFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewEvent(.tappedNavBackButton):
+                return .send(.viewEvent(.tappedNavBackButton))
+                
             case .viewEvent(.bottomSheetOpen):
                 state.bottomSheetIsPresent = true
                 

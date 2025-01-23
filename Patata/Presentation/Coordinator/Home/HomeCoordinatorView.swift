@@ -27,6 +27,9 @@ struct HomeCoordinatorView: View {
                     
                 case let .category(store):
                     SpotCategoryView(store: store)
+                    
+                case let .spotDetail(store):
+                    SpotDetailView(store: store)
                 }
             }
         }
@@ -42,6 +45,8 @@ extension HomeScreen.State: Identifiable {
             return ID.search
         case .category:
             return ID.category
+        case .spotDetail:
+            return ID.spotDetail
         }
     }
     
@@ -49,6 +54,7 @@ extension HomeScreen.State: Identifiable {
         case home
         case search
         case category
+        case spotDetail
         
         var id: ID {
             return self

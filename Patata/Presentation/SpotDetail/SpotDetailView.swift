@@ -85,7 +85,7 @@ extension SpotDetailView {
             HStack {
                 NavBackButton {
                     hideKeyboard()
-                    print("back")
+                    store.send(.viewEvent(.tappedNavBackButton))
                 }
                 .padding(.leading, 15)
                 
