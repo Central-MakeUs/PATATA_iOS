@@ -5,13 +5,17 @@
 //  Created by 김진수 on 1/15/25.
 //
 
+//
+
 import SwiftUI
 import ComposableArchitecture
 
 struct PatataMainView: View {
     @Perception.Bindable var store: StoreOf<PatataMainFeature>
     
-    let spacing: CGFloat = 30
+    @State var categoryRatio: CGFloat = .zero
+    
+    let spacing: CGFloat = 24
     let sideCardVisibleRatio: CGFloat = 0.18
     let scaleEffect: CGFloat = 1.05
     
@@ -37,7 +41,6 @@ extension PatataMainView {
     private var contentView: some View {
         GeometryReader { geometry in
             let screenWidth = geometry.size.width
-            let screenHeight = geometry.size.height
             let sideCardWidth = screenWidth * sideCardVisibleRatio
             
             WithPerceptionTracking {
@@ -57,15 +60,17 @@ extension PatataMainView {
                         }
                     
                     bestSpotBar
-                        .padding(.top, 25)
+                        .padding(.top, 18)
                         .padding(.horizontal, 15)
                     
                     setSizeRecommendSpots(sideCardWidth: sideCardWidth)
-                        .shadow(radius: 4)
-                        .padding(.top, 30)
+                        .shadow(color: .shadowColor, radius: 4)
+//                        .shadow(radius: 14)
+                        .padding(.top, 16)
                         .onAppear {
                             cardWidth = screenWidth * 0.65
-                            contentHeight = screenHeight / 2.1
+                            contentHeight = cardWidth * 1.345
+                            // 55 : 74
                             
                             let initialOffset = -(cardWidth + spacing)
                             contentOffsetX = initialOffset

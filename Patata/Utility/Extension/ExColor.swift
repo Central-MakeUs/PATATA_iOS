@@ -65,4 +65,6 @@ extension Color {
    static let border = Color(hex: "CACED8")         // 영역을 구분할 때 사용하는 구분선
    static let bgGrouped = Color(hex: "F6F7F8")      // 페이지 내에서 특정 컨텐츠 영역 구분시 사용
    static let bgOverlay = Color(hex: "1C1C1C").opacity(0.3)  // 팝업이 뜰 때 뒷면에 오버레이
+    
+    static let shadowColor = Color(hex: "313141").opacity(0.12)
 }

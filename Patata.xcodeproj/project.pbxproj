@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
 		DFA57A742D35241F001E785A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DFA57A732D35241F001E785A /* .gitignore */; };
 		DFA57A802D3527E4001E785A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A7F2D3527E4001E785A /* Alamofire */; };
 		DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A822D3527F4001E785A /* Kingfisher */; };
@@ -50,6 +51,7 @@
 				DFA57A912D355A13001E785A /* GoogleSignIn in Frameworks */,
 				DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */,
 				DFA57A802D3527E4001E785A /* Alamofire in Frameworks */,
+				DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */,
 				DFA57A932D355A13001E785A /* GoogleSignInSwift in Frameworks */,
 				DFA57A892D352840001E785A /* TCACoordinators in Frameworks */,
 				DFA57A862D35282C001E785A /* ComposableArchitecture in Frameworks */,
@@ -102,6 +104,7 @@
 				DFA57A882D352840001E785A /* TCACoordinators */,
 				DFA57A902D355A13001E785A /* GoogleSignIn */,
 				DFA57A922D355A13001E785A /* GoogleSignInSwift */,
+				DF9D5F762D42572F00042314 /* NMapsMap */,
 			);
 			productName = Patata;
 			productReference = DFA57A602D35214B001E785A /* Patata.app */;
@@ -137,6 +140,7 @@
 				DFA57A842D35282C001E785A /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 				DFA57A872D352840001E785A /* XCRemoteSwiftPackageReference "TCACoordinators" */,
 				DFA57A8F2D355A13001E785A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+				DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFA57A612D35214B001E785A /* Products */;
@@ -302,6 +306,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "해당앱은";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -338,6 +343,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "해당앱은";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -385,6 +391,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.20.0;
+			};
+		};
 		DFA57A7E2D3527E4001E785A /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire.git";
@@ -428,6 +442,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DF9D5F762D42572F00042314 /* NMapsMap */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
+			productName = NMapsMap;
+		};
 		DFA57A7F2D3527E4001E785A /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DFA57A7E2D3527E4001E785A /* XCRemoteSwiftPackageReference "Alamofire" */;

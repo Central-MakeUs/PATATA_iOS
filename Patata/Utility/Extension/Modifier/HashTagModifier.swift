@@ -23,7 +23,7 @@ struct HashTagModifier: ViewModifier {
             .padding(.vertical, verticalPadding)
             .padding(.horizontal, horizontalPadding)
             .background(backgroundColor)
-            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             
     }
 }
