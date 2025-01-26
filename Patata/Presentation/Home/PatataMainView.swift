@@ -15,13 +15,14 @@ struct PatataMainView: View {
     
     @State var categoryRatio: CGFloat = .zero
     
-    let spacing: CGFloat = 24
-    let sideCardVisibleRatio: CGFloat = 0.18
-    let scaleEffect: CGFloat = 1.05
+    private let spacing: CGFloat = 24
+    private let sideCardVisibleRatio: CGFloat = 0.18
+    private let scaleEffect: CGFloat = 1.05
     
     @State private var contentOffsetX: CGFloat = 0
     @State private var cardWidth: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
+    @State private var dragOffset: CGFloat = 0
     
     @State private var currentIndex = 0 {
         didSet {
@@ -64,22 +65,19 @@ extension PatataMainView {
                         .padding(.horizontal, 15)
                     
                     setSizeRecommendSpots(sideCardWidth: sideCardWidth)
-                        .shadow(color: .shadowColor, radius: 4)
-//                        .shadow(radius: 14)
-                        .padding(.top, 16)
+                        .padding(.vertical, 16)
                         .onAppear {
-                            cardWidth = screenWidth * 0.65
-                            contentHeight = cardWidth * 1.345
-                            // 55 : 74
-                            
-                            let initialOffset = -(cardWidth + spacing)
-                            contentOffsetX = initialOffset
+                            if cardWidth == 0 {
+                                cardWidth = screenWidth * 0.65
+                                contentHeight = cardWidth * 1.345
+                                
+                                contentOffsetX = -(cardWidth + spacing)
+                            }
                         }
                     
                     spotCategory
-                        .shadow(radius: 8)
                         .padding(.horizontal, 15)
-                        .padding(.top, 35)
+                        .padding(.top, 8)
                     
                     categoryRecommendView
                         .padding(.horizontal, 15)
@@ -134,32 +132,33 @@ extension PatataMainView {
                 Spacer()
             }
             
-            HStack {
+            HStack(spacing: 8) {
                 ForEach(0..<5) { _ in
                     categoryView
-                        .frame(height: 80)
                         .frame(maxWidth: .infinity)
+                        .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
                         .clipShape(
                             RoundedRectangle(cornerRadius: 12)
                         )
+                        .shadow(color: .shadowColor, radius: 8)
                 }
             }
         }
     }
     
     private var categoryView: some View {
-        VStack(alignment: .center) {
+        VStack(alignment: .center, spacing: 8) {
             Image("RecommendIcon")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 29, height: 36)
-                .padding(.all, 5)
             
             Text("작가 추천")
                 .textStyle(.captionS)
                 .foregroundStyle(.textDefault)
         }
+        .padding(.vertical, 8)
     }
     
     private var categoryRecommendView: some View {
@@ -205,30 +204,27 @@ extension PatataMainView {
 
 extension PatataMainView {
     private func scrollToCurrentPage() {
+        let baseOffset = -(cardWidth + spacing)
+        let totalCount = store.recommendItem.item.count
+        
         withAnimation(.linear(duration: 0.3)) {
-            let baseOffset = -(cardWidth + spacing)
-            
-            if currentIndex >= store.recommendItem.item.count {
-                contentOffsetX = baseOffset * CGFloat(store.recommendItem.item.count + 1)
-//                Task.sleep(for: .now() + 0.3)
-                Task {
-                    try? await Task.sleep(for: .milliseconds(300))
-                    withAnimation(.none) {
-                        contentOffsetX = baseOffset
-                        currentIndex = 0
-                    }
+            contentOffsetX = baseOffset * CGFloat(currentIndex + 1)
+        }
+        
+        // 끝에 도달했을 때 반대편으로 이동
+        if currentIndex >= totalCount {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.none) {
+                    contentOffsetX = baseOffset
+                    currentIndex = 0
                 }
-            } else if currentIndex < 0 {
-                contentOffsetX = 0
-                Task {
-                    try? await Task.sleep(for: .milliseconds(300))
-                    withAnimation(.none) {
-                        contentOffsetX = baseOffset * CGFloat(store.recommendItem.item.count)
-                        currentIndex = store.recommendItem.item.count - 1
-                    }
+            }
+        } else if currentIndex < 0 {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                withAnimation(.none) {
+                    contentOffsetX = baseOffset * CGFloat(totalCount)
+                    currentIndex = totalCount - 1
                 }
-            } else {
-                contentOffsetX = baseOffset * CGFloat(currentIndex + 1)
             }
         }
     }
@@ -239,37 +235,69 @@ extension PatataMainView {
                 HStack(spacing: spacing) {
                     ForEach(-1..<store.recommendItem.item.count + 1, id: \.self) { i in
                         let adjustedIndex = i < 0 ? store.recommendItem.item.count - 1 : (i >= store.recommendItem.item.count ? 0 : i)
-                        let isCurrentIndex = adjustedIndex == (currentIndex % store.recommendItem.item.count)
+                        
+                        let progress = -dragOffset / (cardWidth + spacing)
+                        
+                        let scale: CGFloat = {
+                            let totalCount = store.recommendItem.item.count
+                            let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
+                            let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                            
+                            let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
+                            let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
+                            let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                            
+                            if isCurrentCard {
+                                return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
+                            } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
+                                return 1.0 + (abs(progress) * (scaleEffect - 1.0))
+                            }
+                            return 1.0
+                        }()
                         
                         TodayRecommendView(string: store.recommendItem.item[adjustedIndex])
                             .frame(width: cardWidth, height: contentHeight)
-                            .scaleEffect(isCurrentIndex ? scaleEffect : 1.0)
+                            .shadow(color: .shadowColor, radius: 8)
+                            .scaleEffect(scale)
+                            .animation(.smooth, value: dragOffset)
                             .onTapGesture {
                                 store.send(.viewEvent(.tappedSpot))
                             }
                     }
                 }
-                .offset(x: contentOffsetX)
+                .offset(x: contentOffsetX + dragOffset)
                 .padding(.horizontal, sideCardWidth)
-                .padding(.vertical, 10)
+                .frame(height: contentHeight * scaleEffect + 50)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 1)
+                        .onChanged { value in
+                            let velocityThreshold: CGFloat = 800
+                            let velocity = abs(value.predictedEndTranslation.width - value.translation.width)
+                            
+                            if velocity < velocityThreshold {
+                                withAnimation(.linear(duration: 0.1)) {
+                                    dragOffset = value.translation.width
+                                }
+                            } else {
+                                dragOffset = value.translation.width
+                            }
+                        }
+                        .onEnded { value in
+                            withAnimation(.smooth(duration: 0.3)) {
+                                dragOffset = 0
+                                if value.translation.width < -30 {
+                                    currentIndex += 1
+                                } else if value.translation.width > 30 {
+                                    currentIndex -= 1
+                                }
+                            }
+                        }
+                )
             }
             .scrollDisabled(true)
             .frame(height: contentHeight * scaleEffect + 20)
-            .padding(.top, 10)
-            .padding(.bottom, 10)
-            
-            Spacer()
+            .padding(.vertical, 10)
         }
-        .frame(height: contentHeight)
-        .gesture(
-            DragGesture()
-                .onEnded { value in
-                    if value.translation.width < 0 && value.translation.width < -30 {
-                        currentIndex += 1
-                    } else if value.translation.width > 0 && value.translation.width > 30 {
-                        currentIndex -= 1
-                    }
-                }
-        )
+        .frame(height: contentHeight * scaleEffect)
     }
 }

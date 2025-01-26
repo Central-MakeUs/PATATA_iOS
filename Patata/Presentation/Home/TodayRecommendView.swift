@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TodayRecommendView: View {
-    @State var isValid: Bool = false
+    @State var isValid: Bool = false // 여기는 걍 스팟 데이터만 받자
     let string: String
     
     var body: some View {
@@ -18,7 +18,6 @@ struct TodayRecommendView: View {
         }
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 12))
-        .shadow(radius: 8)
     }
 }
 
