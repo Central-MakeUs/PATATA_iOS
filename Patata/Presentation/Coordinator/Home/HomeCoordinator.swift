@@ -65,6 +65,9 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
+            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail)))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State()))
+                
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
                 

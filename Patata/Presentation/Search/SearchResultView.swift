@@ -154,6 +154,9 @@ extension SearchResultView {
                         .padding(.trailing, 10)
                         .padding(.top, 10)
                 }
+                .onTapGesture {
+                    store.send(.viewEvent(.tappedSpotDetail))
+                }
             
             // 아래부터는 아이템 들어오면 데이터자리들
             Text("이촌 한강공원 철교")

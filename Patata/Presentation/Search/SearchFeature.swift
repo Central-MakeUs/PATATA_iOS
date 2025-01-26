@@ -34,6 +34,7 @@ struct SearchFeature {
             case tappedBackButton
             // 이때 전달시 결과값들이 있으면 같이 전달
             case successSearch
+            case tappedSpotDetail
         }
     }
     
@@ -41,6 +42,7 @@ struct SearchFeature {
         case tappedBackButton
         case searchOnSubmit
         case searchStart
+        case tappedSpotDetail // 나중에 탭하면서 서버에서 준 데이터도 같이 보내자
     }
     
     var body: some ReducerOf<Self> {
@@ -69,6 +71,9 @@ extension SearchFeature {
             case .viewEvent(.searchStart):
                 state.searchText = ""
                 state.viewState = .search
+                
+            case .viewEvent(.tappedSpotDetail):
+                return .send(.delegate(.tappedSpotDetail))
                 
             case .switchViewState:
                 state.viewState = .searchResult
