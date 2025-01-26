@@ -8,6 +8,9 @@
 import SwiftUI
 import ComposableArchitecture
 
+// 검색 실패시 서치의 값이 달라지면 바로 searchView로 이동
+// 검색 성공시에서 서치바를 누르면 searchView로 이동
+
 struct SearchView: View {
     
     @Perception.Bindable var store: StoreOf<SearchFeature>
@@ -18,6 +21,7 @@ struct SearchView: View {
             case .loading:
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .navigationBarBackButtonHidden(true)
             case .search:
                 contentView
                     .navigationBarBackButtonHidden(true)
@@ -29,8 +33,7 @@ struct SearchView: View {
                             }
                     )
             case .searchResult:
-//                SearchResultView(store: store)
-                Text("fuck")
+                SearchResultView(store: store)
             }
         }
     }

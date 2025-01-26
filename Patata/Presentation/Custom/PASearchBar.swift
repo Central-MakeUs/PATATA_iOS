@@ -13,26 +13,30 @@ struct PASearchBar: View {
     var bindingText: Binding<String>?
     let onSubmit: (() -> Void)?
     let imageSubmit: (() -> Void)?
+    let placeHolderColor: Color
         
     init(
         placeHolder: String,
         bindingText: Binding<String>,
         onSubmit: @escaping () -> Void,
-        imageSubmit: @escaping () -> Void
+        imageSubmit: @escaping () -> Void,
+        placeHolderColor: Color = .textDisabled
     ) {
         self.placeHolder = placeHolder
         self.realSearch = true
         self.bindingText = bindingText
         self.onSubmit = onSubmit
         self.imageSubmit = imageSubmit
+        self.placeHolderColor = placeHolderColor
     }
     
-    init(placeHolder: String) {
+    init(placeHolder: String, placeHolderColor: Color = .textDisabled) {
         self.placeHolder = placeHolder
         self.realSearch = false
         self.bindingText = nil
         self.onSubmit = nil
         self.imageSubmit = nil
+        self.placeHolderColor = placeHolderColor
     }
     
     var body: some View {
@@ -50,7 +54,7 @@ extension PASearchBar {
                     prompt: Text(
                         placeHolder
                     ).foregroundColor(
-                        .textDisabled
+                        placeHolderColor
                     )
                 )
                 .onSubmit {
@@ -67,7 +71,7 @@ extension PASearchBar {
                 
             } else {
                 Text(placeHolder)
-                    .foregroundStyle(.textDisabled)
+                    .foregroundStyle(placeHolderColor)
                     .textStyle(.bodyS)
                 
                 Spacer()

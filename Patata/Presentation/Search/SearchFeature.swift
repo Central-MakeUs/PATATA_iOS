@@ -25,8 +25,8 @@ struct SearchFeature {
     
     enum Action {
         case viewEvent(ViewEvent)
+        case switchViewState
         case delegate(Delegate)
-        
         // bindingAction
         case bindingSearchText(String)
         
@@ -40,6 +40,7 @@ struct SearchFeature {
     enum ViewEvent {
         case tappedBackButton
         case searchOnSubmit
+        case searchStart
     }
     
     var body: some ReducerOf<Self> {
@@ -58,7 +59,19 @@ extension SearchFeature {
                 // network후 결과에 따라서 실패시 hidden 풀고
                 // 성공시 화면 변경
                 // 임시로 성공시 바로 delegate 전달로
-                return .send(.delegate(.successSearch))
+                state.viewState = .loading
+                
+                return .run { send in
+                    try? await Task.sleep(for: .seconds(2))
+                    await send(.switchViewState)
+                }
+                
+            case .viewEvent(.searchStart):
+                state.searchText = ""
+                state.viewState = .search
+                
+            case .switchViewState:
+                state.viewState = .searchResult
                 
             case let .bindingSearchText(text):
                 state.searchText = text

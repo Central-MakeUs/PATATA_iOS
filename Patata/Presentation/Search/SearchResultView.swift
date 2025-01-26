@@ -16,6 +16,7 @@ import ComposableArchitecture
 
 struct SearchResultView: View {
     
+    @Perception.Bindable var store: StoreOf<SearchFeature>
 //    @Binding var spotItems: SpotItems
     @State var isPresent: Bool = false
     @State var isSaved: Bool = false
@@ -27,8 +28,7 @@ struct SearchResultView: View {
     ]
     
     var body: some View {
-//        WithPerceptionTracking {
-        NavigationView {
+        WithPerceptionTracking {
             contentView
                 .navigationBarHidden(true)
                 .presentBottomSheet(isPresented: $isPresent) {
@@ -38,8 +38,6 @@ struct SearchResultView: View {
                         // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
-
-            //        }
         }
     }
 }
@@ -66,7 +64,7 @@ extension SearchResultView {
             ZStack {
                 HStack {
                     NavBackButton {
-                        print("back")
+                        store.send(.viewEvent(.tappedBackButton))
                     }
                     .padding(.leading, 15)
                     
@@ -78,8 +76,11 @@ extension SearchResultView {
                     .foregroundStyle(.textDefault)
             }
             
-            PASearchBar(placeHolder: "검색어")
+            PASearchBar(placeHolder: store.searchText, placeHolderColor: .textDefault)
                 .padding(.horizontal, 15)
+                .onTapGesture {
+                    store.send(.viewEvent(.searchStart))
+                }
             
             Spacer()
                 .frame(height: 12)
