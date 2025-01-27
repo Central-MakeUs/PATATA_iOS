@@ -73,8 +73,8 @@ extension View {
 }
 
 extension View {
-    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, content: @escaping () -> SheetContent) -> some View {
-        self.modifier(BottomSheetModifier(sheetContent: content, isPresented: isPresented))
+    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, isFullSheet: Bool = false, content: @escaping () -> SheetContent) -> some View {
+        self.modifier(BottomSheetModifier(sheetContent: content, isFullSheet: isFullSheet, isPresented: isPresented))
     }
 }
 

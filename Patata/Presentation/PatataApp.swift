@@ -28,6 +28,11 @@ struct PatataApp: App {
 //                GIDSignIn.sharedInstance.handle(url)
 //            }
 //            SpotMapView()
+//            TestView()
+//            SpotCategoryView(store: Store(initialState: SpotCategoryFeature.State(), reducer: {
+//                SpotCategoryFeature()
+//            }))
+//            TestView()
         }
     }
 }

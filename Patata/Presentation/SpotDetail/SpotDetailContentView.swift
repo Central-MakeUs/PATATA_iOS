@@ -1,123 +1,64 @@
 //
-//  SpotDetailView.swift
+//  SpotDetailContentView.swift
 //  Patata
 //
-//  Created by 김진수 on 1/22/25.
+//  Created by 김진수 on 1/27/25.
 //
 
 import SwiftUI
-import ComposableArchitecture
 
-// 어떤 카테고리와 그 해당하는 이미지를 받아야됨
-
-struct SpotDetailView: View {
+struct SpotDetailContentView: View {
     
-    @Perception.Bindable var store: StoreOf<SpotDetailFeature>
-    
-    @Environment(\.scrollIsValid) var isScroll
+    @State var currentIndex: Int = 0
+    @State var isSaved: Bool = false
+    @State var commentText: String = "fdfdf"
     
     var body: some View {
-        WithPerceptionTracking {
-            contentView
-                .navigationBarHidden(true)
-                .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
-                    BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
-                        store.send(.viewEvent(.bottomSheetClose))
-                    }
-                }
-        }
+        contentView
     }
 }
 
-extension SpotDetailView {
+extension SpotDetailContentView {
     private var contentView: some View {
-        VStack {
-            fakeNavBar
-                .background(.white)
+        ScrollView(.vertical) {
+            spotDetailImage
             
-            ScrollView(.vertical) {
-                spotDetailImage
-                
-                detailView
-                    .background(.white)
-                    .cornerRadius(20, corners: [.topLeft, .topRight])
-                    .offset(y: -30)
-                
-                VStack {
-                    commentBar
-                        .padding(.top, 10)
-                        .padding(.horizontal, 15)
-                    
-                    Divider()
-                        .frame(height: 0.35)
-                        .background(.blue100)
-                    
-                    ForEach(0..<5) { index in
-                        commentView(nick: "ddd", text: "dsfadffdsfadasfa\ndsfasdfasfadsfas", date: Date(), user: true)
-                            .background(.white)
-                            .padding(.vertical, 12)
-                        
-                        if index != 4 {
-                            Divider()
-                                .frame(height: 0.3)
-                                .background(.blue100)
-                        }
-                    }
-                    
-                }
+            detailView
                 .background(.white)
-                .padding(.top, 0)
-                .offset(y: -28)
-            }
-            .background(.gray20)
-            .scrollDisabled(!isScroll)
+                .cornerRadius(20, corners: [.topLeft, .topRight])
+                .offset(y: -30)
             
             VStack {
-                commentTextField
-                    .padding(.top, 5)
+                commentBar
+                    .padding(.top, 10)
                     .padding(.horizontal, 15)
-                    .padding(.bottom, 10)
-            }
-        }
-        .onTapGesture {
-            hideKeyboard()
-        }
-    }
-    
-    private var fakeNavBar: some View {
-        ZStack {
-            HStack {
-                NavBackButton {
-                    hideKeyboard()
-                    store.send(.viewEvent(.tappedNavBackButton))
-                }
-                .padding(.leading, 15)
                 
-                Spacer()
-            }
-            
-            Text("작가 추천")
-                .textStyle(.subtitleL)
-                .foregroundStyle(.textDefault)
-            
-            HStack {
-                Spacer()
+                Divider()
+                    .frame(height: 0.35)
+                    .background(.blue100)
                 
-                Image("ComplaintActive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .padding(.trailing, 15)
-                    .asButton {
-                        hideKeyboard()
-                        store.send(.viewEvent(.bottomSheetOpen))
+                ForEach(0..<5) { index in
+                    commentView(nick: "ddd", text: "dsfadffdsfadasfa\ndsfasdfasfadsfas", date: Date(), user: true)
+                        .background(.white)
+                        .padding(.vertical, 12)
+                    
+                    if index != 4 {
+                        Divider()
+                            .frame(height: 0.3)
+                            .background(.blue100)
                     }
+                }
+                
             }
+            .background(.white)
+            .padding(.top, 0)
+            .offset(y: -28)
         }
+        .background(.gray20)
     }
     
     private var spotDetailImage: some View {
-        TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
+        TabView(selection: $currentIndex) {
             ForEach(0..<2) { index in
                 Rectangle()
                     .frame(maxWidth: .infinity)
@@ -126,13 +67,12 @@ extension SpotDetailView {
             }
         }
         .frame(maxWidth: .infinity)
-        .scrollDisabled(false)
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .aspectRatio(1, contentMode: .fit)
         .overlay(alignment: .bottom) {
             CustomPageIndicator(
                 numberOfPages: 2,
-                currentIndex: store.currentIndex
+                currentIndex: currentIndex
             )
             .padding(.bottom, 40)
         }
@@ -148,7 +88,7 @@ extension SpotDetailView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: $store.saveIsTapped.sending(\.bindingSaveIsTapped)) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: $isSaved) {
                     hideKeyboard()
                 }
             }
@@ -232,7 +172,7 @@ extension SpotDetailView {
         HStack {
             TextField(
                 "comment",
-                text: $store.commentText.sending(\.bindingCommentText),
+                text: $commentText,
                 prompt: Text("댓글을 입력하세요")
                     .foregroundColor(.textDisabled)
             )
@@ -256,10 +196,9 @@ extension SpotDetailView {
         .clipShape(RoundedRectangle(cornerRadius: 25))
         
     }
-    
 }
 
-extension SpotDetailView {
+extension SpotDetailContentView {
     private func commentView(nick: String, text: String, date: Date, user: Bool) -> some View {
         VStack {
             HStack {

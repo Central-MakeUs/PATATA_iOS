@@ -25,12 +25,23 @@ struct SpotCategoryView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden(true)
-                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
-                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
-                        store.send(.viewEvent(.tappedBottomSheetItem(item)))
-                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
-                    }
-                }
+//                .sheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
+//                    SpotDetailView(store: Store(initialState: SpotDetailFeature.State(), reducer: {
+//                        SpotDetailFeature()
+//                    }))
+//                        .presentationDetents([.medium, .large])
+//                }
+                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent), isFullSheet: true, content: {
+                    SpotDetailView(store: Store(initialState: SpotDetailFeature.State(), reducer: {
+                        SpotDetailFeature()
+                    }))
+                })
+//                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
+//                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
+//                        store.send(.viewEvent(.tappedBottomSheetItem(item)))
+//                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
+//                    }
+//                }
         }
     }
 }
