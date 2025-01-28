@@ -10,11 +10,14 @@ import ComposableArchitecture
 
 // 어떤 카테고리와 그 해당하는 이미지를 받아야됨
 
+// 일단 맵에서 불러오는지 확인해야됨 -> 맵 일때는 뷰를 그리기전에 scrollEnable의 값에 따라 보여주는 화면이 다르기 때문이다.
+// 그럼 굳이 값을 두 개로 나눌 필요가 있냐 -> 
+
 struct SpotDetailView: View {
     
     @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
-    @Environment(\.scrollIsValid) var isScroll
+    @Environment(\.isScrollEnabled) var scrollEnable
     
     var body: some View {
         WithPerceptionTracking {
@@ -32,8 +35,13 @@ struct SpotDetailView: View {
 extension SpotDetailView {
     private var contentView: some View {
         VStack {
-            fakeNavBar
-                .background(.white)
+            if !store.isHomeCoordinator && scrollEnable {
+                fakeNavBar
+                    .background(.white)
+            } else if store.isHomeCoordinator {
+                fakeNavBar
+                    .background(.white)
+            }
             
             ScrollView(.vertical) {
                 spotDetailImage
@@ -70,7 +78,7 @@ extension SpotDetailView {
                 .offset(y: -28)
             }
             .background(.gray20)
-            .scrollDisabled(!isScroll)
+            .scrollDisabled(store.isHomeCoordinator ? false : (scrollEnable ? false : true))
             
             VStack {
                 commentTextField
@@ -78,6 +86,7 @@ extension SpotDetailView {
                     .padding(.horizontal, 15)
                     .padding(.bottom, 10)
             }
+
         }
         .onTapGesture {
             hideKeyboard()
@@ -87,11 +96,28 @@ extension SpotDetailView {
     private var fakeNavBar: some View {
         ZStack {
             HStack {
-                NavBackButton {
-                    hideKeyboard()
-                    store.send(.viewEvent(.tappedNavBackButton))
+//                NavBackButton {
+//                    hideKeyboard()
+//                    store.send(.viewEvent(.tappedNavBackButton))
+//                }
+//                .padding(.leading, 15)
+                
+                if scrollEnable {
+                    Image("XActive")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .padding(.leading, 15)
+                        .asButton {
+                            store.send(.viewEvent(.tappedDismissIcon))
+                        }
+                } else {
+                    NavBackButton {
+                        hideKeyboard()
+                        store.send(.viewEvent(.tappedNavBackButton))
+                    }
+                    .padding(.leading, 15)
                 }
-                .padding(.leading, 15)
                 
                 Spacer()
             }

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 
 // 일단 해당 뷰는 어떤 카테고리인지에 따라 시작하는 화면이 달라진다
 // 선택된 카테고리는 하단에 라인과 약간의 padding과 함께 달라진다
@@ -25,16 +26,8 @@ struct SpotCategoryView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden(true)
-//                .sheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
-//                    SpotDetailView(store: Store(initialState: SpotDetailFeature.State(), reducer: {
-//                        SpotDetailFeature()
-//                    }))
-//                        .presentationDetents([.medium, .large])
-//                }
                 .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent), isFullSheet: true, content: {
-                    SpotDetailView(store: Store(initialState: SpotDetailFeature.State(), reducer: {
-                        SpotDetailFeature()
-                    }))
+                    SpotDetailView(store: store.scope(state: \.spotDetailState, action: \.spotDetailAction))
                 })
 //                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
 //                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in

@@ -12,6 +12,8 @@ import ComposableArchitecture
 struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
+        var isHomeCoordinator: Bool
+        
         // bindingState
         var currentIndex: Int = 0
         var saveIsTapped: Bool = false
@@ -31,6 +33,7 @@ struct SpotDetailFeature {
         
         enum Delegate {
             case tappedNavBackButton
+            case tappedDismissIcon
         }
     }
     
@@ -38,6 +41,7 @@ struct SpotDetailFeature {
         case bottomSheetOpen
         case bottomSheetClose
         case tappedNavBackButton
+        case tappedDismissIcon
     }
     
     var body: some ReducerOf<Self> {
@@ -57,6 +61,9 @@ extension SpotDetailFeature {
                 
             case .viewEvent(.bottomSheetClose):
                 state.bottomSheetIsPresent = false
+                
+            case .viewEvent(.tappedDismissIcon):
+                return .send(.delegate(.tappedDismissIcon))
                 
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index

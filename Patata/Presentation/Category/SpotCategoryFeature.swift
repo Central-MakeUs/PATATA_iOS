@@ -17,10 +17,13 @@ struct SpotCategoryFeature {
         var selectedIndex: Int = 0
         var isPresent: Bool = false
         var filterText: String = "거리순"
+        var spotDetailState = SpotDetailFeature.State(isHomeCoordinator: false)
     }
     
     enum Action {
         case viewEvent(ViewEvent)
+        case spotDetailAction(SpotDetailFeature.Action)
+        
         case delegate(Delegate)
         
         // bindingAction
@@ -39,6 +42,10 @@ struct SpotCategoryFeature {
     }
     
     var body: some ReducerOf<Self> {
+        Scope(state: \.spotDetailState, action: \.spotDetailAction) {
+            SpotDetailFeature()
+        }
+        
         core()
     }
 }
@@ -59,6 +66,9 @@ extension SpotCategoryFeature {
                 
             case .viewEvent(.tappedNavBackButton):
                 return .send(.delegate(.tappedNavBackButton))
+             
+            case .spotDetailAction(.delegate(.tappedDismissIcon)):
+                state.isPresent = false
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent

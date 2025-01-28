@@ -31,14 +31,16 @@ extension CategoryRecommendView {
                 .padding(.vertical, 10)
                 
             
-            spotDesView
-                .padding(.top, 20)
-                .padding(.leading, 15)
-            
-            Text("작가 추천 스팟")
-                .hashTagStyle(backgroundColor: .navy100, textColor: .blue50, font: .captionS)
-                .padding(.top, 10)
-                .padding(.trailing, 10)
+            ZStack(alignment: .topTrailing) {  // ZStack으로 변경
+                    spotDesView
+                        .padding(.top, 20)
+                        .padding(.leading, 8)
+                    
+                    Text("작가 추천 스팟")
+                        .hashTagStyle(backgroundColor: .navy100, textColor: .blue50, font: .captionS)
+                        .padding(.top, 10)
+                        .padding(.trailing, 10)
+                }
         }
         
     }
@@ -60,7 +62,7 @@ extension CategoryRecommendView {
                 .padding(.bottom, 6)
             
             SaveCommentCountView(archiveCount: 117, commentCount: 117, imageSize: 12)
-                .padding(.bottom, 20)
+                .padding(.bottom, 25)
             
             HStack {
                 Text("#가을사진")

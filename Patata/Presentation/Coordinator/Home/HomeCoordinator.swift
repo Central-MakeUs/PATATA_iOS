@@ -60,13 +60,13 @@ extension HomeCoordinator {
                 state.routes.push(.category(SpotCategoryFeature.State()))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot)))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State()))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true)))
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail)))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State()))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true)))
                 
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
