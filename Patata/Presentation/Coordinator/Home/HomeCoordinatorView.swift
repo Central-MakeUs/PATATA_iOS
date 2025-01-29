@@ -19,7 +19,6 @@ struct HomeCoordinatorView: View {
                 switch screen.case {
                 case let .home(store):
                     PatataMainView(store: store)
-                        .hideTabBar(false)
                     
                 case let .search(store):
                     SearchView(store: store)
@@ -27,9 +26,11 @@ struct HomeCoordinatorView: View {
                     
                 case let .category(store):
                     SpotCategoryView(store: store)
+                        .hideTabBar(true)
                     
                 case let .spotDetail(store):
                     SpotDetailView(store: store)
+                        .hideTabBar(true)
                 }
             }
         }
