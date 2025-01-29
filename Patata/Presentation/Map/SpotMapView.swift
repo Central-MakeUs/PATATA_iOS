@@ -6,13 +6,24 @@
 //
 
 import SwiftUI
-import NMapsMap
 
 // 지도 뷰를 그리기 전에 먼저 통신을 해서 기억하고 있는 좌표가 있는지 체크
 // 없다면 그냥 지도 그리고
 // 있다면 일단 해당 값 카테고리를 체크후 해당하는 마커를 만들고 좌표값을 넣어 맵 뷰에 넣는다.
 // 그리고 지도를 그린다.
 
+
+enum SpotMarkerImage {
+    static let housePin: String = "HousePin"
+    static let inActivePin: String = "InActivePin"
+    static let activePin: String = "ActivePin"
+    static let naturePin: String = "NaturePin"
+    static let myPin: String = "MyPin"
+    static let nightPin: String = "NightPin"
+    static let recommendPin: String = "RecommendPin"
+    static let snapPin: String = "SnapPin"
+    static let archivePin: String = "ArchivePin"
+}
 
 // 예시로 버튼을 누를때마다 카메라가 바라보는 좌표에 마커를 추가하는 걸 해보자
 struct SpotMapView: View {
@@ -67,7 +78,7 @@ extension SpotMapView {
                )
              
             ZStack {
-                UIMapView(coord: coord)
+                UIMapView(coord: coord, markers: [(coord, SpotMarkerImage.housePin)])
                 
                 VStack {
                     mapMenuView
@@ -172,36 +183,4 @@ extension SpotMapView {
     }
 }
 
-struct UIMapView: UIViewRepresentable {
-    func makeCoordinator() -> Coordinator {
-        Coordinator()
-    }
-    
-    var coord: (Double, Double)
-  
-    func makeUIView(context: Context) -> NMFNaverMapView {
-        let view = NMFNaverMapView()
-        view.showZoomControls = false
-        view.mapView.positionMode = .direction
-        view.mapView.zoomLevel = 17
-        
-        view.mapView.addCameraDelegate(delegate: context.coordinator)
-      
-        return view
-    }
-    
-    // 여기서에서 마커 추가하는 로직 (좌표와 카테고리 이미지를 받으면서 마커 찍기)
-    func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
-        let coord = NMGLatLng(lat: coord.1, lng: coord.0)
-        let cameraUpdate = NMFCameraUpdate(scrollTo: coord)
-        cameraUpdate.animation = .fly
-        cameraUpdate.animationDuration = 1
-        uiView.mapView.moveCamera(cameraUpdate)
-    }
-    
-    class Coordinator: NSObject, NMFMapViewCameraDelegate {
-        func mapViewCameraIdle(_ mapView: NMFMapView) {
-            print("mapViewCameraIdle 카메라 좌표", mapView.cameraPosition.target)
-        }
-    }
-}
+

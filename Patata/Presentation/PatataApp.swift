@@ -33,7 +33,7 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            ArchiveView()
+            SpotMapView()
         }
     }
 }
