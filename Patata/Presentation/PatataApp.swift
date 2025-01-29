@@ -24,6 +24,7 @@ struct PatataApp: App {
 //            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(tabState: .home), reducer: {
 //                TabCoordinator()
 //            }))
+            
 //            .onOpenURL { url in
 //                GIDSignIn.sharedInstance.handle(url)
 //            }

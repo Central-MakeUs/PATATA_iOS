@@ -18,17 +18,19 @@ import NMapsMap
 // 초기값으로는 좌표값과 카테고리가 있어야지
 
 struct UIMapView: UIViewRepresentable {
+    
+    private final class MapState {
+        var markerImages: [String: NMFOverlayImage] = [:]
+        var currentMarkers: [NMFMarker] = []
+    }
+
+    let coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
+    let markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
+    private let mapState = MapState()
+    
     func makeCoordinator() -> Coordinator {
         Coordinator()
     }
-    
-    var coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
-    var markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
-    
-    @State private var markerImages: [String: NMFOverlayImage] = [:]
-    @State private var currentMarkers: [NMFMarker] = []
-  
-//    private let imageManager = MarkerImageManager()
     
     func makeUIView(context: Context) -> NMFNaverMapView {
         let view = NMFNaverMapView()
@@ -45,7 +47,6 @@ struct UIMapView: UIViewRepresentable {
     func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
         let coord = NMGLatLng(lat: coord.1, lng: coord.0)
         let cameraUpdate = NMFCameraUpdate(scrollTo: coord) // 유저 초기화면
-        let marker = NMFMarker()
         
         Task {
             let newMarkers = markers.map { marker in
@@ -58,7 +59,7 @@ struct UIMapView: UIViewRepresentable {
             }
             
             await MainActor.run {
-                currentMarkers = newMarkers
+                mapState.currentMarkers = newMarkers
                 newMarkers.forEach { $0.mapView = uiView.mapView }
             }
         }
@@ -74,18 +75,13 @@ struct UIMapView: UIViewRepresentable {
         marker.position = NMGLatLng(lat: lat, lng: long)
         
         // 여기서 해당하는 사진 객체를 생성하면서 없으면 생성 아니면 바로 그걸로 적용
-        if let image = markerImages[category] {
+        if let image = mapState.markerImages[category] {
             marker.iconImage = image
         } else {
             let image = NMFOverlayImage(name: category)
             
             marker.iconImage = image
-            markerImages[category] = image
-            
-            DispatchQueue.main.async {
-                marker.mapView = mapView
-            }
-            
+            mapState.markerImages[category] = image
         }
         
         return marker
@@ -97,17 +93,3 @@ struct UIMapView: UIViewRepresentable {
         }
     }
 }
-
-//    private class MarkerImageManager {
-//        private var markerImages: [String: NMFOverlayImage] = [:]
-//
-//        func getMarkerImage(for category: String) -> NMFOverlayImage {
-//            if let image = markerImages[category] {
-//                return image
-//            }
-//
-//            let image = NMFOverlayImage(name: "\(category)")
-//            markerImages[category] = image
-//            return image
-//        }
-//    }
