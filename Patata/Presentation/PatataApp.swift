@@ -34,7 +34,7 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            SpotMapView()
+            SpotEditorView()
         }
     }
 }
