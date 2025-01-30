@@ -34,7 +34,9 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            SpotEditorView()
+            SpotEditorView(store: Store(initialState: SpotEditorFeature.State(viewState: .add), reducer: {
+                SpotEditorFeature()
+            }))
         }
     }
 }

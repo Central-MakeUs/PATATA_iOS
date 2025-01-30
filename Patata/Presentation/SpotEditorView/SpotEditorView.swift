@@ -6,16 +6,22 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct SpotEditorView: View {
     
-    @State private var title: String = ""
-    @State private var location: String = ""
-    @State private var detail: String = ""
-    @State private var hashTag: String = ""
+    @Perception.Bindable var store: StoreOf<SpotEditorFeature>
     
     var body: some View {
-        contentView
+        WithPerceptionTracking {
+            contentView
+                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
+                    BottomSheetItem(title: "카테고리 선택", items: ["스냅 스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
+                        store.send(.viewEvent(.tappedBottomSheet(category)))
+                        store.send(.viewEvent(.closeBottomSheet(false)))
+                    }
+                }
+        }
     }
 }
 
@@ -93,7 +99,10 @@ extension SpotEditorView {
         VStack {
             titleView("제목을 입력하세요")
             
-            textFieldView(bindingText: $title, placeHolder: "제목을 입력하세요 (15자 이내)", key: "title")
+            textFieldView(bindingText: $store.title.sending(\.bindingTitle), placeHolder: "제목을 입력하세요 (15자 이내)", key: "title")
+                .onChange(of: store.title) { value in
+                    store.send(.textValidation(.titleValidation(value)))
+                }
         }
     }
     
@@ -123,7 +132,7 @@ extension SpotEditorView {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             )
             
-            textFieldView(bindingText: $location, placeHolder: "상세한 위치를 입력하세요", key: "location")
+            textFieldView(bindingText: $store.location.sending(\.bindingLocation), placeHolder: "상세한 위치를 입력하세요", key: "location")
         }
     }
     
@@ -131,7 +140,7 @@ extension SpotEditorView {
         VStack {
             titleView("간단한 설명을 입력하세요")
             
-            TextEditor(text: $detail)
+            TextEditor(text: $store.detail.sending(\.bindingDetail))
                 .textStyle(.subtitleS)
                 .frame(maxWidth: .infinity)
                 .aspectRatio(2.5, contentMode: .fit)
@@ -139,9 +148,12 @@ extension SpotEditorView {
                 .padding(.horizontal, 16)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .onChange(of: store.detail) { value in
+                    store.send(.textValidation(.detilValidation(value)))
+                }
                 .overlay(
                     VStack(alignment: .leading, spacing: 16) {
-                        if detail.isEmpty {
+                        if store.detail.isEmpty {
                             Text("장소에 대한 간단한 설명을 남겨하세요 (300자 이하)")
                                 .textStyle(.bodyM)
                                 .foregroundColor(.textDisabled)
@@ -163,8 +175,9 @@ extension SpotEditorView {
             titleView("카테고리를 선택해주세요")
             
             HStack {
-                Text("카테고리를 선택해주세요")
-                    .foregroundColor(.textDisabled)
+                Text(store.categoryText)
+                    .textStyle(store.categoryText == "카테고리를 선택해주세요" ? .bodyS : .subtitleS)
+                    .foregroundColor(store.categoryText == "카테고리를 선택해주세요" ? .textDisabled : .textSub)
                     .padding(.leading, 16)
                 
                 Spacer()
@@ -178,6 +191,9 @@ extension SpotEditorView {
             .padding(.vertical, 12)
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: 8))
+            .onTapGesture {
+                store.send(.viewEvent(.openBottomSheet(true)))
+            }
         }
     }
     
@@ -193,14 +209,13 @@ extension SpotEditorView {
                             .resizable()
                             .aspectRatio(1, contentMode: .fit)
                             .frame(width: 36)
-                            .padding(.top, 15)
                         
                         Text("사진 추가하기")
                             .textStyle(.captionS)
                             .foregroundStyle(.gray60)
-                            .padding(.bottom, 15)
-                            .padding(.horizontal, 20)
                     }
+                    .padding(.vertical, 20)
+                    .padding(.horizontal, 20)
                     .background(
                         RoundedRectangle(cornerRadius: 10)
                             .strokeBorder(.gray30, lineWidth: 1)
@@ -219,7 +234,7 @@ extension SpotEditorView {
         VStack {
             titleView("해쉬태그를 입력해주세요 (최대 2개)")
             
-            textFieldView(bindingText: $hashTag, placeHolder: "#해쉬태그를 입력해주세요", key: "hashTag")
+            textFieldView(bindingText: $store.hashTag.sending(\.bindingHashTag), placeHolder: "#해쉬태그를 입력해주세요", key: "hashTag")
         }
     }
     
@@ -242,19 +257,12 @@ extension SpotEditorView {
 
 extension SpotEditorView {
     private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String) -> some View {
-        TextField(
-            key,
+        CustomTextField(
             text: bindingText,
-            prompt: Text(
-                placeHolder
-            ).foregroundColor(
-                .textDisabled
-            )
+            placeholder: placeHolder,
+            textStyle: .subtitleS,
+            placeholderStyle: .bodyS  // 플레이스홀더용 스타일 따로 지정
         )
-        .onSubmit {
-            print("submit")
-        }
-        .textStyle(.subtitleS)
         .frame(maxWidth: .infinity)
         .frame(height: 44)
         .padding(.horizontal, 16)
