@@ -7,10 +7,14 @@
 
 import SwiftUI
 import ComposableArchitecture
+import Photos
 
 struct SpotEditorView: View {
     
     @Perception.Bindable var store: StoreOf<SpotEditorFeature>
+    
+    @State private var selectedImages: [UIImage] = []
+    @State private var showPermissionAlert: Bool = false
     
     var body: some View {
         WithPerceptionTracking {
@@ -19,6 +23,17 @@ struct SpotEditorView: View {
                     BottomSheetItem(title: "카테고리 선택", items: ["스냅 스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
                         store.send(.viewEvent(.tappedBottomSheet(category)))
                         store.send(.viewEvent(.closeBottomSheet(false)))
+                    }
+                }
+                .customAlert( // 알럿 추가
+                    isPresented: $showPermissionAlert,
+                    title: "권한 필요",
+                    message: "사진 접근 권한이 필요합니다.\n설정에서 권한을 허용해주세요.",
+                    cancelText: "취소",
+                    confirmText: "설정으로 이동"
+                ) {
+                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(settingsUrl)
                     }
                 }
         }
@@ -48,7 +63,7 @@ extension SpotEditorView {
                     .padding(.bottom, 28)
                 
                 pictureView
-                    .padding(.horizontal, 15)
+//                    .padding(.horizontal, 15)
                     .padding(.bottom, 28)
                 
                 hashtagView
@@ -197,36 +212,74 @@ extension SpotEditorView {
         }
     }
     
+    @ViewBuilder
     private var pictureView: some View {
         VStack {
             titleView("사진을 추가해주세요 (최소 1개)")
+                .padding(.leading, 15)
             
-            ScrollView {
-                
-                HStack {
-                    VStack(alignment: .center) {
-                        Image("ImageDefault")
-                            .resizable()
-                            .aspectRatio(1, contentMode: .fit)
-                            .frame(width: 36)
-                        
-                        Text("사진 추가하기")
-                            .textStyle(.captionS)
-                            .foregroundStyle(.gray60)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    PhotoPickerView(selectedImages: $selectedImages, showPermissionAlert: $showPermissionAlert) {
+                        VStack(alignment: .center) {
+                            Image("ImageDefault")
+                                .resizable()
+                                .aspectRatio(1, contentMode: .fit)
+                                .frame(width: 36)
+                            
+                            Text("사진 추가하기")
+                                .textStyle(.captionS)
+                                .foregroundStyle(.gray60)
+                        }
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 20)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10)
+                                .strokeBorder(.gray30, lineWidth: 1)
+                                .background(.gray20)
+                        )
                     }
-                    .padding(.vertical, 20)
-                    .padding(.horizontal, 20)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10)
-                            .strokeBorder(.gray30, lineWidth: 1)
-                            .background(.gray20)
-                    )
+                    .padding(.leading, 15)
                     
-                    Spacer()
-                    
+                    ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
+                        ZStack(alignment: .topTrailing) {
+                            Image(uiImage: image)
+                                .resizable()
+                                .scaledToFill()
+                                .frame(width: 100, height: 100)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .overlay(alignment: .bottom) {
+                                    if index == 0 {
+                                        HStack {
+                                            Spacer()
+                                            
+                                            Text("대표 이미지")
+                                                .textStyle(.captionS)
+                                                .foregroundColor(.white)
+                                                .padding(.vertical, 7)
+                                                .padding(.horizontal, 8)
+                                            
+                                            Spacer()
+                                        }
+                                        .background(.blue100)
+                                        .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
+                                    }
+                                }
+                            
+                            Image(systemName: "xmark")
+                                .foregroundColor(.white)
+                                .padding(4)
+                                .background(Color.black.opacity(0.5))
+                                .clipShape(Circle())
+                                .padding(4)
+                                .onTapGesture {
+                                    selectedImages.remove(at: index)
+                                }
+                        }
+                    }
                 }
-                
             }
+            .scrollDisabled(selectedImages.isEmpty)
         }
     }
     

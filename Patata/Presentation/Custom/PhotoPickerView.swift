@@ -8,13 +8,16 @@
 import PhotosUI
 import SwiftUI
 
-public struct PhotoPicker<Content: View>: View {
+public struct PhotoPickerView<Content: View>: View {
     @State private var selectedPhotos: [PhotosPickerItem]
     @Binding private var selectedImages: [UIImage]
     @Binding private var isPresentedError: Bool
+    @Binding private var showPermissionAlert: Bool
+    @State private var isPhotoLibraryAuthorized: Bool = false
+    
     private let maxSelectedCount: Int
     private var disabled: Bool {
-        selectedImages.count >= maxSelectedCount
+        selectedImages.count >= maxSelectedCount || !isPhotoLibraryAuthorized
     }
     private var availableSelectedCount: Int {
         maxSelectedCount - selectedImages.count
@@ -27,6 +30,7 @@ public struct PhotoPicker<Content: View>: View {
         selectedPhotos: [PhotosPickerItem] = [],
         selectedImages: Binding<[UIImage]>,
         isPresentedError: Binding<Bool> = .constant(false),
+        showPermissionAlert: Binding<Bool>, // 새로운 파라미터 추가
         maxSelectedCount: Int = 3,
         matching: PHPickerFilter = .images,
         photoLibrary: PHPhotoLibrary = .shared(),
@@ -39,9 +43,14 @@ public struct PhotoPicker<Content: View>: View {
         self.matching = matching
         self.photoLibrary = photoLibrary
         self.content = content
+        self._showPermissionAlert = showPermissionAlert
     }
     
     public var body: some View {
+        contentView
+    }
+    
+    private var contentView: some View {
         PhotosPicker(
             selection: $selectedPhotos,
             maxSelectionCount: availableSelectedCount,
@@ -52,29 +61,78 @@ public struct PhotoPicker<Content: View>: View {
                 .disabled(disabled)
         }
         .disabled(disabled)
-        .onChange(of: selectedPhotos) { _, newValue in
+        .onChange(of: selectedPhotos) { newValue in
             handleSelectedPhotos(newValue)
+        }
+        .asButton {
+            checkAndRequestPhotoLibraryPermission()
+        }
+    }
+
+}
+
+extension PhotoPickerView {
+    private func checkAndRequestPhotoLibraryPermission() {
+        let current = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        
+        switch current {
+        case .authorized, .limited:
+            isPhotoLibraryAuthorized = true
+            
+        case .denied, .restricted:
+            isPhotoLibraryAuthorized = false
+            showPermissionAlert = true
+            
+        case .notDetermined:
+            requestPhotoLibraryPermission()
+            
+        @unknown default:
+            isPhotoLibraryAuthorized = false
+        }
+    }
+    
+    private func requestPhotoLibraryPermission() {
+        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
+            DispatchQueue.main.async {
+                switch status {
+                case .authorized, .limited:
+                    isPhotoLibraryAuthorized = true
+                    
+                case .denied, .restricted:
+                    isPhotoLibraryAuthorized = false
+                    showPermissionAlert = true
+                    
+                case .notDetermined:
+                    isPhotoLibraryAuthorized = false
+                @unknown default:
+                    isPhotoLibraryAuthorized = false
+                }
+            }
         }
     }
     
     private func handleSelectedPhotos(_ newPhotos: [PhotosPickerItem]) {
-        for newPhoto in newPhotos {
-            newPhoto.loadTransferable(type: Data.self) { result in
-                switch result {
-                case .success(let data):
-                    if let data = data, let newImage = UIImage(data: data) {
-                        if !selectedImages.contains(where: { $0.pngData() == newImage.pngData() }) {
-                            DispatchQueue.main.async {
-                                selectedImages.append(newImage)
+        Task {
+            do {
+                for newPhoto in newPhotos {
+                    if let data = try await newPhoto.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        await MainActor.run {
+                            if !selectedImages.contains(where: { $0.pngData() == uiImage.pngData() }) {
+                                selectedImages.append(uiImage)
                             }
                         }
                     }
-                case .failure:
+                }
+            } catch {
+                await MainActor.run {
                     isPresentedError = true
                 }
             }
+            
+            await MainActor.run {
+                selectedPhotos.removeAll()
+            }
         }
-        
-        selectedPhotos.removeAll()
     }
 }

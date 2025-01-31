@@ -90,6 +90,26 @@ extension View {
     }
 }
 
+extension View {
+    func customAlert(
+        isPresented: Binding<Bool>,
+        title: String? = nil,
+        message: String,
+        cancelText: String = "취소",
+        confirmText: String = "확인",
+        onConfirm: @escaping () -> Void
+    ) -> some View {
+        modifier(CustomAlertModifier(
+            isPresented: isPresented,
+            title: title,
+            message: message,
+            cancelText: cancelText,
+            confirmText: confirmText,
+            onConfirm: onConfirm
+        ))
+    }
+}
+
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners
