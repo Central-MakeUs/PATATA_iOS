@@ -15,6 +15,7 @@ struct SpotEditorView: View {
     
     @State private var selectedImages: [UIImage] = []
     @State private var showPermissionAlert: Bool = false
+    @State private var sizeState: CGSize = .zero
     
     var body: some View {
         WithPerceptionTracking {
@@ -25,7 +26,7 @@ struct SpotEditorView: View {
                         store.send(.viewEvent(.closeBottomSheet(false)))
                     }
                 }
-                .customAlert( // 알럿 추가
+                .customAlert(
                     isPresented: $showPermissionAlert,
                     title: "권한 필요",
                     message: "사진 접근 권한이 필요합니다.\n설정에서 권한을 허용해주세요.",
@@ -63,7 +64,6 @@ extension SpotEditorView {
                     .padding(.bottom, 28)
                 
                 pictureView
-//                    .padding(.horizontal, 15)
                     .padding(.bottom, 28)
                 
                 hashtagView
@@ -233,6 +233,7 @@ extension SpotEditorView {
                         }
                         .padding(.vertical, 20)
                         .padding(.horizontal, 20)
+                        .sizeState(size: $sizeState)
                         .background(
                             RoundedRectangle(cornerRadius: 10)
                                 .strokeBorder(.gray30, lineWidth: 1)
@@ -246,7 +247,7 @@ extension SpotEditorView {
                             Image(uiImage: image)
                                 .resizable()
                                 .scaledToFill()
-                                .frame(width: 100, height: 100)
+                                .frame(width: sizeState.width, height: sizeState.height)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .overlay(alignment: .bottom) {
                                     if index == 0 {
@@ -265,15 +266,14 @@ extension SpotEditorView {
                                         .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
                                     }
                                 }
-                            
-                            Image(systemName: "xmark")
-                                .foregroundColor(.white)
-                                .padding(4)
-                                .background(Color.black.opacity(0.5))
-                                .clipShape(Circle())
-                                .padding(4)
-                                .onTapGesture {
-                                    selectedImages.remove(at: index)
+                                .overlay(alignment: .topTrailing) {
+                                    Image("WhiteX")
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(width: 34, height: 34)
+                                        .onTapGesture {
+                                            selectedImages.remove(at: index)
+                                        }
                                 }
                         }
                     }
@@ -292,7 +292,6 @@ extension SpotEditorView {
     }
     
     private var spotEditButton: some View {
-        // 텍스트필드가 다 채워지면 색 변경
         HStack {
             Spacer()
             
@@ -314,7 +313,7 @@ extension SpotEditorView {
             text: bindingText,
             placeholder: placeHolder,
             textStyle: .subtitleS,
-            placeholderStyle: .bodyS  // 플레이스홀더용 스타일 따로 지정
+            placeholderStyle: .bodyS 
         )
         .frame(maxWidth: .infinity)
         .frame(height: 44)

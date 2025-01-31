@@ -64,7 +64,7 @@ public struct PhotoPickerView<Content: View>: View {
         .onChange(of: selectedPhotos) { newValue in
             handleSelectedPhotos(newValue)
         }
-        .asButton {
+        .onAppear {
             checkAndRequestPhotoLibraryPermission()
         }
     }
@@ -78,6 +78,7 @@ extension PhotoPickerView {
         switch current {
         case .authorized, .limited:
             isPhotoLibraryAuthorized = true
+            requestPhotoLibraryPermission()
             
         case .denied, .restricted:
             isPhotoLibraryAuthorized = false
