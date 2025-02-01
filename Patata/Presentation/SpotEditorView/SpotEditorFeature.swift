@@ -17,6 +17,7 @@ struct SpotEditorFeature {
         var viewState: ViewState
         var spotEditorIsValid: Bool = false
         var categoryText: String = "카테고리를 선택해주세요"
+        var hashTags: [String] = []
         
         // bindingState
         var title: String = ""
@@ -50,12 +51,15 @@ struct SpotEditorFeature {
         case locationValidation(String)
         case categoryValidtaion(String)
         case detilValidation(String)
+        case hashTagValidation(String)
     }
     
     enum ViewEvent {
         case tappedBottomSheet(String)
         case openBottomSheet(Bool)
         case closeBottomSheet(Bool)
+        case hashTagOnSubmit
+        case deleteHashTag(Int)
     }
     
     var body: some ReducerOf<Self> {
@@ -76,23 +80,35 @@ extension SpotEditorFeature {
             case let .viewEvent(.closeBottomSheet(isPresent)):
                 state.isPresent = isPresent
                 
+            case .viewEvent(.hashTagOnSubmit):
+                let tagToAdd = state.hashTag.hasPrefix("#") ? String(state.hashTag.dropFirst()) : state.hashTag
+                
+                if !tagToAdd.isEmpty {
+                    state.hashTags.append(tagToAdd)
+                    state.hashTag = ""
+                }
+                
+                validateEditorState(&state)
+                
+            case let .viewEvent(.deleteHashTag(index)):
+                state.hashTags.remove(at: index)
+                
+                validateEditorState(&state)
+                
             case let .textValidation(.titleValidation(titleText)):
                 let limitedText = String(titleText.prefix(15))
-                let pattern = "[^a-zA-Z0-9가-힣\\s]"
-                
+
                 if limitedText.first == " " {
                     state.title = ""
                     return .none
                 }
-                
-                
+
                 if limitedText.contains("  ") {
                     state.title = limitedText.replacingOccurrences(of: "  ", with: " ")
                     validateEditorState(&state)
                     return .none
                 }
-                
-                
+
                 if let lastChar = state.title.last,
                    lastChar == " ",
                    limitedText.last == " " {
@@ -100,41 +116,36 @@ extension SpotEditorFeature {
                     validateEditorState(&state)
                     return .none
                 }
-                
-                guard let regex = try? NSRegularExpression(pattern: pattern) else {
-                    state.title = limitedText
-                    validateEditorState(&state)
-                    return .none
+
+                var allowedCharacters = CharacterSet()
+                allowedCharacters.formUnion(.alphanumerics)
+                allowedCharacters.formUnion(.whitespaces)
+                allowedCharacters.insert(charactersIn: "가-힣")
+
+                // 문자열을 Unicode.Scalar로 변환하여 필터링
+                let filteredText = limitedText.unicodeScalars.filter {
+                    allowedCharacters.contains($0)
+                }.reduce(into: "") { result, scalar in
+                    result.append(String(scalar))
                 }
-                
-                let range = NSRange(location: 0, length: limitedText.utf16.count)
-                let filteredText = regex.stringByReplacingMatches(
-                    in: limitedText,
-                    range: range,
-                    withTemplate: ""
-                )
 
                 state.title = filteredText
-                
                 validateEditorState(&state)
                 
             case let .textValidation(.locationValidation(locationText)):
-                let pattern = "[^a-zA-Z0-9가-힣\\s-]"
-                    
-                guard let regex = try? NSRegularExpression(pattern: pattern) else {
-                    state.location = state.location
-                    return .none
+                var allowedCharacters = CharacterSet()
+                allowedCharacters.formUnion(.alphanumerics)
+                allowedCharacters.formUnion(.whitespaces)
+                allowedCharacters.insert(charactersIn: "가-힣")
+                allowedCharacters.insert(charactersIn: "-")
+
+                let filteredText = locationText.unicodeScalars.filter {
+                    allowedCharacters.contains($0)
+                }.reduce(into: "") { result, scalar in
+                    result.append(String(scalar))
                 }
-                
-                let range = NSRange(location: 0, length: locationText.utf16.count)
-                let filteredText = regex.stringByReplacingMatches(
-                    in: locationText,
-                    range: range,
-                    withTemplate: ""
-                )
-                
+
                 state.location = filteredText
-                
                 validateEditorState(&state)
                 
             case let .textValidation(.detilValidation(detail)):
@@ -171,6 +182,27 @@ extension SpotEditorFeature {
                 
                 validateEditorState(&state)
                 
+            case let .textValidation(.hashTagValidation(text)):
+                var processedText = text
+
+                if !text.hasPrefix("#") {
+                    processedText = "#" + text
+                }
+
+                let withoutHash = processedText.dropFirst()
+
+                let specialCharPattern = "[^a-zA-Z0-9가-힣\\s]"
+                let filteredText = withoutHash.components(separatedBy: CharacterSet(charactersIn: specialCharPattern))
+                    .joined()
+
+                let singleSpaceText = filteredText.replacingOccurrences(
+                    of: "\\s+",
+                    with: " ",
+                    options: .regularExpression
+                ).trimmingCharacters(in: .whitespaces)
+
+                state.hashTag = "#" + singleSpaceText
+                
             case let .bindingTitle(titleText):
                 state.title = titleText
                 
@@ -198,6 +230,6 @@ extension SpotEditorFeature {
     }
     
     private func validateEditorState(_ state: inout State) {
-        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요"
+        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요" && !state.hashTags.isEmpty
     }
 }

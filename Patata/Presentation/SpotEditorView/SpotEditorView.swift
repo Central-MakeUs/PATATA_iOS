@@ -338,6 +338,41 @@ extension SpotEditorView {
                 nextFocus: .hashTag,
                 nowFocus: .hashTag
             )
+            .disabled(store.hashTags.count == 2)
+            .onChange(of: store.hashTag) { newValue in
+                store.send(.textValidation(.hashTagValidation(newValue)))
+            }
+            .onSubmit {
+                store.send(.viewEvent(.hashTagOnSubmit))
+            }
+            
+            HStack {
+                ForEach(Array(store.hashTags.enumerated()), id: \.element.self) { index, item in
+                    HStack(spacing: 4) {
+                        Text(item)
+                            .textStyle(.captionS)
+                            .foregroundStyle(.gray80)
+                        
+                        Image("XInActive")
+                            .resizable()
+                            .frame(width: 12, height: 12)
+                            .asButton {
+                                store.send(.viewEvent(.deleteHashTag(index)))
+                            }
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 30)
+                            .strokeBorder(.gray30, lineWidth: 2)
+                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                    )
+                }
+                
+                Spacer()
+            }
+            .padding(.top, 4)
+            
         }
     }
     
@@ -364,24 +399,30 @@ extension SpotEditorView {
 
 extension SpotEditorView {
     private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String, nextFocus: Field, nowFocus: Field) -> some View {
-        TextField(
-            key,
-            text: bindingText,
-            prompt: Text(
-                placeHolder
-            ).foregroundColor(
-                .textInfo
+        TextField("", text: bindingText)
+            .textStyle(.subtitleL)
+            .focused($focusedField, equals: nowFocus)
+            .frame(maxWidth: .infinity)
+            .frame(height: 44)
+            .padding(.horizontal, 16)
+            .background(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .onSubmit {
+                focusedField = nextFocus
+            }
+            .overlay(
+                ZStack(alignment: .leading) {
+                    if bindingText.wrappedValue.isEmpty {
+                        HStack {
+                            Text(placeHolder)
+                                .textStyle(.bodyS)
+                                .foregroundColor(.textDisabled)
+                                .padding(.horizontal, 16)
+                            Spacer()
+                        }
+                    }
+                }
             )
-        )
-        .focused($focusedField, equals: nowFocus)
-        .onSubmit {
-            focusedField = nextFocus
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 44)
-        .padding(.horizontal, 16)
-        .background(.white)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
     private func titleView(_ text: String) -> some View {
