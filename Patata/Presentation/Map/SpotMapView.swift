@@ -31,6 +31,7 @@ struct SpotMapView: View {
     @State var searchText: String = ""
     @State var isSelected: Bool = false
     @State var menuIndex: Int = 0
+    @State var isPresented: Bool = false
     
     let categoryItems = [
         CategoryItem(
@@ -60,6 +61,11 @@ struct SpotMapView: View {
     
     var body: some View {
         contentView
+            .presentBottomSheet(isPresented: $isPresented, isMap: true, mapBottomView: {
+                AnyView(mapBottomView)
+            }, content: {
+                AnyView(spotDetailSheet)
+            })
     }
 }
 
@@ -140,6 +146,9 @@ extension SpotMapView {
             Text("장소 추가하기")
                 .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
                 .padding(.bottom, 16)
+                .asButton {
+                    isPresented = true
+                }
             
             HStack {
                 Spacer()
@@ -156,6 +165,65 @@ extension SpotMapView {
             }
             .padding(.bottom, 15)
         }
+    }
+    
+    private var spotDetailSheet: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // 첫 번째 행: 태그와 제목
+            HStack(spacing: 8) {
+                Text("작가추천")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.blue50)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 4)
+                    .background(.navy100)
+                    .clipShape(RoundedRectangle(cornerRadius: 22))
+                
+                Text("시청역 어쩌고저쩌고")
+                    .textStyle(.subtitleS)
+                    .foregroundStyle(.blue100)
+                
+                Text("category")
+                    .foregroundStyle(.gray70)
+                    .textStyle(.captionS)
+                
+                Spacer()
+                
+                Image("ArchiveInactive")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24, height: 24)
+            }
+            
+            HStack(spacing: 4) {
+                Text("512 m")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textSub)
+                
+                Text("서울특별시 종로구 가나다길 441-49 두번째 계단")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textInfo)
+                
+                Spacer()
+            }
+            
+            HStack(spacing: 8) {
+                Text("#야경맛집")
+                    .hashTagStyle()
+                
+                Text("#국회의사당뷰")
+                    .hashTagStyle()
+            }
+            
+            Rectangle()
+                .foregroundStyle(.red)
+                .frame(maxWidth: .infinity)
+                .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .padding(.horizontal, 15)
+        .padding(.vertical, 12)
+        
     }
 }
 

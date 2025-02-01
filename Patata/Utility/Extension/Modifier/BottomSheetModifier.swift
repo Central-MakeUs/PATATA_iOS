@@ -10,6 +10,8 @@ import SwiftUI
 struct BottomSheetModifier<SheetContent: View>: ViewModifier {
     
     let sheetContent: () -> SheetContent
+    let mapBottomView: (() -> SheetContent)?
+    let isMap: Bool
     
     private var sheetOffset: CGFloat {
         isPresented ? (isFullSheet ? (isFull ? 0 : UIScreen.main.bounds.height / 2) : 0) : bottomSheetSize.height
@@ -27,7 +29,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
         ZStack {
             content
             
-            if isPresented {
+            if isPresented && !isMap {
                 
                 if isFull {
                     Color.white
@@ -47,6 +49,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
             }
             
             bottomSheetItem
+                .shadow(color: isMap ? .shadowColor : .clear, radius: 8)
             
         }
         .frame(maxWidth: .infinity)
@@ -56,26 +59,38 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
     private var bottomSheetItem: some View {
         VStack {
             Spacer()
-
-            VStack {
-                if isFullSheet {
-                    if !isFull {
-                        Rectangle()
-                            .frame(width: 50, height: 4)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .padding(.vertical, 8)
-                            .opacity(isFull ? 0 : 1)
-                    }
-                    
-                    sheetContent()
-                        .environment(\.isScrollEnabled, isFull)
-                } else {
-                    VStack {
-                        Rectangle()
-                            .frame(width: 50, height: 4)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .padding(.top, 8)
+            
+            Group {
+                if let mapBottomView {
+                    mapBottomView()
+                }
+                
+                VStack {
+                    if isFullSheet {
+                        if !isFull {
+                            Rectangle()
+                                .frame(width: 50, height: 4)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .padding(.vertical, 8)
+                                .opacity(isFull ? 0 : 1)
+                        }
                         
+                        sheetContent()
+                            .environment(\.isScrollEnabled, isFull)
+                    } else if !isMap {
+                        VStack {
+                            Rectangle()
+                                .frame(width: 50, height: 4)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .padding(.top, 8)
+                            
+                            sheetContent()
+                                .fixedSize(horizontal: false, vertical: true)
+                                .foregroundStyle(.textDefault)
+                                .padding(.top, 8)
+                                .padding(.bottom, 30)
+                        }
+                    } else {
                         sheetContent()
                             .fixedSize(horizontal: false, vertical: true)
                             .foregroundStyle(.textDefault)
@@ -83,9 +98,9 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                             .padding(.bottom, 30)
                     }
                 }
+                .background(.white)
+                .cornerRadius(20, corners: [.topLeft, .topRight])
             }
-            .background(.white)
-            .cornerRadius(20, corners: [.topLeft, .topRight])
         }
         .frame(maxWidth: .infinity)
         .sizeState(size: $bottomSheetSize)

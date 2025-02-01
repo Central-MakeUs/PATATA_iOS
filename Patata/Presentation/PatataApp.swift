@@ -28,15 +28,12 @@ struct PatataApp: App {
 //            .onOpenURL { url in
 //                GIDSignIn.sharedInstance.handle(url)
 //            }
-//            SpotMapView()
+            SpotMapView()
 //            TestView()
 //            SpotCategoryView(store: Store(initialState: SpotCategoryFeature.State(), reducer: {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            SpotEditorView(store: Store(initialState: SpotEditorFeature.State(viewState: .add), reducer: {
-                SpotEditorFeature()
-            }))
         }
     }
 }
