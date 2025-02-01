@@ -14,12 +14,26 @@ struct SpotEditorView: View {
     @Perception.Bindable var store: StoreOf<SpotEditorFeature>
     
     @State private var selectedImages: [UIImage] = []
-    @State private var showPermissionAlert: Bool = false
     @State private var sizeState: CGSize = .zero
+    @FocusState private var focusedField: Field?
+    
+    enum Field: Hashable {
+        case title
+        case location
+        case detail
+        case hashTag
+    }
     
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .background(
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            hideKeyboard()
+                        }
+                )
                 .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
                     BottomSheetItem(title: "카테고리 선택", items: ["스냅 스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
                         store.send(.viewEvent(.tappedBottomSheet(category)))
@@ -27,7 +41,7 @@ struct SpotEditorView: View {
                     }
                 }
                 .customAlert(
-                    isPresented: $showPermissionAlert,
+                    isPresented: $store.showPermissionAlert.sending(\.bindingPermission),
                     title: "권한 필요",
                     message: "사진 접근 권한이 필요합니다.\n설정에서 권한을 허용해주세요.",
                     cancelText: "취소",
@@ -75,7 +89,11 @@ extension SpotEditorView {
             VStack {
                 spotEditButton
                     .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
             }
+        }
+        .onTapGesture {
+            hideKeyboard()
         }
     }
     
@@ -84,6 +102,7 @@ extension SpotEditorView {
             HStack {
                 NavBackButton {
                     print("back")
+                    hideKeyboard()
                 }
                 .padding(.leading, 15)
                 
@@ -104,6 +123,7 @@ extension SpotEditorView {
                     .padding(.trailing, 15)
                     .asButton {
                         print("X")
+                        hideKeyboard()
                     }
             }
         }
@@ -114,10 +134,16 @@ extension SpotEditorView {
         VStack {
             titleView("제목을 입력하세요")
             
-            textFieldView(bindingText: $store.title.sending(\.bindingTitle), placeHolder: "제목을 입력하세요 (15자 이내)", key: "title")
-                .onChange(of: store.title) { value in
-                    store.send(.textValidation(.titleValidation(value)))
-                }
+            textFieldView(
+                bindingText: $store.title.sending(\.bindingTitle),
+                placeHolder: "제목을 입력하세요 (15자 이내)",
+                key: "title",
+                nextFocus: .location,
+                nowFocus: .title
+            )
+            .onChange(of: store.title) { newValue in
+                store.send(.textValidation(.titleValidation(newValue)))
+            }
         }
     }
     
@@ -147,7 +173,16 @@ extension SpotEditorView {
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             )
             
-            textFieldView(bindingText: $store.location.sending(\.bindingLocation), placeHolder: "상세한 위치를 입력하세요", key: "location")
+            textFieldView(
+                bindingText: $store.location.sending(\.bindingLocation),
+                placeHolder: "상세한 위치를 입력하세요",
+                key: "location",
+                nextFocus: .detail,
+                nowFocus: .location
+            )
+            .onChange(of: store.location) { newValue in
+                store.send(.textValidation(.locationValidation(newValue)))
+            }
         }
     }
     
@@ -163,8 +198,12 @@ extension SpotEditorView {
                 .padding(.horizontal, 16)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .onChange(of: store.detail) { value in
-                    store.send(.textValidation(.detilValidation(value)))
+                .focused($focusedField, equals: .detail)
+                .onChange(of: store.detail) { newValue in
+                    store.send(.textValidation(.detilValidation(newValue)))
+                }
+                .onSubmit {
+                    focusedField = .hashTag
                 }
                 .overlay(
                     VStack(alignment: .leading, spacing: 16) {
@@ -194,6 +233,9 @@ extension SpotEditorView {
                     .textStyle(store.categoryText == "카테고리를 선택해주세요" ? .bodyS : .subtitleS)
                     .foregroundColor(store.categoryText == "카테고리를 선택해주세요" ? .textDisabled : .textSub)
                     .padding(.leading, 16)
+                    .onChange(of: store.categoryText) { newValue in
+                        store.send(.textValidation(.categoryValidtaion(newValue)))
+                    }
                 
                 Spacer()
                 
@@ -220,7 +262,10 @@ extension SpotEditorView {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    PhotoPickerView(selectedImages: $selectedImages, showPermissionAlert: $showPermissionAlert) {
+                    PhotoPickerView(
+                        selectedImages: $selectedImages,
+                        showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission)
+                    ) {
                         VStack(alignment: .center) {
                             Image("ImageDefault")
                                 .resizable()
@@ -287,7 +332,12 @@ extension SpotEditorView {
         VStack {
             titleView("해쉬태그를 입력해주세요 (최대 2개)")
             
-            textFieldView(bindingText: $store.hashTag.sending(\.bindingHashTag), placeHolder: "#해쉬태그를 입력해주세요", key: "hashTag")
+            textFieldView(
+                bindingText: $store.hashTag.sending(\.bindingHashTag),
+                placeHolder: "#해쉬태그를 입력해주세요", key: "hashTag",
+                nextFocus: .hashTag,
+                nowFocus: .hashTag
+            )
         }
     }
     
@@ -302,19 +352,31 @@ extension SpotEditorView {
             Spacer()
         }
         .padding(.vertical, 14)
-        .background(.black)
+        .background(store.spotEditorIsValid && !selectedImages.isEmpty ? .black : .gray50)
         .clipShape(RoundedRectangle(cornerRadius: 24))
+        .asButton {
+            if store.spotEditorIsValid {
+                print("tap")
+            }
+        }
     }
 }
 
 extension SpotEditorView {
-    private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String) -> some View {
-        CustomTextField(
+    private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String, nextFocus: Field, nowFocus: Field) -> some View {
+        TextField(
+            key,
             text: bindingText,
-            placeholder: placeHolder,
-            textStyle: .subtitleS,
-            placeholderStyle: .bodyS 
+            prompt: Text(
+                placeHolder
+            ).foregroundColor(
+                .textInfo
+            )
         )
+        .focused($focusedField, equals: nowFocus)
+        .onSubmit {
+            focusedField = nextFocus
+        }
         .frame(maxWidth: .infinity)
         .frame(height: 44)
         .padding(.horizontal, 16)

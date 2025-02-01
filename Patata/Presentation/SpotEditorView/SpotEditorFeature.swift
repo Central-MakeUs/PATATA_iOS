@@ -24,6 +24,7 @@ struct SpotEditorFeature {
         var detail: String = ""
         var hashTag: String = ""
         var isPresent: Bool = false
+        var showPermissionAlert: Bool = false
     }
     
     enum ViewState {
@@ -41,10 +42,13 @@ struct SpotEditorFeature {
         case bindingDetail(String)
         case bindingHashTag(String)
         case bindingPresent(Bool)
+        case bindingPermission(Bool)
     }
     
     enum TextValidation {
         case titleValidation(String)
+        case locationValidation(String)
+        case categoryValidtaion(String)
         case detilValidation(String)
     }
     
@@ -74,50 +78,83 @@ extension SpotEditorFeature {
                 
             case let .textValidation(.titleValidation(titleText)):
                 let limitedText = String(titleText.prefix(15))
+                let pattern = "[^a-zA-Z0-9가-힣\\s]"
                 
-                // 새로운 입력이 빈 스페이스로 시작하는 경우 방지
                 if limitedText.first == " " {
                     state.title = ""
                     return .none
                 }
                 
-                // 연속 스페이스 방지
+                
                 if limitedText.contains("  ") {
                     state.title = limitedText.replacingOccurrences(of: "  ", with: " ")
+                    validateEditorState(&state)
                     return .none
                 }
                 
-                // 현재 상태의 마지막 문자가 스페이스이고, 새로운 입력도 스페이스로 시작하는 경우 방지
+                
                 if let lastChar = state.title.last,
                    lastChar == " ",
                    limitedText.last == " " {
                     state.title = state.title
+                    validateEditorState(&state)
                     return .none
                 }
                 
-                state.title = limitedText
+                guard let regex = try? NSRegularExpression(pattern: pattern) else {
+                    state.title = limitedText
+                    validateEditorState(&state)
+                    return .none
+                }
+                
+                let range = NSRange(location: 0, length: limitedText.utf16.count)
+                let filteredText = regex.stringByReplacingMatches(
+                    in: limitedText,
+                    range: range,
+                    withTemplate: ""
+                )
+
+                state.title = filteredText
+                
+                validateEditorState(&state)
+                
+            case let .textValidation(.locationValidation(locationText)):
+                let pattern = "[^a-zA-Z0-9가-힣\\s-]"
+                    
+                guard let regex = try? NSRegularExpression(pattern: pattern) else {
+                    state.location = state.location
+                    return .none
+                }
+                
+                let range = NSRange(location: 0, length: locationText.utf16.count)
+                let filteredText = regex.stringByReplacingMatches(
+                    in: locationText,
+                    range: range,
+                    withTemplate: ""
+                )
+                
+                state.location = filteredText
+                
+                validateEditorState(&state)
                 
             case let .textValidation(.detilValidation(detail)):
                 let totalLength = detail.reduce(0) { count, char in
                     if char == "\n" {
-                        return count + 1  // 엔터를 1자로 계산
+                        return count + 1
                     }
                     return count + 1
                 }
                 
-                // 300자 제한 적용
                 if totalLength > 300 {
-                    state.detail = state.detail  // 현재 상태 유지
+                    state.detail = state.detail
                     return .none
                 }
                 
-                // 연속 스페이스 방지
                 if detail.contains("  ") {
                     state.detail = state.detail
                     return .none
                 }
                 
-                // 첫 글자 공백 방지
                 if detail.first == " " {
                     state.detail = ""
                     return .none
@@ -125,12 +162,21 @@ extension SpotEditorFeature {
                     
                 state.detail = detail
                 
-            case let .bindingTitle(title):
-                state.title = title
+                validateEditorState(&state)
                 
-            case let .bindingLocation(location):
-                state.location = location
+            case let .textValidation(.categoryValidtaion(category)):
+                if category == "카테고리를 선택해주세요" {
+                    return .none
+                }
                 
+                validateEditorState(&state)
+                
+            case let .bindingTitle(titleText):
+                state.title = titleText
+                
+            case let .bindingLocation(locationText):
+                state.location = locationText
+
             case let .bindingDetail(detail):
                 state.detail = detail
                 
@@ -140,11 +186,18 @@ extension SpotEditorFeature {
             case let .bindingPresent(isPresent):
                 state.isPresent = isPresent
                 
+            case let .bindingPermission(permission):
+                state.showPermissionAlert = permission
+                
             default:
                 break
             }
             
             return .none
         }
+    }
+    
+    private func validateEditorState(_ state: inout State) {
+        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요"
     }
 }
