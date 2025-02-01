@@ -80,6 +80,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                             .fixedSize(horizontal: false, vertical: true)
                             .foregroundStyle(.textDefault)
                             .padding(.top, 8)
+                            .padding(.bottom, 30)
                     }
                 }
             }
@@ -100,7 +101,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         }
                     } else {
                         if dragOffset + value.translation.height > 0 {
-                            dragOffset += value.translation.height
+                            dragOffset = value.translation.height
                         }
                     }
                 }
