@@ -82,14 +82,14 @@ extension SpotEditorView {
                 
                 hashtagView
                     .padding(.horizontal, 15)
-                    .padding(.bottom, 28)
+                    .padding(.bottom, 50)
             }
             .background(.gray20)
             
             VStack {
                 spotEditButton
                     .padding(.horizontal, 20)
-                    .padding(.bottom, 20)
+                    .padding(.bottom, 10)
             }
         }
         .onTapGesture {
