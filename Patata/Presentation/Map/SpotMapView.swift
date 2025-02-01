@@ -86,6 +86,10 @@ extension SpotMapView {
             ZStack {
                 UIMapView(coord: coord, markers: [(coord, SpotMarkerImage.housePin)])
                 
+                UIMapView(coord: coord, markers: [(coord, SpotMarkerImage.housePin)]) { lat, long in
+                    isPresented = true
+                }
+                
                 VStack {
                     mapMenuView
                         .scrollIndicators(.hidden)
@@ -146,9 +150,6 @@ extension SpotMapView {
             Text("장소 추가하기")
                 .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
                 .padding(.bottom, 16)
-                .asButton {
-                    isPresented = true
-                }
             
             HStack {
                 Spacer()

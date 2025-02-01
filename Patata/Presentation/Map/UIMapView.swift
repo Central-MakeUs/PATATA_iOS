@@ -26,7 +26,18 @@ struct UIMapView: UIViewRepresentable {
 
     let coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
     let markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
+    let onMarkerTap: ((Double, Double) -> Void)?
     private let mapState = MapState()
+    
+    init(
+        coord: (Double, Double),
+        markers: [(coordinate: (long: Double, lat: Double), category: String)],
+        onMarkerTap: ((Double, Double) -> Void)? = nil
+    ) {
+        self.coord = coord
+        self.markers = markers
+        self.onMarkerTap = onMarkerTap
+    }
     
     func makeCoordinator() -> Coordinator {
         Coordinator()
@@ -73,6 +84,10 @@ struct UIMapView: UIViewRepresentable {
         let marker = NMFMarker()
         
         marker.position = NMGLatLng(lat: lat, lng: long)
+        marker.touchHandler = { (overlay) -> Bool in
+            onMarkerTap?(lat, long)
+            return true
+        }
         
         // 여기서 해당하는 사진 객체를 생성하면서 없으면 생성 아니면 바로 그걸로 적용
         if let image = mapState.markerImages[category] {
