@@ -29,12 +29,12 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
         ZStack {
             content
             
-            if isPresented && !isMap {
+            if isPresented {
                 
                 if isFull {
                     Color.white
                         .ignoresSafeArea()
-                } else {
+                } else if !isMap {
                     Color.black
                         .opacity(0.1)
                         .ignoresSafeArea()
@@ -45,6 +45,18 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                             }
                         }
                         .transition(.opacity)
+                } else {
+                    Color.clear
+                        .ignoresSafeArea()
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation {
+                                isPresented = false
+                            }
+                        }
+                        .onAppear {
+                            print("ehre?")
+                        }
                 }
             }
             
