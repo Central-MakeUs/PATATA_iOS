@@ -28,7 +28,9 @@ struct PatataApp: App {
 //            .onOpenURL { url in
 //                GIDSignIn.sharedInstance.handle(url)
 //            }
-            SpotMapView()
+            SpotMapView(store: Store(initialState: SpotMapFeature.State(), reducer: {
+                SpotMapFeature()
+            }))
 //            TestView()
 //            SpotCategoryView(store: Store(initialState: SpotCategoryFeature.State(), reducer: {
 //                SpotCategoryFeature()

@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 // 지도 뷰를 그리기 전에 먼저 통신을 해서 기억하고 있는 좌표가 있는지 체크
 // 없다면 그냥 지도 그리고
@@ -13,45 +14,18 @@ import SwiftUI
 // 그리고 지도를 그린다.
 // 예시로 버튼을 누를때마다 카메라가 바라보는 좌표에 마커를 추가하는 걸 해보자
 struct SpotMapView: View {
-    @State var coord: (Double, Double) = (126.9784147, 37.5666805)
-    @State var searchText: String = ""
-    @State var isSelected: Bool = false
-    @State var menuIndex: Int = 0
-    @State var isPresented: Bool = false
     
-    let categoryItems = [
-        CategoryItem(
-            item: "전체",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "작가 추천",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "스냅스팟",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "시크한 야경",
-            images: "RecommendIcon"
-        ),
-        CategoryItem(
-            item: "싱그러운 자연",
-            images: "RecommendIcon"
-        )
-    ]
-    
-    @State var selectedIndex: Int = 0
-    var currentIndex: Int = 0
-    
+    @Perception.Bindable var store: StoreOf<SpotMapFeature>
+
     var body: some View {
-        contentView
-            .presentBottomSheet(isPresented: $isPresented, isMap: true, mapBottomView: {
-                AnyView(mapBottomView)
-            }, content: {
-                AnyView(spotDetailSheet)
-            })
+        WithPerceptionTracking {
+            contentView
+                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
+                    AnyView(mapBottomView)
+                }, content: {
+                    AnyView(spotDetailSheet)
+                })
+        }
     }
 }
 
@@ -70,10 +44,8 @@ extension SpotMapView {
                )
              
             ZStack {
-                UIMapView(coord: coord, markers: [(coord, SpotMarkerImage.housePin)])
-                
-                UIMapView(coord: coord, markers: [(coord, SpotMarkerImage.housePin)]) { lat, long in
-                    isPresented = true
+                UIMapView(coord: store.coord, markers: [(store.coord, SpotMarkerImage.housePin)]) { lat, long in
+                    store.send(.viewEvent(.tappedMarker))
                 }
                 
                 VStack {
@@ -120,10 +92,10 @@ extension SpotMapView {
     private var mapMenuView: some View {
         ScrollView(.horizontal) {
             HStack {
-                ForEach(Array(categoryItems.enumerated()), id: \.element.id) { index, item in
+                ForEach(Array(store.categoryItems.enumerated()), id: \.element.id) { index, item in
                     categoryMenuView(categoryItem: item, index: index)
                         .onTapGesture {
-                            selectedIndex = index
+                            store.send(.viewEvent(.tappedMenu(index)))
                         }
                 }
             }
@@ -137,7 +109,7 @@ extension SpotMapView {
                 .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
                 .padding(.bottom, 16)
                 .asButton {
-                    isPresented = false
+                    store.send(.viewEvent(.tappedSpotAddButton))
                 }
             
             HStack {
@@ -159,7 +131,6 @@ extension SpotMapView {
     
     private var spotDetailSheet: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // 첫 번째 행: 태그와 제목
             HStack(spacing: 8) {
                 Text("작가추천")
                     .textStyle(.captionS)
@@ -227,15 +198,15 @@ extension SpotMapView {
             }
             
             Text(categoryItem.item)
-                .textStyle(selectedIndex == index ? .subtitleXS : .captionM)
-                .foregroundStyle(selectedIndex == index ? .white : .textInfo)
+                .textStyle(store.selectedMenuIndex == index ? .subtitleXS : .captionM)
+                .foregroundStyle(store.selectedMenuIndex == index ? .white : .textInfo)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(selectedIndex == index ? .clear : .gray30, lineWidth: 2)
-                .background(selectedIndex == index ? .black : .white)
+                .strokeBorder(store.selectedMenuIndex == index ? .clear : .gray30, lineWidth: 2)
+                .background(store.selectedMenuIndex == index ? .black : .white)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         )
     }
