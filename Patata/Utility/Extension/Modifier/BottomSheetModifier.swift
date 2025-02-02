@@ -54,9 +54,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                                 isPresented = false
                             }
                         }
-                        .onAppear {
-                            print("ehre?")
-                        }
                 }
             }
             

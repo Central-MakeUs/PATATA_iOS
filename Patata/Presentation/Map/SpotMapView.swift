@@ -11,20 +11,6 @@ import SwiftUI
 // 없다면 그냥 지도 그리고
 // 있다면 일단 해당 값 카테고리를 체크후 해당하는 마커를 만들고 좌표값을 넣어 맵 뷰에 넣는다.
 // 그리고 지도를 그린다.
-
-
-enum SpotMarkerImage {
-    static let housePin: String = "HousePin"
-    static let inActivePin: String = "InActivePin"
-    static let activePin: String = "ActivePin"
-    static let naturePin: String = "NaturePin"
-    static let myPin: String = "MyPin"
-    static let nightPin: String = "NightPin"
-    static let recommendPin: String = "RecommendPin"
-    static let snapPin: String = "SnapPin"
-    static let archivePin: String = "ArchivePin"
-}
-
 // 예시로 버튼을 누를때마다 카메라가 바라보는 좌표에 마커를 추가하는 걸 해보자
 struct SpotMapView: View {
     @State var coord: (Double, Double) = (126.9784147, 37.5666805)
@@ -150,6 +136,9 @@ extension SpotMapView {
             Text("장소 추가하기")
                 .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
                 .padding(.bottom, 16)
+                .asButton {
+                    isPresented = false
+                }
             
             HStack {
                 Spacer()
