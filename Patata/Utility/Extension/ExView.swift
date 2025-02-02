@@ -26,7 +26,8 @@ extension View {
     func customTabView(
         selection: Binding<TabCase>,
         tabState: TabCase,
-        tabContentView: @escaping () -> some View
+        tabHomeContentView: @escaping () -> some View,
+        tabMapContentView: @escaping () -> some View
     ) -> some View {
         if #available(iOS 18.0, *) {
             TabView(selection: selection) {
@@ -35,17 +36,30 @@ extension View {
                     image: tabState == .home ? "HomeActive" : "HomeInActive",
                     value: .home
                 ) {
-                    tabContentView()
+                    tabHomeContentView()
+                }
+                
+                Tab(
+                    "내주변",
+                    image: tabState == .map ? "SpotActive" : "SpotInActive",
+                    value: .map
+                ) {
+                    tabMapContentView()
                 }
             }
             .tint(.textDefault)
         } else {
             TabView(selection: selection) {
-                tabContentView()
+                tabHomeContentView()
                     .tabItem {
                         Image(tabState == .home ? "HomeActive" : "HomeInActive")
                     }
                     .tag(TabCase.home)
+                tabMapContentView()
+                    .tabItem {
+                        Image(tabState == .map ?  "SpotActive" : "SpotInActive")
+                    }
+                    .tag(TabCase.map)
             }
         }
     }

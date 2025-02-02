@@ -1,0 +1,45 @@
+//
+//  MapCoordinator.swift
+//  Patata
+//
+//  Created by 김진수 on 2/2/25.
+//
+
+import Foundation
+import ComposableArchitecture
+@preconcurrency import TCACoordinators
+
+@Reducer(state: .equatable)
+enum MapScreen {
+    case spotMap(SpotMapFeature)
+}
+
+@Reducer
+struct MapCoordinator {
+    @ObservableState
+    struct State: Equatable, Sendable {
+        static let initialState = State(routes: [.root(.spotMap(SpotMapFeature.State()), embedInNavigationView: true)])
+        var routes: IdentifiedArrayOf<Route<MapScreen.State>>
+    }
+    
+    enum Action {
+        case router(IdentifiedRouterActionOf<MapScreen>)
+    }
+    
+    var body: some ReducerOf<Self> {
+        core()
+    }
+}
+
+extension MapCoordinator {
+    private func core() -> some ReducerOf<Self> {
+        Reduce { state, action in
+            switch action {
+            default:
+                break
+            }
+            return .none
+        }
+        .forEachRoute(\.routes, action: \.router)
+    }
+}

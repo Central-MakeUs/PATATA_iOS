@@ -8,11 +8,16 @@
 import Foundation
 import ComposableArchitecture
 
+struct Coordinate: Equatable {
+    var latitude: Double
+    var longitude: Double
+}
+
 @Reducer
 struct SpotMapFeature {
     @ObservableState
-    struct State {
-        var coord: (Double, Double) = (126.9784147, 37.5666805)
+    struct State: Equatable {
+        var coord: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
         var selectedMenuIndex: Int = 0
         let categoryItems = [
             CategoryItem(

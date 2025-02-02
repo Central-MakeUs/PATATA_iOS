@@ -44,7 +44,7 @@ extension SpotMapView {
                )
              
             ZStack {
-                UIMapView(coord: store.coord, markers: [(store.coord, SpotMarkerImage.housePin)]) { lat, long in
+                UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 }
                 

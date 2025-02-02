@@ -17,10 +17,12 @@ struct TabCoordinator {
 //        var isTabBarHidden: Bool = false
         
         var homeTabState = HomeCoordinator.State.initialState
+        var mapTabState = MapCoordinator.State.initialState
     }
     
     enum Action {
         case homeTabAction(HomeCoordinator.Action)
+        case mapTabAction(MapCoordinator.Action)
         
         // binding
         case bindingTab(TabCase)
@@ -29,6 +31,10 @@ struct TabCoordinator {
     var body: some ReducerOf<Self> {
         Scope(state: \.homeTabState, action: \.homeTabAction) {
             HomeCoordinator()
+        }
+        
+        Scope(state: \.mapTabState, action: \.mapTabAction) {
+            MapCoordinator()
         }
         
         core()
@@ -41,9 +47,6 @@ extension TabCoordinator {
             switch action {
             case let .bindingTab(tab):
                 state.tabState = tab
-                
-//            case .homeTabAction(.delegate(.tappedSearch)):
-//                state.isTabBarHidden = true
                 
             default:
                 break

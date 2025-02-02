@@ -9,4 +9,5 @@ import Foundation
 
 enum TabCase {
     case home
+    case map
 }
