@@ -38,10 +38,8 @@ extension SpotMapView {
                     .padding(.bottom, 12)
             }
             .frame(maxWidth: .infinity)
-            .background(
-                   Color.white
-                       .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-               )
+            .background(Color.white)
+            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
              
             ZStack {
                 UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
@@ -150,10 +148,7 @@ extension SpotMapView {
                 
                 Spacer()
                 
-                Image("ArchiveInactive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
+                SpotArchiveButton(height: 24, width: 24, isSaved: $store.archive.sending(\.bindingArchive))
             }
             
             HStack(spacing: 4) {

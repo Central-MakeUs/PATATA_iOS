@@ -19,6 +19,7 @@ struct SpotMapFeature {
     struct State: Equatable {
         var coord: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
         var selectedMenuIndex: Int = 0
+        
         let categoryItems = [
             CategoryItem(
                 item: "전체",
@@ -44,14 +45,15 @@ struct SpotMapFeature {
         
         // bindingState
         var isPresented: Bool = false
+        var archive: Bool = false
     }
     
     enum Action {
         case viewEvent(ViewEvent)
         
-        
         // bindingAction
         case bindingIsPresented(Bool)
+        case bindingArchive(Bool)
     }
     
     enum ViewEvent {
@@ -80,6 +82,9 @@ extension SpotMapFeature {
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented
+                
+            case let .bindingArchive(isArchive):
+                state.archive = isArchive
                 
             default:
                 break

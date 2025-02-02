@@ -58,7 +58,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
             }
             
             bottomSheetItem
-                .shadow(color: isMap ? .shadowColor : .clear, radius: 8)
             
         }
         .frame(maxWidth: .infinity)
@@ -110,6 +109,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
             }
+            .shadow(color: isMap ? .shadowColor.opacity(0.15) : .clear, radius: 8)
         }
         .frame(maxWidth: .infinity)
         .sizeState(size: $bottomSheetSize)

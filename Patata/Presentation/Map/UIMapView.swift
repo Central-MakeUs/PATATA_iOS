@@ -17,17 +17,29 @@ import NMapsMap
 
 // 초기값으로는 좌표값과 카테고리가 있어야지
 
-struct UIMapView: UIViewRepresentable {
+final class MapState: @unchecked Sendable {
+    var markerImages: [String: NMFOverlayImage] = [:]
+    var currentMarkers: [NMFMarker] = []
     
-    private final class MapState {
-        var markerImages: [String: NMFOverlayImage] = [:]
-        var currentMarkers: [NMFMarker] = []
+    private init() { }
+    
+    func clearMarkers() {
+        currentMarkers.forEach {
+            $0.mapView = nil
+        }
+        currentMarkers.removeAll()
     }
+}
 
+extension MapState {
+    static let shared = MapState()
+}
+
+struct UIMapView: UIViewRepresentable {
     let coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
     let markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
     let onMarkerTap: ((Double, Double) -> Void)?
-    private let mapState = MapState()
+    let mapState = MapState.shared
     
     init(
         coord: (Double, Double),
@@ -59,6 +71,8 @@ struct UIMapView: UIViewRepresentable {
         let coord = NMGLatLng(lat: coord.1, lng: coord.0)
         let cameraUpdate = NMFCameraUpdate(scrollTo: coord) // 유저 초기화면
         
+        mapState.clearMarkers()
+        
         Task {
             let newMarkers = markers.map { marker in
                 addMarker(
@@ -85,6 +99,7 @@ struct UIMapView: UIViewRepresentable {
         
         marker.position = NMGLatLng(lat: lat, lng: long)
         marker.touchHandler = { (overlay) -> Bool in
+            print("marker tapped")
             onMarkerTap?(lat, long)
             return true
         }
