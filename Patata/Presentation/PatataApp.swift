@@ -36,9 +36,7 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            MySpotListView(store: Store(initialState: MySpotListFeature.State(), reducer: {
-                MySpotListFeature()
-            }))
+            MyPageView()
         }
     }
 }
