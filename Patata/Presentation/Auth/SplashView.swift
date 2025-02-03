@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
-
+import ComposableArchitecture
 // task sleep으로 걸기
 
 struct SplashView: View {
+    
+    @Perception.Bindable var store: StoreOf<SplashFeature>
+    
     var body: some View {
         ZStack(alignment: .topLeading) {
             Color.blue100.ignoresSafeArea(.all)

@@ -29,7 +29,7 @@ struct SplashFeature {
         Reduce { state, action in
             switch action {
             case .onAppear:
-//                UserDefaultsManager.isFirst = false
+                UserDefaultsManager.isFirst = false
                 
                 return .run { [state = state] send in
                     try await Task.sleep(for: .seconds(2))

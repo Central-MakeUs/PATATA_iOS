@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import ComposableArchitecture
 
 struct OnboardingView: View {
     // 사용자 안내 온보딩 페이지를 앱 설치 후 최초 실행할 때만 띄우도록 하는 변수.
@@ -13,6 +14,7 @@ struct OnboardingView: View {
 //        @AppStorage("_isFirstLaunching") var isFirstLaunching: Bool = true
     
     @State private var currentIndex = 0
+    @Perception.Bindable var store: StoreOf<OnboardPageFeature>
     
     var body: some View {
         contentView
