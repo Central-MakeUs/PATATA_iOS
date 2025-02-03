@@ -21,9 +21,9 @@ struct PatataApp: App {
     
     var body: some Scene {
         WindowGroup {
-            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(tabState: .home), reducer: {
-                TabCoordinator()
-            }))
+//            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(tabState: .home), reducer: {
+//                TabCoordinator()
+//            }))
             
 //            .onOpenURL { url in
 //                GIDSignIn.sharedInstance.handle(url)
@@ -36,6 +36,9 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
+            MySpotListView(store: Store(initialState: MySpotListFeature.State(), reducer: {
+                MySpotListFeature()
+            }))
         }
     }
 }
