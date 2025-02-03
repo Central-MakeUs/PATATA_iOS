@@ -13,6 +13,7 @@ struct TabCoordinator {
     
     @ObservableState
     struct State: Equatable {
+        static let initialState = State(tabState: .home, homeTabState: .initialState, mapTabState: .initialState)
         var tabState: TabCase
 //        var isTabBarHidden: Bool = false
         
