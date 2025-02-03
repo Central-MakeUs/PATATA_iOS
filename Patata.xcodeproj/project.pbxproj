@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = DF1764902D5139F9003FA3B3 /* PopupView */; };
 		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
 		DFA57A742D35241F001E785A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DFA57A732D35241F001E785A /* .gitignore */; };
 		DFA57A802D3527E4001E785A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A7F2D3527E4001E785A /* Alamofire */; };
@@ -48,6 +49,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */,
 				DFA57A912D355A13001E785A /* GoogleSignIn in Frameworks */,
 				DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */,
 				DFA57A802D3527E4001E785A /* Alamofire in Frameworks */,
@@ -105,6 +107,7 @@
 				DFA57A902D355A13001E785A /* GoogleSignIn */,
 				DFA57A922D355A13001E785A /* GoogleSignInSwift */,
 				DF9D5F762D42572F00042314 /* NMapsMap */,
+				DF1764902D5139F9003FA3B3 /* PopupView */,
 			);
 			productName = Patata;
 			productReference = DFA57A602D35214B001E785A /* Patata.app */;
@@ -141,6 +144,7 @@
 				DFA57A872D352840001E785A /* XCRemoteSwiftPackageReference "TCACoordinators" */,
 				DFA57A8F2D355A13001E785A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
+				DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFA57A612D35214B001E785A /* Products */;
@@ -393,6 +397,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/exyte/PopupView.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.0.0;
+			};
+		};
 		DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
@@ -444,6 +456,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DF1764902D5139F9003FA3B3 /* PopupView */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */;
+			productName = PopupView;
+		};
 		DF9D5F762D42572F00042314 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */;
