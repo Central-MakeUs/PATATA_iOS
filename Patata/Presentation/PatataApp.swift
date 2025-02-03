@@ -36,7 +36,9 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            MyPageView()
+            ProfileEditView(store: Store(initialState: ProfileEditFeature.State(), reducer: {
+                ProfileEditFeature()
+            }))
         }
     }
 }
