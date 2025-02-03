@@ -13,8 +13,10 @@ struct OnboardingView: View {
         // @AppStorage에 저장되어 앱 종료 후에도 유지됨.
 //        @AppStorage("_isFirstLaunching") var isFirstLaunching: Bool = true
     
-    @State private var currentIndex = 0
+    
     @Perception.Bindable var store: StoreOf<OnboardPageFeature>
+    
+    @State private var isShowingToast = false
     
     var body: some View {
         contentView
@@ -32,21 +34,34 @@ extension OnboardingView {
                     .padding(.horizontal, 15)
                     .padding(.bottom, 10)
             }
+            .background(.blue20)
             .navigationBarBackButtonHidden(true)
         }
         
     }
     
     private var onboardingTabView: some View {
-        TabView(selection: $currentIndex) {
+        TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
             OnboardingPageView(firstTitle: "사진 스팟,", secondTitle: "아직도 발품 팔아요?", subTitle: "놓치기 아까운 스팟, 파타타엔 다 있어요!", imageName: "Onboarding1")
                 .tag(0)
             
             OnboardingPageView(firstTitle: "추천과 검색을 통해", secondTitle: "최고의 스팟을 찾아봐요!", subTitle: "놓치기 아까운 스팟, 파타타엔 다 있어요!", imageName: "Onboarding2")
                 .tag(1)
             
-            OnboardingPageView(firstTitle: "나만 아는 숨은 스팟을", secondTitle: "등록하고 공유해봐요", subTitle: "놓치기 아까운 스팟, 파타타엔 다 있어요!", imageName: "Onboarding3")
+            lastOnboardingPageView
                 .tag(2)
+                .onAppear {
+                    print("onAppear")
+                    withAnimation(.spring(response: 0.6, dampingFraction: 0.6)) {
+                        isShowingToast = true
+                    }
+                }
+                .onDisappear {
+                    // 마지막 페이지에서 벗어날 때 토스트 숨김
+                    withAnimation {
+                        isShowingToast = false
+                    }
+                }
         }
         .tabViewStyle(PageTabViewStyle())
         .indexViewStyle(.page(backgroundDisplayMode: .interactive))
@@ -59,7 +74,7 @@ extension OnboardingView {
         HStack {
             Spacer()
             
-            Text("시작하기")
+            Text(store.currentIndex == 2 ? "시작하기" : "다음")
                 .textStyle(.subtitleM)
                 .foregroundStyle(.white)
                 .padding(.vertical, 8)
@@ -69,7 +84,51 @@ extension OnboardingView {
         .frame(height: 56)
         .background(.blue100)
         .clipShape(RoundedRectangle(cornerRadius: 24))
-        
+        .asButton {
+            store.send(.startButtonTapped)
+        }
+    }
+    
+    private var lastOnboardingPageView: some View {
+        VStack {
+            VStack{
+                Text("나만 아는 숨은 스팟을")
+                    .textStyle(.headlineS)
+                Text("등록하고 공유해봐요")
+                    .textStyle(.headlineS)
+            }
+            
+            Text("놓치기 아까운 스팟, 파타타엔 다 있어요!")
+                .textStyle(.subtitleS)
+                .foregroundColor(.blue50)
+                .padding(.top, 5)
+                .padding(.bottom, 40)
+            
+            ZStack {
+                HStack {
+                    Text("스팟이 등록되었습니다!")
+                        .foregroundStyle(.gray70)
+                        .textStyle(.subtitleM)
+                    
+                    Image("StarIcon")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 18, height: 18)
+                }
+                .padding(.vertical, 20)
+                .padding(.horizontal, 50)
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 16))
+                .offset(y: isShowingToast ? -180 : -100) // 애니메이션 위치 조정
+                
+                Image("Onboarding3")
+                    .resizable()
+                    .scaledToFit()
+                    .aspectRatio(1, contentMode: .fit)
+                    .padding(.top, 12)
+                    .padding(.horizontal, 16)
+            }
+        }
     }
 }
 

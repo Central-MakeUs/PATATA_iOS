@@ -36,8 +36,11 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
-                RootCoordinator()
+//            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
+//                RootCoordinator()
+//            }))
+            OnboardingView(store: Store(initialState: OnboardPageFeature.State(), reducer: {
+                OnboardPageFeature()
             }))
         }
     }

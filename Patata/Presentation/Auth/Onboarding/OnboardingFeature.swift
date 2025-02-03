@@ -11,7 +11,10 @@ import ComposableArchitecture
 @Reducer
 struct OnboardPageFeature {
     
-    struct State: Equatable {}
+    @ObservableState
+    struct State: Equatable {
+        var currentIndex: Int = 0
+    }
     
     enum Action {
         
@@ -22,6 +25,9 @@ struct OnboardPageFeature {
         enum Delegate {
             case startButtonTapped
         }
+        
+        // bindingAction
+        case bindingCurrentIndex(Int)
     }
     
     var body: some ReducerOf<Self> {
@@ -29,7 +35,14 @@ struct OnboardPageFeature {
             switch action {
                 
             case .startButtonTapped:
-                return .send(.delegate(.startButtonTapped))
+                if state.currentIndex == 2 {
+                    return .send(.delegate(.startButtonTapped))
+                } else {
+                    state.currentIndex += 1
+                }
+                
+            case let .bindingCurrentIndex(index):
+                state.currentIndex = index
              
             default:
                 break
