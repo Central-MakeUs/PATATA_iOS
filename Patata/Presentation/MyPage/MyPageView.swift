@@ -9,6 +9,8 @@ import SwiftUI
 import ComposableArchitecture
 
 struct MyPageView: View {
+    @Perception.Bindable var store: StoreOf<MyPageFeature>
+    
     private let imageCount: Int = 0
     
     var body: some View {
@@ -107,14 +109,14 @@ extension MyPageView {
     
     private var myProfileView: some View {
         VStack(alignment: .center, spacing: 0) {
-            Image("MyPageActive")
+            Image(store.profileImage)
                 .resizable()
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 100, height: 100)
                 .clipShape(Circle())
             
             HStack(spacing: 6) {
-                Text("가나다라마바사")
+                Text(store.nickname)
                     .textStyle(.subtitleL)
                     .foregroundStyle(.textDefault)
                 
@@ -122,12 +124,12 @@ extension MyPageView {
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.blue100)
                     .asButton {
-                        print("tap")
+                        store.send(.viewEvent(.tappedProfileEdit))
                     }
             }
             .padding(.top, 16)
             
-            Text(verbatim: "aafadsfads@gmail.com")
+            Text(verbatim: store.email)
                 .textStyle(.captionM)
                 .foregroundStyle(.textInfo)
         }
@@ -165,6 +167,9 @@ extension MyPageView {
                 Rectangle()
                     .foregroundStyle(.red)
                     .aspectRatio(1, contentMode: .fit)
+                    .asButton {
+                        store.send(.viewEvent(.tappedSpot))
+                    }
             }
         }
     }
