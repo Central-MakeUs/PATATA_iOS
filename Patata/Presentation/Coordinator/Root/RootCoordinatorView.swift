@@ -22,7 +22,7 @@ struct RootCoordinatorView: View {
                         switch screen.case {
                         case let .splash(store):
                             SplashView(store: store)
-                        case let .onboardPage(store):
+                        case let .onboarding(store):
                             OnboardingView(store: store)
                         }
                     }
@@ -40,14 +40,14 @@ extension RootScreen.State: Identifiable {
         switch self {
         case .splash:
             return .splash
-        case .onboardPage:
-            return .onboardPage
+        case .onboarding:
+            return .onboarding
         }
     }
 
     enum ID: Identifiable {
         case splash
-        case onboardPage
+        case onboarding
 
         var id: ID {
             return self

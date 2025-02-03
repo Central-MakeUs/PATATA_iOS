@@ -36,8 +36,8 @@ struct PatataApp: App {
 //                SpotCategoryFeature()
 //            }))
 //            TestView()
-            ProfileEditView(store: Store(initialState: ProfileEditFeature.State(), reducer: {
-                ProfileEditFeature()
+            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
+                RootCoordinator()
             }))
         }
     }

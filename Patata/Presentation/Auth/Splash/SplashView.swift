@@ -14,12 +14,18 @@ struct SplashView: View {
     @Perception.Bindable var store: StoreOf<SplashFeature>
     
     var body: some View {
-        ZStack(alignment: .topLeading) {
-            Color.blue100.ignoresSafeArea(.all)
-            
-            contentView
-                .padding(.top, 120)
-                .padding(.leading, 30)
+        WithPerceptionTracking {
+            ZStack(alignment: .topLeading) {
+                Color.blue100.ignoresSafeArea(.all)
+                
+                contentView
+                    .padding(.top, 120)
+                    .padding(.leading, 30)
+                    .onAppear {
+                        print("onAppear")
+                        store.send(.onAppear)
+                    }
+            }
         }
     }
 }

@@ -11,7 +11,7 @@ import ComposableArchitecture
 @Reducer(state: .equatable)
 enum RootScreen {
     case splash(SplashFeature)
-    case onboardPage(OnboardPageFeature)
+    case onboarding(OnboardPageFeature)
 }
 
 @Reducer
@@ -44,11 +44,20 @@ struct RootCoordinator {
 
         Reduce { state, action in
             switch action {
+            case let .router(.routeAction(id: _, action: .splash(.delegate(.isFirstUser(trigger))))):
+                
+                if trigger {
+                    state.routes.push(.onboarding(OnboardPageFeature.State()))
+                } else {
+                    state.viewState = .tab
+                }
+                
             default:
                 break
             }
 
             return .none
         }
+        .forEachRoute(\.routes, action: \.router)
     }
 }

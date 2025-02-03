@@ -23,14 +23,18 @@ struct OnboardingView: View {
 
 extension OnboardingView {
     private var contentView: some View {
-        VStack(alignment: .center) {
-            onboardingTabView
-            Spacer()
-                .frame(height: 66)
-            startButton
-                .padding(.horizontal, 15)
-                .padding(.bottom, 10)
+        WithPerceptionTracking {
+            VStack(alignment: .center) {
+                onboardingTabView
+                Spacer()
+                    .frame(height: 66)
+                startButton
+                    .padding(.horizontal, 15)
+                    .padding(.bottom, 10)
+            }
+            .navigationBarBackButtonHidden(true)
         }
+        
     }
     
     private var onboardingTabView: some View {
