@@ -10,7 +10,7 @@ import Foundation
 enum APIError: Error {
     case routerError(RouterError)
     case viewError(PresentationError)
-    case domainError(DomainError)
+    case apiResponseError(APIResponseError)
     case unowned
 }
 

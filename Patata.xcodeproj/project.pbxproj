@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = DF1764902D5139F9003FA3B3 /* PopupView */; };
+		DF8D2B392D527EC10081561A /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = DF8D2B382D527EC10081561A /* Logging */; };
 		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
 		DFA57A742D35241F001E785A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DFA57A732D35241F001E785A /* .gitignore */; };
 		DFA57A802D3527E4001E785A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A7F2D3527E4001E785A /* Alamofire */; };
@@ -28,16 +29,28 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Resource/Codable/Request/AppleLoginRequestDTO,
 			);
 			target = DFA57A5F2D35214B001E785A /* Patata */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		DF8D2B3F2D5289C90081561A /* Exceptions for "Patata" folder in "Compile Sources" phase from "Patata" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = DFA57A5C2D35214B001E785A /* Sources */;
+			membershipExceptions = (
+				Resource/Codable/Request/AppleLoginRequestDTO,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DFA57A622D35214B001E785A /* Patata */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				DFA57A962D355CA7001E785A /* Exceptions for "Patata" folder in "Patata" target */,
+				DF8D2B3F2D5289C90081561A /* Exceptions for "Patata" folder in "Compile Sources" phase from "Patata" target */,
 			);
 			path = Patata;
 			sourceTree = "<group>";
@@ -49,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF8D2B392D527EC10081561A /* Logging in Frameworks */,
 				DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */,
 				DFA57A912D355A13001E785A /* GoogleSignIn in Frameworks */,
 				DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */,
@@ -108,6 +122,7 @@
 				DFA57A922D355A13001E785A /* GoogleSignInSwift */,
 				DF9D5F762D42572F00042314 /* NMapsMap */,
 				DF1764902D5139F9003FA3B3 /* PopupView */,
+				DF8D2B382D527EC10081561A /* Logging */,
 			);
 			productName = Patata;
 			productReference = DFA57A602D35214B001E785A /* Patata.app */;
@@ -145,6 +160,7 @@
 				DFA57A8F2D355A13001E785A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */,
+				DF8D2B372D527EC10081561A /* XCRemoteSwiftPackageReference "swift-log" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFA57A612D35214B001E785A /* Products */;
@@ -405,6 +421,14 @@
 				minimumVersion = 4.0.0;
 			};
 		};
+		DF8D2B372D527EC10081561A /* XCRemoteSwiftPackageReference "swift-log" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/apple/swift-log.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.6.2;
+			};
+		};
 		DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/navermaps/SPM-NMapsMap";
@@ -460,6 +484,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */;
 			productName = PopupView;
+		};
+		DF8D2B382D527EC10081561A /* Logging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF8D2B372D527EC10081561A /* XCRemoteSwiftPackageReference "swift-log" */;
+			productName = Logging;
 		};
 		DF9D5F762D42572F00042314 /* NMapsMap */ = {
 			isa = XCSwiftPackageProductDependency;

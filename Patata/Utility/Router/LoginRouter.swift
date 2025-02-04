@@ -9,14 +9,15 @@ import Foundation
 import Alamofire
 
 enum LoginRouter: Router {
-    case apple(AppleLoginRequest)
-    case google(GoogleLoginRequest)
+    case apple(AppleLoginRequestDTO)
+    case google(GoogleLoginRequestDTO)
+    case refresh(refreshToken: String)
 }
 
 extension LoginRouter {
     var method: HTTPMethod {
         switch self {
-        case .apple, .google:
+        case .apple, .google, .refresh:
             return .post
         }
     }
@@ -27,6 +28,8 @@ extension LoginRouter {
             return "/auth/apple/login"
         case .google:
             return "/auth/google/login"
+        case .refresh:
+            return "/auth/refresh"
         }
     }
     
@@ -36,12 +39,18 @@ extension LoginRouter {
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
+        
+        case let .refresh(refreshToken: token):
+            return HTTPHeaders([
+                HTTPHeader(name: "Content-Type", value: "application/json"),
+                HTTPHeader(name: "RefreshToken", value: token)
+            ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case .apple, .google:
+        case .apple, .google, .refresh:
             return nil
         }
     }
@@ -52,12 +61,14 @@ extension LoginRouter {
             return requestToBody(appleLoginRequest)
         case .google(let googleLoginRequest):
             return requestToBody(googleLoginRequest)
+        case .refresh:
+            return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .apple, .google:
+        case .apple, .google, .refresh:
             return .json
         }
     }

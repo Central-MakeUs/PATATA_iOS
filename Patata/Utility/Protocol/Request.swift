@@ -7,4 +7,4 @@
 
 import Foundation
 
-protocol Request: DTO, Encodable { }
+//protocol Request: DTO, Encodable { }

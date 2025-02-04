@@ -11,6 +11,8 @@ final actor UserDefaultsManager {
     
     enum Key: String {
         case isFirst
+        case accessToken
+        case refreshToken
         
         var value: String {
             return self.rawValue
@@ -19,4 +21,8 @@ final actor UserDefaultsManager {
     
     @UserDefaultsWrapper(key: Key.isFirst.value, placeValue: true)
     static var isFirst: Bool
+    @UserDefaultsWrapper(key: Key.accessToken.value, placeValue: "")
+    static var accessToken
+    @UserDefaultsWrapper(key: Key.refreshToken.value, placeValue: "")
+    static var refreshToken
 }
