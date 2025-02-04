@@ -25,9 +25,7 @@ struct PatataApp: App {
 //                TabCoordinator()
 //            }))
             
-//            .onOpenURL { url in
-//                GIDSignIn.sharedInstance.handle(url)
-//            }
+            
 //            SpotMapView(store: Store(initialState: SpotMapFeature.State(), reducer: {
 //                SpotMapFeature()
 //            }))
@@ -39,9 +37,14 @@ struct PatataApp: App {
 //            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
 //                RootCoordinator()
 //            }))
-            OnboardingView(store: Store(initialState: OnboardPageFeature.State(), reducer: {
-                OnboardPageFeature()
-            }))
+//            OnboardingView(store: Store(initialState: OnboardPageFeature.State(), reducer: {
+//                OnboardPageFeature()
+//            }))
+//            LoginView()
+//                .onOpenURL { url in
+//                    GIDSignIn.sharedInstance.handle(url)
+//                }
+            LoginView()
         }
     }
 }
