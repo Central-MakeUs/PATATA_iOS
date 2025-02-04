@@ -8,10 +8,11 @@
 import SwiftUI
 import GoogleSignInSwift
 import AuthenticationServices
+import ComposableArchitecture
 
 struct LoginView: View {
-    let loginManager = LoginManager()
-    let networkManager = NetworkManager()
+
+    @Perception.Bindable var store: StoreOf<LoginFeature>
     
     @State private var scale: CGFloat = 1.0
     @State private var imageOffset: CGFloat = 0
@@ -91,6 +92,15 @@ struct LoginView: View {
                     
                     
                     customGoogleLoginButton
+                        .asButton {
+//                            store.send(.)
+//                            Task {
+//                                let gIDToken = try await loginManager.googleLogin()
+//                                let result = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequest(idToken: gIDToken.tokenString)))
+//                                
+//                                print("success", result)
+//                            }
+                        }
                 }
                 .padding(.horizontal, 15)
                 .padding(.bottom, 25)
@@ -141,17 +151,17 @@ extension LoginView {
     
     private var oriAppleLoginButton: some View {
         SignInWithAppleButton { request in
-            loginManager.appleRequest(request: request)
+//            loginManager.appleRequest(request: request)
         } onCompletion: { result in
             do {
-                let identityToken = try loginManager.appleLoginResult(result: result)
+//                let identityToken = try loginManager.appleLoginResult(result: result)
                 
-                Task {
-                    let result = try await NetworkManager.shared.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequest(identityToken: identityToken)))
-                    
-                    print("success", result)
-                }
-                
+//                Task {
+//                    let result = try await NetworkManager.shared.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequest(identityToken: identityToken)))
+//                    
+//                    print("success", result)
+//                }
+//                
             } catch {
                 print(error)
             }
@@ -167,12 +177,7 @@ extension LoginView {
             scheme: .light,
             style: .wide
         ) {
-            Task {
-                let gIDToken = try await loginManager.googleLogin()
-                let result = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequest(idToken: gIDToken.tokenString)))
-                
-                print("success", result)
-            }
+            
         }
         .clipShape(RoundedRectangle(cornerRadius: 50))
 //        .clipShape(RoundedRectangle(cornerRadius: 20))

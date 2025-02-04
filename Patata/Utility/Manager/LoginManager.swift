@@ -8,9 +8,13 @@
 import Foundation
 import GoogleSignIn
 import AuthenticationServices
+import ComposableArchitecture
 
 @MainActor
-struct LoginManager {
+final class LoginManager: @unchecked Sendable {
+    
+    private init() { }
+    
     func appleRequest(request: ASAuthorizationAppleIDRequest) {
         request.requestedScopes = [.email, .fullName]
     }
@@ -71,5 +75,20 @@ struct LoginManager {
                     continuation.resume(returning: idToken)
                 }
         }
+    }
+}
+
+extension LoginManager {
+    static let shared = LoginManager()
+}
+
+extension LoginManager: DependencyKey {
+    static let liveValue: LoginManager = LoginManager.shared
+}
+
+extension DependencyValues {
+    var loginManager: LoginManager {
+        get { self[LoginManager.self] }
+        set { self[LoginManager.self] = newValue }
     }
 }

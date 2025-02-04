@@ -7,13 +7,15 @@
 
 import Foundation
 import Alamofire
+import ComposableArchitecture
 
 // 나중에 고려해야될 사항
 // 네트워크 단절
 // 네트워크 일정시간 지속될때
 
-final class NetworkManager {
-    static let shared = NetworkManager()
+final class NetworkManager: Sendable {
+    
+    private init() { }
     
     func requestNetwork<T: DTO, R: Router>(dto: T.Type, router: R) async throws(APIError) -> T {
         do {
@@ -73,3 +75,17 @@ extension NetworkManager {
     }
 }
 
+extension NetworkManager {
+    static let shared = NetworkManager()
+}
+
+extension NetworkManager: DependencyKey {
+    static let liveValue: NetworkManager = NetworkManager.shared
+}
+
+extension DependencyValues {
+    var networkManager: NetworkManager {
+        get { self[NetworkManager.self] }
+        set { self[NetworkManager.self] = newValue }
+    }
+}

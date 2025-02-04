@@ -44,7 +44,9 @@ struct PatataApp: App {
 //                .onOpenURL { url in
 //                    GIDSignIn.sharedInstance.handle(url)
 //                }
-            LoginView()
+            LoginView(store: Store(initialState: LoginFeature.State(), reducer: {
+                LoginFeature()
+            }))
         }
     }
 }
