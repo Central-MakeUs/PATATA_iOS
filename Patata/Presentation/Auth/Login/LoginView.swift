@@ -78,7 +78,10 @@ struct LoginView: View {
                             }
                         }
                     }
-                
+                Text("aaa")
+                    .asButton {
+                        store.send(.viewEvent(.nickName))
+                    }
                 
                 Spacer()
                 
@@ -93,13 +96,7 @@ struct LoginView: View {
                     
                     customGoogleLoginButton
                         .asButton {
-//                            store.send(.)
-//                            Task {
-//                                let gIDToken = try await loginManager.googleLogin()
-//                                let result = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequest(idToken: gIDToken.tokenString)))
-//                                
-//                                print("success", result)
-//                            }
+                            store.send(.viewEvent(.tappedGoogleLogin))
                         }
                 }
                 .padding(.horizontal, 15)

@@ -33,6 +33,7 @@ struct LoginFeature {
     enum ViewEvent {
         case tappedGoogleLogin
         case tappedStartButton
+        case nickName
     }
     
     enum NetworkType {
@@ -40,6 +41,7 @@ struct LoginFeature {
     }
     
     @Dependency(\.loginManager) var loginManager
+    @Dependency(\.loginRepository) var loginRepository
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -58,8 +60,18 @@ struct LoginFeature {
                     await send(.networkType(.googleLogin(idToken.tokenString)))
                 }
                 
+            case .viewEvent(.nickName):
+                return .run { send in
+                    await loginRepository.changeNickName()
+                }
+                
             case let .networkType(.googleLogin(token)):
-                print(token)
+                return .run { send in
+                    let result = await loginRepository.googleLogin(idToken: token)
+                    
+                    UserDefaultsManager.accessToken = result!.result.accessToken
+                    UserDefaultsManager.refreshToken = result!.result.refreshToken
+                }
                 
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index

@@ -41,7 +41,7 @@ extension Router {
         return combine
     }
     
-    func asURLRequest() throws(RouterError) -> URLRequest {
+    func asURLRequest() throws(PAError) -> URLRequest {
         let url = try baseURLToURL()
         
         var urlRequest = try urlToURLRequest(url: url)
@@ -53,7 +53,7 @@ extension Router {
                 
                 return urlRequest
             } catch {
-                throw .encodingFail
+                throw .routerError(.encodingFail)
             }
         case .json:
             do {
@@ -61,39 +61,44 @@ extension Router {
                 urlRequest = try JSONEncoding.default.encode(urlRequest, withJSONObject: jsonObject)
                 return urlRequest
             } catch {
-                throw .decodingFail
+                throw .routerError(.decodingFail)
             }
         }
     }
     
-    private func baseURLToURL() throws(RouterError) -> URL {
+    private func baseURLToURL() throws(PAError) -> URL {
         do {
             let url = try baseURL.asURL()
             return url
         } catch let error as AFError {
-            if case .invalidURL = error {
-                throw .urlFail(url: baseURL)
-            } else {
-                throw .unknown
+            switch error {
+            case .invalidURL:
+                throw PAError.routerError(.urlFail(url: baseURL))
+            case .parameterEncodingFailed, .multipartEncodingFailed:
+                throw PAError.routerError(.encodingFail)
+            default:
+                throw PAError.routerError(.networkError(error: error))
             }
         }catch {
-            throw .unknown
+            throw PAError.routerError(.unknown(error: error))
         }
     }
     
-    private func urlToURLRequest(url: URL) throws(RouterError) -> URLRequest {
+    private func urlToURLRequest(url: URL) throws(PAError) -> URLRequest {
         do {
             let urlRequest = try URLRequest(url: url.appending(path: path), method: method, headers: headers)
-            
             return urlRequest
         } catch let error as AFError {
-            if case .invalidURL = error {
-                throw .urlFail(url: baseURL)
-            } else {
-                throw .unknown
+            switch error {
+            case .invalidURL:
+                throw PAError.routerError(.urlFail(url: baseURL))
+            case .parameterEncodingFailed:
+                throw PAError.routerError(.encodingFail)
+            default:
+                throw PAError.routerError(.networkError(error: error))
             }
-        }catch {
-            throw .unknown
+        } catch {
+            throw PAError.routerError(.unknown(error: error))
         }
     }
 

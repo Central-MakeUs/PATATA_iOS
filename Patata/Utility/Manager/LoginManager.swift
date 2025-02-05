@@ -70,8 +70,6 @@ final class LoginManager: @unchecked Sendable {
                         return
                     }
                     
-                    print(idToken.tokenString)
-                    
                     continuation.resume(returning: idToken)
                 }
         }

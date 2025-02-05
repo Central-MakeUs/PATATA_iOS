@@ -15,7 +15,7 @@ struct LoginDTO: DTO {
 }
 
 struct UserResult: DTO {
-    let nickName: String
+    let nickName: String?
     let email: String
     let accessToken: String
     let refreshToken: String

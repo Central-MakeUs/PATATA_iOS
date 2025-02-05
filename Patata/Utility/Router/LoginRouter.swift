@@ -12,6 +12,7 @@ enum LoginRouter: Router {
     case apple(AppleLoginRequestDTO)
     case google(GoogleLoginRequestDTO)
     case refresh(refreshToken: String)
+    case nick
 }
 
 extension LoginRouter {
@@ -19,6 +20,8 @@ extension LoginRouter {
         switch self {
         case .apple, .google, .refresh:
             return .post
+        case .nick:
+            return .patch
         }
     }
     
@@ -30,6 +33,8 @@ extension LoginRouter {
             return "/auth/google/login"
         case .refresh:
             return "/auth/refresh"
+        case .nick:
+            return "/member/nickname"
         }
     }
     
@@ -43,14 +48,20 @@ extension LoginRouter {
         case let .refresh(refreshToken: token):
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json"),
-                HTTPHeader(name: "RefreshToken", value: token)
+                HTTPHeader(name: "RefreshToken", value: "Bearer \(token)")
+            ])
+            
+        case .nick:
+            return HTTPHeaders([
+                HTTPHeader(name: "Content-Type", value: "application/json"),
+                HTTPHeader(name: "Authorization", value: UserDefaultsManager.accessToken)
             ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case .apple, .google, .refresh:
+        case .apple, .google, .refresh, .nick:
             return nil
         }
     }
@@ -63,12 +74,14 @@ extension LoginRouter {
             return requestToBody(googleLoginRequest)
         case .refresh:
             return nil
+        case .nick:
+            return requestToBody(Nick(nickName: "멜론"))
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .apple, .google, .refresh:
+        case .apple, .google, .refresh, .nick:
             return .json
         }
     }

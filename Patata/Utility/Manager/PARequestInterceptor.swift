@@ -28,12 +28,15 @@ final class PARequestInterceptor: RequestInterceptor {
             }
             
             if statusCode == 401 && !UserDefaultsManager.refreshToken.isEmpty {
+                print("heheheheheheh")
                 if await requestRefresh() {
                     completion(.retry)
                 } else {
                     completion(.doNotRetry)
                 }
             } else {
+                print("statuscode", statusCode)
+                print("hereh?")
                 completion(.doNotRetry)
             }
 
@@ -56,7 +59,8 @@ final class PARequestInterceptor: RequestInterceptor {
         )
         
         guard let result else { return false }
-        
+        print("successAccess", result.result.accessToken)
+        print("successRefresh", result.result.refreshToken)
         UserDefaultsManager.accessToken = result.result.accessToken
         UserDefaultsManager.refreshToken = result.result.refreshToken
         await retryCount.withValue { num in

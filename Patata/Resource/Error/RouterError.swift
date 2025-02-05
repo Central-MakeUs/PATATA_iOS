@@ -11,5 +11,6 @@ enum RouterError: Error {
     case urlFail(url: String = "")
     case decodingFail
     case encodingFail
-    case unknown
+    case networkError(error: Error)
+    case unknown(error: Error)
 }

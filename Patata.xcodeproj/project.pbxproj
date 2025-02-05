@@ -29,28 +29,16 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Resource/Codable/Request/AppleLoginRequestDTO,
 			);
 			target = DFA57A5F2D35214B001E785A /* Patata */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
-/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
-		DF8D2B3F2D5289C90081561A /* Exceptions for "Patata" folder in "Compile Sources" phase from "Patata" target */ = {
-			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
-			buildPhase = DFA57A5C2D35214B001E785A /* Sources */;
-			membershipExceptions = (
-				Resource/Codable/Request/AppleLoginRequestDTO,
-			);
-		};
-/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		DFA57A622D35214B001E785A /* Patata */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				DFA57A962D355CA7001E785A /* Exceptions for "Patata" folder in "Patata" target */,
-				DF8D2B3F2D5289C90081561A /* Exceptions for "Patata" folder in "Compile Sources" phase from "Patata" target */,
 			);
 			path = Patata;
 			sourceTree = "<group>";

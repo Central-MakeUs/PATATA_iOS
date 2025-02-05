@@ -41,12 +41,12 @@ struct PatataApp: App {
 //                OnboardPageFeature()
 //            }))
 //            LoginView()
-//                .onOpenURL { url in
-//                    GIDSignIn.sharedInstance.handle(url)
-//                }
             LoginView(store: Store(initialState: LoginFeature.State(), reducer: {
                 LoginFeature()
             }))
+            .onOpenURL { url in
+                GIDSignIn.sharedInstance.handle(url)
+            }
         }
     }
 }
