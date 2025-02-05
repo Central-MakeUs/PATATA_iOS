@@ -14,32 +14,20 @@ struct Nick: DTO, Encodable {
 
 final class LoginRepository: @unchecked Sendable {
     @Dependency(\.networkManager) var networkManager
-    
-    func googleLogin(idToken: String) async -> LoginDTO? {
-        do {
-            return try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequestDTO(idToken: idToken)))
-        } catch {
-            print("error", error)
-            
-            return nil
-        }
+    @Dependency(\.loginMapper) var mapper
+}
+
+extension LoginRepository {
+    func googleLogin(idToken: String) async throws(PAError) -> LoginEntity {
+        let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequestDTO(idToken: idToken)))
+        
+        return mapper.dtoToEntity(data)
     }
     
-    func appleLogin(identityToken: String) async -> LoginDTO? {
+    func appleLogin(identityToken: String) async throws(PAError) -> LoginEntity {
+        let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(identityToken: identityToken)))
         
-        do {
-            let result = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(identityToken: identityToken)))
-            
-            print("success", result)
-            
-            return result
-            
-            
-        } catch {
-            print("error", error)
-            
-            return nil
-        }
+        return mapper.dtoToEntity(data)
     }
 }
 

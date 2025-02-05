@@ -20,11 +20,12 @@ struct LoginFeature {
     enum Action {
         case viewEvent(ViewEvent)
         case networkType(NetworkType)
-        
+        case dataTransType(DataTransType)
         case delegate(Delegate)
         
         enum Delegate {
             case startButtonTapped
+            case checkNickname(String?)
         }
         
         // bindingAction
@@ -40,6 +41,10 @@ struct LoginFeature {
     enum NetworkType {
         case googleLogin(String)
         case appleLogin(String)
+    }
+    
+    enum DataTransType {
+        case loginEntity(LoginEntity)
     }
     
     @Dependency(\.loginManager) var loginManager
@@ -70,19 +75,20 @@ struct LoginFeature {
                 
             case let .networkType(.googleLogin(token)):
                 return .run { send in
-                    let result = await loginRepository.googleLogin(idToken: token)
+                    let data = try await loginRepository.googleLogin(idToken: token)
                     
-                    UserDefaultsManager.accessToken = result!.result.accessToken
-                    UserDefaultsManager.refreshToken = result!.result.refreshToken
+                    await send(.dataTransType(.loginEntity(data)))
                 }
                 
             case let .networkType(.appleLogin(token)):
                 return .run { send in
-                    let result = await loginRepository.appleLogin(identityToken: token)
+                    let data = try await loginRepository.appleLogin(identityToken: token)
                     
-//                    UserDefaultsManager.accessToken = result?.result.accessToken
-//                    UserDefaultsManager.refreshToken = result?.result.refreshToken
+                    await send(.dataTransType(.loginEntity(data)))
                 }
+                
+            case let .dataTransType(.loginEntity(loginEntity)):
+                return .send(.delegate(.checkNickname(loginEntity.nickName)))
                 
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index
