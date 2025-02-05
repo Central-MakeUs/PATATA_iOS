@@ -100,6 +100,7 @@ struct LoginView: View {
                 .background(.blue20)
             }
         }
+        .navigationBarBackButtonHidden()
         .onAppear {
             startAnimation()
         }

@@ -12,6 +12,8 @@ import ComposableArchitecture
 enum RootScreen {
     case splash(SplashFeature)
     case onboarding(OnboardPageFeature)
+    case login(LoginFeature)
+    case profileEdit(ProfileEditFeature)
 }
 
 @Reducer
@@ -45,9 +47,19 @@ struct RootCoordinator {
         Reduce { state, action in
             switch action {
             case let .router(.routeAction(id: _, action: .splash(.delegate(.isFirstUser(trigger))))):
-                
+                // 로그인을 했는데 닉네임을 설정하지 않고 그냥 앱을 껐을경우
+                // 로그인을 하지않고 앱을 껐을경우
                 if trigger {
                     state.routes.push(.onboarding(OnboardPageFeature.State()))
+                } else if UserDefaultsManager.nickname.isEmpty {
+                    state.routes.push(.login(LoginFeature.State()))
+                } else {
+                    state.viewState = .tab
+                }
+                
+            case .router(.routeAction(id: _, action: .login(.delegate(.loginSuccess)))):
+                if UserDefaultsManager.nickname.isEmpty {
+                    state.routes.push(.login(LoginFeature.State()))
                 } else {
                     state.viewState = .tab
                 }

@@ -13,6 +13,7 @@ final actor UserDefaultsManager {
         case isFirst
         case accessToken
         case refreshToken
+        case nickname
         
         var value: String {
             return self.rawValue
@@ -25,4 +26,6 @@ final actor UserDefaultsManager {
     static var accessToken
     @UserDefaultsWrapper(key: Key.refreshToken.value, placeValue: "")
     static var refreshToken
+    @UserDefaultsWrapper(key: Key.nickname.value, placeValue: "")
+    static var nickname
 }

@@ -25,7 +25,7 @@ struct LoginFeature {
         
         enum Delegate {
             case startButtonTapped
-            case checkNickname(String?)
+            case loginSuccess
         }
         
         // bindingAction
@@ -88,7 +88,9 @@ struct LoginFeature {
                 }
                 
             case let .dataTransType(.loginEntity(loginEntity)):
-                return .send(.delegate(.checkNickname(loginEntity.nickName)))
+                UserDefaultsManager.nickname = loginEntity.nickName ?? ""
+                
+                return .send(.delegate(.loginSuccess))
                 
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index

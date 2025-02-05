@@ -21,28 +21,8 @@ struct PatataApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            TabCoordinatorView(store: Store(initialState: TabCoordinator.State(tabState: .home), reducer: {
-//                TabCoordinator()
-//            }))
-            
-            
-//            SpotMapView(store: Store(initialState: SpotMapFeature.State(), reducer: {
-//                SpotMapFeature()
-//            }))
-//            TestView()
-//            SpotCategoryView(store: Store(initialState: SpotCategoryFeature.State(), reducer: {
-//                SpotCategoryFeature()
-//            }))
-//            TestView()
-//            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
-//                RootCoordinator()
-//            }))
-//            OnboardingView(store: Store(initialState: OnboardPageFeature.State(), reducer: {
-//                OnboardPageFeature()
-//            }))
-//            LoginView()
-            LoginView(store: Store(initialState: LoginFeature.State(), reducer: {
-                LoginFeature()
+            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
+                RootCoordinator()
             }))
             .onOpenURL { url in
                 GIDSignIn.sharedInstance.handle(url)
