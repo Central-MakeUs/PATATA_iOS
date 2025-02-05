@@ -9,7 +9,10 @@ import Foundation
 
 enum APIError: Error {
     case token(TokenError)
-    case unwoned(APIResponseError)
+    case member(MemberError)
+    case common(CommonError)
+    case oauth(OAuthError)
+    case unwoned(APIResponseErrorDTO)
     
     static func getType(code: String) -> APIError? {
         switch code {
@@ -21,6 +24,17 @@ enum APIError: Error {
             return .token(.invalidAccessToken)
         case "TOKEN4003":
             return .token(.invalidRefreshToken)
+            
+        case "MEMBER4001":
+            return .member(.usedNickname)
+            
+        case "OAUTH4003":
+            return .oauth(.failApplelogin)
+            
+        case "COMMON200":
+            return .common(.success)
+        case "COMMON400":
+            return .common(.invalidRequest)
         default:
             return nil
         }

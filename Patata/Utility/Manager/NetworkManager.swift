@@ -106,8 +106,8 @@ extension NetworkManager {
             return data
         case let .failure(patataError):
             print("AFError details:", patataError.localizedDescription)
-                print("AFError underlying error:", patataError.underlyingError ?? "nil")
-                print("Response status code:", response.response?.statusCode ?? "nil")
+            print("AFError underlying error:", patataError.underlyingError ?? "nil")
+            print("Response status code:", response.response?.statusCode ?? "nil")
             throw checkResponseData(response.data, patataError)
         }
     }
@@ -177,7 +177,7 @@ extension NetworkManager {
     private func checkResponseData(_ responseData: Data?, _ error: AFError) -> PAError {
         if let data = responseData {
             do {
-                let errorResponse = try CodableManager.shared.jsonDecoding(model: APIResponseError.self, from: data)
+                let errorResponse = try CodableManager.shared.jsonDecoding(model: APIResponseErrorDTO.self, from: data)
                 
                 guard let apiError = APIError.getType(code: errorResponse.code) else {
                     // code가 없을때

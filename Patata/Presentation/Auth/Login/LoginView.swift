@@ -78,10 +78,6 @@ struct LoginView: View {
                             }
                         }
                     }
-                Text("aaa")
-                    .asButton {
-                        store.send(.viewEvent(.nickName))
-                    }
                 
                 Spacer()
                 
@@ -151,6 +147,7 @@ extension LoginView {
 //            loginManager.appleRequest(request: request)
         } onCompletion: { result in
             do {
+                store.send(.viewEvent(.tappedAppleLogin(result)))
 //                let identityToken = try loginManager.appleLoginResult(result: result)
                 
 //                Task {

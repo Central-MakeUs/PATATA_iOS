@@ -25,13 +25,20 @@ final class LoginRepository: @unchecked Sendable {
         }
     }
     
-    func changeNickName() async {
+    func appleLogin(identityToken: String) async -> LoginDTO? {
+        
         do {
-            let result = try await networkManager.requestNetworkWithRefresh(dto: Nick.self, router: LoginRouter.nick)
+            let result = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(identityToken: identityToken)))
             
             print("success", result)
+            
+            return result
+            
+            
         } catch {
-            print("error!!!!!!", error)
+            print("error", error)
+            
+            return nil
         }
     }
 }

@@ -7,6 +7,7 @@
 
 import Foundation
 import ComposableArchitecture
+import AuthenticationServices
 
 @Reducer
 struct LoginFeature {
@@ -31,13 +32,14 @@ struct LoginFeature {
     }
     
     enum ViewEvent {
+        case tappedAppleLogin(Result<ASAuthorization, any Error>)
         case tappedGoogleLogin
         case tappedStartButton
-        case nickName
     }
     
     enum NetworkType {
         case googleLogin(String)
+        case appleLogin(String)
     }
     
     @Dependency(\.loginManager) var loginManager
@@ -54,15 +56,16 @@ struct LoginFeature {
                     state.currentIndex += 1
                 }
                 
+            case let .viewEvent(.tappedAppleLogin(result)):
+                return .run { send in
+                    let identityToken = try await loginManager.appleLoginResult(result: result)
+                    await send(.networkType(.appleLogin(identityToken)))
+                }
+                
             case .viewEvent(.tappedGoogleLogin):
                 return .run { send in
                     let idToken = try await loginManager.googleLogin()
                     await send(.networkType(.googleLogin(idToken.tokenString)))
-                }
-                
-            case .viewEvent(.nickName):
-                return .run { send in
-                    await loginRepository.changeNickName()
                 }
                 
             case let .networkType(.googleLogin(token)):
@@ -71,6 +74,14 @@ struct LoginFeature {
                     
                     UserDefaultsManager.accessToken = result!.result.accessToken
                     UserDefaultsManager.refreshToken = result!.result.refreshToken
+                }
+                
+            case let .networkType(.appleLogin(token)):
+                return .run { send in
+                    let result = await loginRepository.appleLogin(identityToken: token)
+                    
+//                    UserDefaultsManager.accessToken = result?.result.accessToken
+//                    UserDefaultsManager.refreshToken = result?.result.refreshToken
                 }
                 
             case let .bindingCurrentIndex(index):

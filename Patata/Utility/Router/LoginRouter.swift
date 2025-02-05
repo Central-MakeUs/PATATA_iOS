@@ -75,7 +75,7 @@ extension LoginRouter {
         case .refresh:
             return nil
         case .nick:
-            return requestToBody(Nick(nickName: "멜론"))
+            return requestToBody(Nick(nickName: "멜론테스트"))
         }
     }
     
