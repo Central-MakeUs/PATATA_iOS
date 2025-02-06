@@ -29,6 +29,8 @@ struct ProfileEditFeature {
     
     enum Action {
         case viewEvent(ViewEvent)
+        case networkType(NetworkType)
+        case dataTransType(DataTransType)
         case validCheckText(String)
         case delegate(Delegate)
         
@@ -37,13 +39,26 @@ struct ProfileEditFeature {
         
         enum Delegate {
             case tappedBackButton(ViewState)
+            case successChangeNickname
         }
+    }
+    
+    enum NetworkType {
+        case changeNickname
     }
     
     enum ViewEvent {
         case tappedClearNickName
         case tappedBackButton
+        case tappedConfirmButton
     }
+    
+    enum DataTransType {
+        case nicknameData(Bool)
+    }
+    
+    @Dependency(\.networkManager) var networkManager
+    @Dependency(\.myPageRepository) var myPageRepository
     
     var body: some ReducerOf<Self> {
         core()
@@ -61,8 +76,33 @@ extension ProfileEditFeature {
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
-            case let .validCheckText(nickname):
+            case .viewEvent(.tappedConfirmButton):
+                print("tap")
+                return .run { send in
+                    await send(.networkType(.changeNickname))
+                }
                 
+            case .networkType(.changeNickname):
+                return .run { [state = state] send in
+                    do {
+                        print("network")
+                        let result = try await myPageRepository.chageNickname(nickname: state.nickname)
+                        
+                        await send(.dataTransType(.nicknameData(result)))
+                    } catch {
+                        print(error)
+                    }
+                }
+                
+            case let .dataTransType(.nicknameData(isValid)):
+                if isValid {
+                    print("success")
+                    return .send(.delegate(.successChangeNickname))
+                } else {
+                    print("fail")
+                }
+                
+            case let .validCheckText(nickname):
                 let limitedText = String(nickname.prefix(10))
                 
                 if limitedText.first == " " {
@@ -84,9 +124,8 @@ extension ProfileEditFeature {
                     return .none
                 }
                 
-                // 허용된 문자만 필터링
                 var allowedCharacters = CharacterSet()
-                allowedCharacters.formUnion(.alphanumerics)
+                allowedCharacters.formUnion(.letters)
                 allowedCharacters.formUnion(.whitespaces)
                 allowedCharacters.insert(charactersIn: "가-힣")
                 

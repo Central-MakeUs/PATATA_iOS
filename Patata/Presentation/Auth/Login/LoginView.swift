@@ -144,22 +144,10 @@ extension LoginView {
     }
     
     private var oriAppleLoginButton: some View {
-        SignInWithAppleButton { request in
-//            loginManager.appleRequest(request: request)
+        SignInWithAppleButton { _ in
+
         } onCompletion: { result in
-            do {
-                store.send(.viewEvent(.tappedAppleLogin(result)))
-//                let identityToken = try loginManager.appleLoginResult(result: result)
-                
-//                Task {
-//                    let result = try await NetworkManager.shared.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequest(identityToken: identityToken)))
-//                    
-//                    print("success", result)
-//                }
-//                
-            } catch {
-                print(error)
-            }
+            store.send(.viewEvent(.tappedAppleLogin(result)))
         }
         .clipShape(RoundedRectangle(cornerRadius: 50))
     }

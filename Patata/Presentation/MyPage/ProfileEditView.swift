@@ -16,6 +16,9 @@ struct ProfileEditView: View {
             contentView
                 .background(.gray20)
                 .navigationBarBackButtonHidden()
+                .onTapGesture {
+                    hideKeyboard()
+                }
         }
     }
 }
@@ -51,7 +54,10 @@ extension ProfileEditView {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding(.horizontal, 15)
                 .padding(.bottom, 20)
-                .padding(.top, 5)
+                .padding(.top, 10)
+                .asButton {
+                    store.send(.viewEvent(.tappedConfirmButton))
+                }
                 
             }
             .background(.white)

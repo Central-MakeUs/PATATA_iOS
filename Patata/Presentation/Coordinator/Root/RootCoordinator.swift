@@ -85,6 +85,9 @@ struct RootCoordinator {
                     state.viewState = .tab
                 }
                 
+            case .router(.routeAction(id: _, action: .profileEdit(.delegate(.successChangeNickname)))):
+                state.viewState = .tab
+                
             case let .router(.routeAction(id: _, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .first {
                     state.routes.pop()

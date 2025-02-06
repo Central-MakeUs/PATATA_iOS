@@ -15,14 +15,8 @@ import ComposableArchitecture
 final class MyPageRepository: @unchecked Sendable {
     @Dependency(\.networkManager) var networkManager
     
-    func chageNickname(idToken: String) async -> LoginDTO? {
-        do {
-            return try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequestDTO(idToken: idToken)))
-        } catch {
-            print("error", error)
-            
-            return nil
-        }
+    func chageNickname(nickname: String) async throws(PAError) -> Bool {
+        return try await networkManager.requestNetworkWithRefresh(dto: APIResponseErrorDTO.self, router: MyPageRouter.changeNickname(NicknameRequestDTO(nickName: nickname))).isSuccess
     }
 }
 
