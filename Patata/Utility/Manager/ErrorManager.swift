@@ -8,9 +8,7 @@
 import Foundation
 import ComposableArchitecture
 
-final class ErrorManager {
-    static let shared = ErrorManager()
-    
+final class ErrorManager: Sendable {
     func handleError(_ error: Error) -> String? {
         let paError = convertToPAError(error)
         return handlePAError(paError)
@@ -135,5 +133,20 @@ extension ErrorManager {
             print("router에서 모르는 에러 발생 확인해봐!!!")
             return "네트워크 오류가 발생했습니다. 문의해주세요"
         }
+    }
+}
+
+extension ErrorManager {
+    static let shared = ErrorManager()
+}
+
+extension ErrorManager: DependencyKey {
+    static let liveValue: ErrorManager = ErrorManager.shared
+}
+
+extension DependencyValues {
+    var errorManager: ErrorManager {
+        get { self[ErrorManager.self] }
+        set { self[ErrorManager.self] = newValue }
     }
 }

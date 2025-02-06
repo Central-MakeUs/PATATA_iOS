@@ -35,6 +35,9 @@ struct RootCoordinatorView: View {
                     TabCoordinatorView(store: store.scope(state: \.tabCoordinator, action: \.tabCoordinatorAction))
                 }
             }
+            .onAppear {
+                store.send(.viewCycle(.onAppear))
+            }
         }
     }
 }

@@ -24,7 +24,7 @@ struct RootCoordinator {
 
         var routes: IdentifiedArrayOf<Route<RootScreen.State>>
         var viewState: RootCoordinatorViewState = .start
-
+        
         var tabCoordinator: TabCoordinator.State = TabCoordinator.State.initialState
     }
 
@@ -37,6 +37,7 @@ struct RootCoordinator {
         case router(IdentifiedRouterActionOf<RootScreen>)
 
         case tabCoordinatorAction(TabCoordinator.Action)
+        case tokenExpired
         case viewCycle(ViewCycle)
     }
     
@@ -45,6 +46,7 @@ struct RootCoordinator {
     }
     
     @Dependency(\.networkManager) var networkManager
+    @Dependency(\.errorManager) var errorManager
 
     var body: some ReducerOf<Self> {
         Scope(state: \.tabCoordinator, action: \.tabCoordinatorAction) {
@@ -56,7 +58,9 @@ struct RootCoordinator {
             case .viewCycle(.onAppear):
                 return .run { send in
                     for await error in networkManager.getNetworkError() {
-                        
+                        if errorManager.checkTokenError(error) {
+                            await send(.tokenExpired)
+                        }
                     }
                 }
                 
@@ -80,6 +84,10 @@ struct RootCoordinator {
                 } else {
                     state.viewState = .tab
                 }
+                
+            case .tokenExpired:
+                state.routes.removeAll()
+                state.routes.push(.login(LoginFeature.State()))
                 
             default:
                 break
