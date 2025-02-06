@@ -37,7 +37,14 @@ struct RootCoordinator {
         case router(IdentifiedRouterActionOf<RootScreen>)
 
         case tabCoordinatorAction(TabCoordinator.Action)
+        case viewCycle(ViewCycle)
     }
+    
+    enum ViewCycle {
+        case onAppear
+    }
+    
+    @Dependency(\.networkManager) var networkManager
 
     var body: some ReducerOf<Self> {
         Scope(state: \.tabCoordinator, action: \.tabCoordinatorAction) {
@@ -46,6 +53,13 @@ struct RootCoordinator {
 
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                return .run { send in
+                    for await error in networkManager.getNetworkError() {
+                        
+                    }
+                }
+                
             case let .router(.routeAction(id: _, action: .splash(.delegate(.isFirstUser(trigger))))):
                 // 로그인을 했는데 닉네임을 설정하지 않고 그냥 앱을 껐을경우
                 // 로그인을 하지않고 앱을 껐을경우
@@ -57,9 +71,12 @@ struct RootCoordinator {
                     state.viewState = .tab
                 }
                 
+            case .router(.routeAction(id: _, action: .onboarding(.delegate(.startButtonTapped)))):
+                state.routes.push(.login(LoginFeature.State()))
+                
             case .router(.routeAction(id: _, action: .login(.delegate(.loginSuccess)))):
                 if UserDefaultsManager.nickname.isEmpty {
-                    state.routes.push(.login(LoginFeature.State()))
+                    state.routes.push(.profileEdit(ProfileEditFeature.State()))
                 } else {
                     state.viewState = .tab
                 }

@@ -12,7 +12,7 @@ enum APIError: Error {
     case member(MemberError)
     case common(CommonError)
     case oauth(OAuthError)
-    case unwoned(APIResponseErrorDTO)
+    case unknown(APIResponseErrorDTO)
     
     static func getType(code: String) -> APIError? {
         switch code {

@@ -15,6 +15,7 @@ struct ProfileEditView: View {
         WithPerceptionTracking {
             contentView
                 .background(.gray20)
+                .navigationBarBackButtonHidden()
         }
     }
 }

@@ -82,14 +82,18 @@ struct LoginFeature {
                 
             case let .networkType(.appleLogin(token)):
                 return .run { send in
-                    let data = try await loginRepository.appleLogin(identityToken: token)
-                    
-                    await send(.dataTransType(.loginEntity(data)))
+                    do {
+                        let data = try await loginRepository.appleLogin(identityToken: token)
+                        
+                        await send(.dataTransType(.loginEntity(data)))
+                    } catch {
+                        print(error)
+                    }
                 }
                 
             case let .dataTransType(.loginEntity(loginEntity)):
                 UserDefaultsManager.nickname = loginEntity.nickName ?? ""
-                
+                print("here?")
                 return .send(.delegate(.loginSuccess))
                 
             case let .bindingCurrentIndex(index):

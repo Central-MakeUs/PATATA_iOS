@@ -8,12 +8,13 @@
 import Foundation
 import ComposableArchitecture
 
+// 처음 프로필 수정뷰에 있을시에 프로필이미지는 어떻게 처리해야되나
 @Reducer
 struct ProfileEditFeature {
     @ObservableState
     struct State: Equatable {
         var profileImage: String = "MyPageActive"
-        var nickname: String = "가나다라마바사"
+        var nickname: String = ""
         var isValid: Bool = false
         var nickNameIsValid: Bool = false
     }

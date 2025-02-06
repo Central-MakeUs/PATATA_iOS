@@ -181,7 +181,7 @@ extension NetworkManager {
                 
                 guard let apiError = APIError.getType(code: errorResponse.code) else {
                     // code가 없을때
-                    return .errorMessage(.unwoned(errorResponse))
+                    return .errorMessage(.unknown(errorResponse))
                 }
                 
                 return .errorMessage(apiError)
