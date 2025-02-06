@@ -47,7 +47,7 @@ extension ProfileEditView {
                     
                     Spacer()
                 }
-                .background(store.isValid ? .black : .gray50)
+                .background(store.textValueChange ? .black : .gray50)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
                 .padding(.horizontal, 15)
                 .padding(.bottom, 20)
@@ -111,7 +111,6 @@ extension ProfileEditView {
                 .frame(height: 44)
                 .padding(.horizontal, 16)
                 .background(.white)
-//                .background(store.isValid ? .white : .clear)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay {
                     ZStack(alignment: .leading) {
@@ -135,6 +134,7 @@ extension ProfileEditView {
                                 .aspectRatio(contentMode: .fit)
                                 .frame(width: 24, height: 24)
                                 .padding(.trailing, 16)
+                                .opacity(store.cancleButtonHide ? 0 : 1)
                                 .asButton {
                                     store.send(.viewEvent(.tappedClearNickName))
                                 }

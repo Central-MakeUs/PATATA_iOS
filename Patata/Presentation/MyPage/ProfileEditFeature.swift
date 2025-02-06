@@ -13,10 +13,18 @@ import ComposableArchitecture
 struct ProfileEditFeature {
     @ObservableState
     struct State: Equatable {
+        var viewState: ViewState
         var profileImage: String = "MyPageActive"
-        var nickname: String = ""
-        var isValid: Bool = false
-        var nickNameIsValid: Bool = false
+        var nickname: String
+        var initialNickname: String
+        var isValid: Bool = true
+        var textValueChange: Bool = false
+        var cancleButtonHide: Bool = true
+    }
+    
+    enum ViewState {
+        case first
+        case edit
     }
     
     enum Action {
@@ -28,7 +36,7 @@ struct ProfileEditFeature {
         case bindingNickname(String)
         
         enum Delegate {
-            case tappedBackButton
+            case tappedBackButton(ViewState)
         }
     }
     
@@ -48,21 +56,17 @@ extension ProfileEditFeature {
             switch action {
             case .viewEvent(.tappedClearNickName):
                 state.nickname = ""
+                state.textValueChange = false
                 
             case .viewEvent(.tappedBackButton):
-                return .send(.delegate(.tappedBackButton))
+                return .send(.delegate(.tappedBackButton(state.viewState)))
                 
             case let .validCheckText(nickname):
-                
-                if nickname.count >= 2 {
-                    state.isValid = true
-                }
                 
                 let limitedText = String(nickname.prefix(10))
                 
                 if limitedText.first == " " {
                     state.nickname = ""
-                    state.isValid = false
                     return .none
                 }
                 
@@ -92,10 +96,21 @@ extension ProfileEditFeature {
                     result.append(String(scalar))
                 }
                 
+                if filteredText.isEmpty {
+                    state.textValueChange = false
+                } else if filteredText == state.initialNickname {
+                    state.textValueChange = false
+                } else if filteredText.count >= 2 {
+                    state.textValueChange = true
+                } else {
+                    state.textValueChange = false
+                }
+                
                 state.nickname = filteredText
                 
             case let .bindingNickname(nickname):
                 state.nickname = nickname
+                state.cancleButtonHide = false
               
             default:
                 break

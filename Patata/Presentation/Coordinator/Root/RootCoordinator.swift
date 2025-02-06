@@ -80,9 +80,14 @@ struct RootCoordinator {
                 
             case .router(.routeAction(id: _, action: .login(.delegate(.loginSuccess)))):
                 if UserDefaultsManager.nickname.isEmpty {
-                    state.routes.push(.profileEdit(ProfileEditFeature.State()))
+                    state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .first, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
                 } else {
                     state.viewState = .tab
+                }
+                
+            case let .router(.routeAction(id: _, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
+                if viewState == .first {
+                    state.routes.pop()
                 }
                 
             case .tokenExpired:
