@@ -83,14 +83,16 @@ extension PatataMainView {
                             .padding(.horizontal, 15)
                             .padding(.top, 35)
                         
-                        CategoryRecommendView()
-                            .background(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding(.horizontal, 15)
-                            .padding(.top, 15)
-                            .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot))
-                            }
+                        ForEach(store.spotItems, id: \.self) { item in
+                            CategoryRecommendView(spotItem: item)
+                                .background(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .padding(.horizontal, 15)
+                                .padding(.top, 15)
+                                .onTapGesture {
+                                    store.send(.viewEvent(.tappedSpot))
+                                }
+                        }
                         
                         moreButton
                             .padding(.top, 8)
@@ -129,6 +131,9 @@ extension PatataMainView {
                     .foregroundStyle(.textInfo)
                 
                 Image("NextInactive")
+            }
+            .asButton {
+                store.send(.viewEvent(.tappedMoreButton))
             }
         }
     }
@@ -263,9 +268,6 @@ extension PatataMainView {
                                     .onTapGesture {
                                         store.send(.viewEvent(.tappedSpot))
                                     }
-                                
-                                
-                            
                         }
                     }
                 }

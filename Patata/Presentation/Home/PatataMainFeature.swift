@@ -12,15 +12,6 @@ struct PatataMainFeature {
     
     @ObservableState
     struct State: Equatable {
-        let categoryItems = [
-            CategoryItem(item: "전체", images: "RecommendIcon"),
-            CategoryItem(item: "작가 추천", images: "RecommendIcon"),
-            CategoryItem(item: "스냅스팟", images: "SnapIcon"),
-            CategoryItem(item: "시크한 야경", images: "NightIcon"),
-            CategoryItem(item: "일상 속 공간", images: "HouseIcon"),
-            CategoryItem(item: "싱그러운 자연", images: "NatureIcon")
-        ]
-        
         var spotItems: [SpotEntity] = []
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
@@ -38,6 +29,7 @@ struct PatataMainFeature {
             case tappedSearch
             case tappedAddButton
             case tappedSpot // 보낼때 데이터도 같이
+            case tappedMoreButton
         }
     }
     
@@ -50,6 +42,7 @@ struct PatataMainFeature {
         case tappedSearch
         case tappedAddButton
         case tappedSpot // 보낼때 데이터도 같이
+        case tappedMoreButton
     }
     
     enum NetworkType {
@@ -88,6 +81,9 @@ extension PatataMainFeature {
                 
             case .viewEvent(.tappedSpot):
                 return .send(.delegate(.tappedSpot))
+                
+            case .viewEvent(.tappedMoreButton):
+                return .send(.delegate(.tappedMoreButton))
                 
             case .networkType(.fetchCategorySpot):
                 return .run { send in

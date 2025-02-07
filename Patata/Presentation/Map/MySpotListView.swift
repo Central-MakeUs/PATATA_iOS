@@ -14,6 +14,7 @@ struct MySpotListView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .navigationBarBackButtonHidden()
         }
     }
 }
@@ -24,10 +25,13 @@ extension MySpotListView {
             VStack {
                 fakeNavgationBar
                 
-                scrollMenuView
-                    .padding(.top, 10)
-                    .padding(.horizontal, 15)
+                if store.viewState == .map {
+                    scrollMenuView
+                        .padding(.top, 10)
+                        .padding(.horizontal, 15)
+                }
             }
+            .padding(.bottom, 12)
             .background(.white)
             
             ScrollView(.vertical) {
@@ -46,32 +50,55 @@ extension MySpotListView {
     }
     
     private var fakeNavgationBar: some View {
-        HStack(spacing: 5) {
-            Image("MapActive")
-                .resizable()
-                .frame(width: 24, height: 24)
-                .foregroundStyle(.blue100)
-            
-            HStack {
-                Text("장소 또는 위치명을 검색해 보세요")
-                    .textStyle(.bodyS)
-                    .foregroundColor(.textDisabled)
-                
-                Spacer()
-                
-                Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.gray70)
-                    .asButton {
-                        print("imageOnSubmit")
+        Group {
+            if store.viewState == .map {
+                HStack(spacing: 5) {
+                    Image("MapActive")
+                        .resizable()
+                        .frame(width: 24, height: 24)
+                        .foregroundStyle(.blue100)
+                        .asButton {
+                            store.send(.viewEvent(.tappedBackButton))
+                        }
+                    
+                    HStack {
+                        Text("장소 또는 위치명을 검색해 보세요")
+                            .textStyle(.bodyS)
+                            .foregroundColor(.textDisabled)
+                        
+                        Spacer()
+                        
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.gray70)
+                            .asButton {
+                                print("imageOnSubmit")
+                            }
                     }
+                    .frame(maxWidth: .infinity)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 12)
+                    .background(.gray20)
+                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                }
+                .padding(.horizontal, 15)
+            } else {
+                ZStack {
+                    HStack {
+                        NavBackButton {
+                            store.send(.viewEvent(.tappedBackButton))
+                        }
+                        .padding(.leading, 15)
+                        
+                        Spacer()
+                    }
+                    
+                    Text("오늘의 추천 스팟")
+                        .textStyle(.subtitleL)
+                        .foregroundStyle(.textDefault)
+                }
+                .padding(.horizontal, 15)
             }
-            .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
-            .padding(.vertical, 12)
-            .background(.gray20)
-            .clipShape(RoundedRectangle(cornerRadius: 30))
         }
-        .padding(.horizontal, 15)
     }
     
     private var scrollMenuView: some View {

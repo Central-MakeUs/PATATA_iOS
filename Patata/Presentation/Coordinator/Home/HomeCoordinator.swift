@@ -15,6 +15,7 @@ enum HomeScreen {
     case search(SearchFeature)
     case category(SpotCategoryFeature)
     case spotDetail(SpotDetailFeature)
+    case mySpotList(MySpotListFeature)
 }
 
 @Reducer
@@ -62,6 +63,9 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot)))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true)))
                 
+            case .router(.routeAction(id: .home, action: .home(.delegate(.tappedMoreButton)))):
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .home)))
+                
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
@@ -72,6 +76,9 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
             case .navigationAction(.pushSearch):

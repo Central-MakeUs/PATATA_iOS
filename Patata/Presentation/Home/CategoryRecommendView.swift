@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CategoryRecommendView: View {
     @State var isValid: Bool = false
+    let spotItem: SpotEntity
     
     var body: some View {
         contentView
@@ -18,8 +19,8 @@ struct CategoryRecommendView: View {
 extension CategoryRecommendView {
     private var contentView: some View {
         HStack(alignment: .top) {
-            Rectangle()
-                .foregroundStyle(.red)
+            DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .min, fallBackImg: "ImageDefault")
+                .aspectRatio(contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(alignment: .bottomLeading) {
@@ -29,7 +30,6 @@ extension CategoryRecommendView {
                 }
                 .padding(.leading, 10)
                 .padding(.vertical, 10)
-                
             
             ZStack(alignment: .topTrailing) {  // ZStack으로 변경
                     spotDesView
@@ -48,14 +48,14 @@ extension CategoryRecommendView {
     private var spotDesView: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("서울시 마포구")
+                Text(spotItem.spotAddress)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
                 
                 Spacer()
             }
             
-            Text("서울숲 은행길")
+            Text(spotItem.spotName)
                 .foregroundStyle(.textDefault)
                 .textStyle(.subtitleSM)
                 .padding(.top, 1)
@@ -65,10 +65,10 @@ extension CategoryRecommendView {
                 .padding(.bottom, 25)
             
             HStack {
-                Text("#가을사진")
-                    .hashTagStyle()
-                Text("#자연스팟")
-                    .hashTagStyle()
+                ForEach(spotItem.tags, id: \.self) { tag in
+                    Text(tag)
+                        .hashTagStyle()
+                }
             }
         }
     }

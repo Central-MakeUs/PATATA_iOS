@@ -12,6 +12,7 @@ import ComposableArchitecture
 @Reducer(state: .equatable)
 enum MapScreen {
     case spotMap(SpotMapFeature)
+    case mySpotList(MySpotListFeature)
 }
 
 @Reducer
@@ -35,6 +36,12 @@ extension MapCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSideButton)))):
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
+                
+            case .router(.routeAction(id: _, action: .mySpotList(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
             default:
                 break
             }

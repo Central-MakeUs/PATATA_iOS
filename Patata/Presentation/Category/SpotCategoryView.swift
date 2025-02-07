@@ -26,15 +26,12 @@ struct SpotCategoryView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden(true)
-                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent), isFullSheet: true, content: {
-                    SpotDetailView(store: store.scope(state: \.spotDetailState, action: \.spotDetailAction))
-                })
-//                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
-//                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
-//                        store.send(.viewEvent(.tappedBottomSheetItem(item)))
-//                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
-//                    }
-//                }
+                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
+                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
+                        store.send(.viewEvent(.tappedBottomSheetItem(item)))
+                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
+                    }
+                }
         }
     }
 }
@@ -55,7 +52,7 @@ extension SpotCategoryView {
                     .padding(.top, 12)
                     .padding(.horizontal, 15)
                 
-                CategoryRecommendView()
+                CategoryRecommendView(spotItem: store.spotItems)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal, 15)

@@ -19,6 +19,9 @@ struct MapCoordinatorView: View {
                 switch screen.case {
                 case let .spotMap(store):
                     SpotMapView(store: store)
+                    
+                case let .mySpotList(store):
+                    MySpotListView(store: store)
                 }
             }
         }
@@ -30,11 +33,14 @@ extension MapScreen.State: Identifiable {
         switch self {
         case .spotMap:
             return ID.spotMap
+        case .mySpotList:
+            return ID.mySpotList
         }
     }
     
     enum ID: Identifiable {
         case spotMap
+        case mySpotList
         
         var id: ID {
             return self

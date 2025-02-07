@@ -65,6 +65,9 @@ extension SpotMapView {
                 .resizable()
                 .frame(width: 24, height: 24)
                 .foregroundStyle(.blue100)
+                .asButton {
+                    store.send(.viewEvent(.tappedSideButton))
+                }
             
             HStack {
                 Text("장소 또는 위치명을 검색해 보세요")

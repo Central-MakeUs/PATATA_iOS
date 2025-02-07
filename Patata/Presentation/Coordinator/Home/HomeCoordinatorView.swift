@@ -31,6 +31,10 @@ struct HomeCoordinatorView: View {
                 case let .spotDetail(store):
                     SpotDetailView(store: store)
                         .hideTabBar(true)
+                    
+                case let .mySpotList(store):
+                    MySpotListView(store: store)
+                        .hideTabBar(true)
                 }
             }
         }
@@ -48,6 +52,8 @@ extension HomeScreen.State: Identifiable {
             return ID.category
         case .spotDetail:
             return ID.spotDetail
+        case .mySpotList:
+            return ID.mySpotList
         }
     }
     
@@ -56,6 +62,7 @@ extension HomeScreen.State: Identifiable {
         case search
         case category
         case spotDetail
+        case mySpotList
         
         var id: ID {
             return self

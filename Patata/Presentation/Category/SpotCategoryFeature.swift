@@ -18,6 +18,7 @@ struct SpotCategoryFeature {
         var isPresent: Bool = false
         var filterText: String = "거리순"
         var spotDetailState = SpotDetailFeature.State(isHomeCoordinator: false)
+        var spotItems: SpotEntity = SpotEntity()
     }
     
     enum Action {
