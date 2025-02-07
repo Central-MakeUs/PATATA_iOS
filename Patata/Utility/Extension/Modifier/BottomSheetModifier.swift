@@ -11,6 +11,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
     
     let sheetContent: () -> SheetContent
     let mapBottomView: (() -> SheetContent)?
+    let onDismiss: (() -> Void)?
     let isMap: Bool
     
     private var sheetOffset: CGFloat {
@@ -39,6 +40,10 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         .opacity(0.1)
                         .ignoresSafeArea()
                         .onTapGesture {
+                            if let onDismiss {
+                                print("tap")
+                                onDismiss()
+                            }
                             withAnimation {
                                 isFull = false
                                 isPresented = false

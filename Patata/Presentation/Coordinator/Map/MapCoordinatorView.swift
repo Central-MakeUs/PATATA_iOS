@@ -17,11 +17,13 @@ struct MapCoordinatorView: View {
         WithPerceptionTracking {
             TCARouter(store.scope(state: \.routes, action: \.router)) { screen in
                 switch screen.case {
-                case let .spotMap(store):
-                    SpotMapView(store: store)
+                case let .spotMap(spotMapStore):
+                    SpotMapView(store: spotMapStore)
+                        .hideTabBar(store.isHideTabBar)
                     
-                case let .mySpotList(store):
-                    MySpotListView(store: store)
+                case let .mySpotList(mySpotListStore):
+                    MySpotListView(store: mySpotListStore)
+                        .hideTabBar(true)
                 }
             }
         }

@@ -20,10 +20,13 @@ struct SpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
+                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
                     AnyView(spotDetailSheet)
+                }, onDismiss: {
+                    print("tap")
+                    store.send(.viewEvent(.bottomSheetDismiss))
                 })
         }
     }

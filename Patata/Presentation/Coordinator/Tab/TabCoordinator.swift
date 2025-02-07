@@ -15,7 +15,6 @@ struct TabCoordinator {
     struct State: Equatable {
         static let initialState = State(tabState: .home, homeTabState: .initialState, mapTabState: .initialState)
         var tabState: TabCase
-//        var isTabBarHidden: Bool = false
         
         var homeTabState = HomeCoordinator.State.initialState
         var mapTabState = MapCoordinator.State.initialState

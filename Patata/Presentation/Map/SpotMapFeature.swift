@@ -54,6 +54,8 @@ struct SpotMapFeature {
         
         enum Delegate {
             case tappedSideButton
+            case tappedMarker
+            case bottomSheetDismiss
         }
         // bindingAction
         case bindingIsPresented(Bool)
@@ -65,6 +67,7 @@ struct SpotMapFeature {
         case tappedMarker
         case tappedSpotAddButton
         case tappedSideButton
+        case bottomSheetDismiss
     }
     
     var body: some ReducerOf<Self> {
@@ -81,12 +84,17 @@ extension SpotMapFeature {
                 
             case .viewEvent(.tappedMarker):
                 state.isPresented = true
+                return .send(.delegate(.tappedMarker))
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
                 
             case .viewEvent(.tappedSideButton):
                 return .send(.delegate(.tappedSideButton))
+                
+            case .viewEvent(.bottomSheetDismiss):
+                print("onDissmsmsmsms")
+                return .send(.delegate(.bottomSheetDismiss))
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented

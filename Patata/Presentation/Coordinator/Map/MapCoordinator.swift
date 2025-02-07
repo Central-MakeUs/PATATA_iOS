@@ -21,6 +21,8 @@ struct MapCoordinator {
     struct State: Equatable, Sendable {
         static let initialState = State(routes: [.root(.spotMap(SpotMapFeature.State()), embedInNavigationView: true)])
         var routes: IdentifiedArrayOf<Route<MapScreen.State>>
+        
+        var isHideTabBar: Bool = false
     }
     
     enum Action {
@@ -38,6 +40,13 @@ extension MapCoordinator {
             switch action {
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSideButton)))):
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
+                
+            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
+                state.isHideTabBar = true
+                
+            case .router(.routeAction(id: _, action: .spotMap(.delegate(.bottomSheetDismiss)))):
+                print("onDismiss")
+                state.isHideTabBar = false
                 
             case .router(.routeAction(id: _, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()

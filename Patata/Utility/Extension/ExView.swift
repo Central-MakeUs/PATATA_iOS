@@ -87,8 +87,8 @@ extension View {
 }
 
 extension View {
-    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, isFullSheet: Bool = false, isMap: Bool = false, mapBottomView: (() -> SheetContent)? = nil, content: @escaping () -> SheetContent) -> some View {
-        self.modifier(BottomSheetModifier(sheetContent: content, mapBottomView: mapBottomView, isMap: isMap, isFullSheet: isFullSheet, isPresented: isPresented))
+    func presentBottomSheet<SheetContent: View>(isPresented: Binding<Bool>, isFullSheet: Bool = false, isMap: Bool = false, mapBottomView: (() -> SheetContent)? = nil, content: @escaping () -> SheetContent, onDismiss: (() -> Void)? = nil) -> some View {
+        self.modifier(BottomSheetModifier(sheetContent: content, mapBottomView: mapBottomView, onDismiss: onDismiss, isMap: isMap, isFullSheet: isFullSheet, isPresented: isPresented))
     }
 }
 
