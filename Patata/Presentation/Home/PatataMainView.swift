@@ -197,12 +197,14 @@ extension PatataMainView {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
+    
+    
 }
 
 extension PatataMainView {
     private func scrollToCurrentPage() {
         let baseOffset = -(cardWidth + spacing)
-        let totalCount = store.recommendItem.item.count
+        let totalCount = store.spotItems.count
         
         withAnimation(.linear(duration: 0.3)) {
             contentOffsetX = baseOffset * CGFloat(currentIndex + 1)
@@ -230,43 +232,47 @@ extension PatataMainView {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
-                    ForEach(-1..<store.recommendItem.item.count + 1, id: \.self) { i in
-                        let adjustedIndex = i < 0 ? store.recommendItem.item.count - 1 : (i >= store.recommendItem.item.count ? 0 : i)
-                        
-                        let progress = -dragOffset / (cardWidth + spacing)
-                        
-                        let scale: CGFloat = {
-                            let totalCount = store.recommendItem.item.count
-                            let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
-                            let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                    if !store.spotItems.isEmpty {
+                        ForEach(-1..<store.spotItems.count + 1, id: \.self) { i in
+                            let adjustedIndex = i < 0 ? store.spotItems.count - 1 : (i >= store.spotItems.count ? 0 : i)
                             
-                            let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
-                            let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
-                            let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                            let progress = -dragOffset / (cardWidth + spacing)
                             
-                            if isCurrentCard {
-                                return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
-                            } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
-                                return 1.0 + (abs(progress) * (scaleEffect - 1.0))
-                            }
-                            return 1.0
-                        }()
-                        
-                        TodayRecommendView(string: store.recommendItem.item[adjustedIndex])
-                            .frame(width: cardWidth, height: contentHeight)
-                            .shadow(color: .shadowColor, radius: 8)
-                            .scaleEffect(scale)
-                            .animation(.smooth, value: dragOffset)
-                            .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot))
-                            }
+                            let scale: CGFloat = {
+                                let totalCount = store.spotItems.count
+                                let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
+                                let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                                
+                                let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
+                                let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
+                                let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                                
+                                if isCurrentCard {
+                                    return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
+                                } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
+                                    return 1.0 + (abs(progress) * (scaleEffect - 1.0))
+                                }
+                                return 1.0
+                            }()
+                            
+                                TodayRecommendView(item: store.spotItems[adjustedIndex])
+                                    .frame(width: cardWidth, height: contentHeight)
+                                    .shadow(color: .shadowColor, radius: 8)
+                                    .scaleEffect(scale)
+                                    .animation(.smooth, value: dragOffset)
+                                    .onTapGesture {
+                                        store.send(.viewEvent(.tappedSpot))
+                                    }
+                                
+                                
+                            
+                        }
                     }
                 }
                 .offset(x: contentOffsetX + dragOffset)
                 .padding(.horizontal, sideCardWidth)
                 .frame(height: contentHeight * scaleEffect + 50)
                 .simultaneousGesture(
-
                     DragGesture(minimumDistance: 1)
                         .onChanged { value in
                             let verticalDrag = abs(value.translation.height)

@@ -31,7 +31,7 @@ struct SpotMapView: View {
 
 extension SpotMapView {
     private var contentView: some View {
-        VStack {
+        VStack(spacing: 0) {
             VStack {
                 fakeNavgationBar
                     .padding(.horizontal, 15)

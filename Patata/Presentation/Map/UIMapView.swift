@@ -71,8 +71,6 @@ struct UIMapView: UIViewRepresentable {
         let coord = NMGLatLng(lat: coord.1, lng: coord.0)
         let cameraUpdate = NMFCameraUpdate(scrollTo: coord) // 유저 초기화면
         
-        mapState.clearMarkers()
-        
         Task {
             let newMarkers = markers.map { marker in
                 addMarker(
@@ -84,6 +82,7 @@ struct UIMapView: UIViewRepresentable {
             }
             
             await MainActor.run {
+                mapState.clearMarkers()
                 mapState.currentMarkers = newMarkers
                 newMarkers.forEach { $0.mapView = uiView.mapView }
             }
@@ -99,7 +98,6 @@ struct UIMapView: UIViewRepresentable {
         
         marker.position = NMGLatLng(lat: lat, lng: long)
         marker.touchHandler = { (overlay) -> Bool in
-            print("marker tapped")
             onMarkerTap?(lat, long)
             return true
         }

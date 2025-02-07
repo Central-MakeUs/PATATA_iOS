@@ -21,7 +21,7 @@ struct PatataMainFeature {
             CategoryItem(item: "싱그러운 자연", images: "NatureIcon")
         ]
         
-        let recommendItem = RecommendSpotItem()
+        var spotItems: [SpotEntity] = []
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
         var currentIndex: Int = 0
@@ -93,12 +93,15 @@ extension PatataMainFeature {
                 return .run { send in
                     do {
                         let data = try await spotRepository.fetchSpotCategory(category: .snapSpot)
-                        print("success", data)
+                        
                         await send(.dataTransType(.categorySpot(data)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }
                 }
+                
+            case let .dataTransType(.categorySpot(data)):
+                state.spotItems = data
                 
             default:
                 break
