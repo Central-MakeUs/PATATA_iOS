@@ -15,9 +15,9 @@ struct PatataMainView: View {
     
     @State var categoryRatio: CGFloat = .zero
     
-    private let spacing: CGFloat = 24
+    private let spacing: CGFloat = 30
     private let sideCardVisibleRatio: CGFloat = 0.18
-    private let scaleEffect: CGFloat = 1.05
+    private let scaleEffect: CGFloat = 1.1
     
     @State private var contentOffsetX: CGFloat = 0
     @State private var cardWidth: CGFloat = 0
@@ -34,6 +34,7 @@ struct PatataMainView: View {
         WithPerceptionTracking {
             contentView
                 .background(.gray20)
+                .navigationBarBackButtonHidden()
         }
     }
 }
@@ -44,63 +45,70 @@ extension PatataMainView {
             let screenWidth = geometry.size.width
             let sideCardWidth = screenWidth * sideCardVisibleRatio
             
-            WithPerceptionTracking {
-                ScrollView(.vertical) {
-                    HStack {
-                        Text("patata")
-                            .foregroundStyle(.blue100)
-                            .textStyle(.headlineM)
-                            .padding(.leading, 15)
-                        Spacer()
-                    }
-                    
-                    PASearchBar(placeHolder: "검색어를 입력하세요")
-                        .padding(.horizontal, 15)
-                        .asButton {
-                            store.send(.viewEvent(.tappedSearch))
-                        }
-                    
-                    bestSpotBar
-                        .padding(.top, 18)
-                        .padding(.horizontal, 15)
-                    
-                    setSizeRecommendSpots(sideCardWidth: sideCardWidth)
-                        .padding(.vertical, 16)
-                        .onAppear {
-                            if cardWidth == 0 {
-                                cardWidth = screenWidth * 0.65
-                                contentHeight = cardWidth * 1.345
-                                
-                                contentOffsetX = -(cardWidth + spacing)
+            VStack {
+                fakeNavgationBar
+                
+                WithPerceptionTracking {
+                    ScrollView(.vertical) {
+                        PASearchBar(placeHolder: "검색어를 입력하세요")
+                            .padding(.horizontal, 15)
+                            .asButton {
+                                store.send(.viewEvent(.tappedSearch))
                             }
-                        }
-                    
-                    spotCategory
-                        .padding(.horizontal, 15)
-                        .padding(.top, 8)
-                    
-                    categoryRecommendView
-                        .padding(.horizontal, 15)
-                        .padding(.top, 35)
-                    
-                    CategoryRecommendView()
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.horizontal, 15)
-                        .padding(.top, 15)
-                        .onTapGesture {
-                            store.send(.viewEvent(.tappedSpot))
-                        }
-                    
-                    moreButton
-                        .padding(.top, 8)
-                        .padding(.horizontal, 15)
-                        .padding(.bottom, 10)
-                        .asButton {
-                            store.send(.viewEvent(.tappedAddButton))
-                        }
+                        
+                        bestSpotBar
+                            .padding(.top, 18)
+                            .padding(.horizontal, 15)
+                        
+                        setSizeRecommendSpots(sideCardWidth: sideCardWidth)
+                            .padding(.vertical, 16)
+                            .onAppear {
+                                if cardWidth == 0 {
+                                    
+                                    cardWidth = screenWidth * 0.65
+                                    contentHeight = cardWidth * 1.345
+                                    
+                                    contentOffsetX = -(cardWidth + spacing)
+                                }
+                            }
+                        
+                        spotCategory
+                            .padding(.horizontal, 15)
+                            .padding(.top, 8)
+                        
+                        categoryRecommendView
+                            .padding(.horizontal, 15)
+                            .padding(.top, 35)
+                        
+                        CategoryRecommendView()
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding(.horizontal, 15)
+                            .padding(.top, 15)
+                            .onTapGesture {
+                                store.send(.viewEvent(.tappedSpot))
+                            }
+                        
+                        moreButton
+                            .padding(.top, 8)
+                            .padding(.horizontal, 15)
+                            .padding(.bottom, 10)
+                            .asButton {
+                                store.send(.viewEvent(.tappedAddButton))
+                            }
+                    }
                 }
             }
+        }
+    }
+    
+    private var fakeNavgationBar: some View {
+        HStack {
+            Text("patata")
+                .foregroundStyle(.blue100)
+                .textStyle(.headlineM)
+                .padding(.leading, 15)
+            Spacer()
         }
     }
     
@@ -133,8 +141,8 @@ extension PatataMainView {
             }
             
             HStack(spacing: 8) {
-                ForEach(0..<5) { _ in
-                    categoryView
+                ForEach(1..<6) { index in
+                    categoryView(categoryItem: store.categoryItems[index])
                         .frame(maxWidth: .infinity)
                         .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
@@ -145,20 +153,6 @@ extension PatataMainView {
                 }
             }
         }
-    }
-    
-    private var categoryView: some View {
-        VStack(alignment: .center, spacing: 8) {
-            Image("RecommendIcon")
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(width: 29, height: 36)
-            
-            Text("작가 추천")
-                .textStyle(.captionS)
-                .foregroundStyle(.textDefault)
-        }
-        .padding(.vertical, 8)
     }
     
     private var categoryRecommendView: some View {
@@ -317,5 +311,19 @@ extension PatataMainView {
             .padding(.vertical, 10)
         }
         .frame(height: contentHeight * scaleEffect)
+    }
+    
+    private func categoryView(categoryItem: CategoryItem) -> some View {
+        VStack(alignment: .center, spacing: 8) {
+            Image(categoryItem.images)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 29, height: 36)
+            
+            Text(categoryItem.item)
+                .textStyle(.captionS)
+                .foregroundStyle(.textDefault)
+        }
+        .padding(.vertical, 8)
     }
 }

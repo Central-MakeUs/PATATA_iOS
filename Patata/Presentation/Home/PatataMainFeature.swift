@@ -13,26 +13,12 @@ struct PatataMainFeature {
     @ObservableState
     struct State: Equatable {
         let categoryItems = [
-            CategoryItem(
-                item: "전체",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "작가 추천",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "스냅스팟",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "시크한 야경",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "싱그러운 자연",
-                images: "RecommendIcon"
-            )
+            CategoryItem(item: "전체", images: "RecommendIcon"),
+            CategoryItem(item: "작가 추천", images: "RecommendIcon"),
+            CategoryItem(item: "스냅스팟", images: "SnapIcon"),
+            CategoryItem(item: "시크한 야경", images: "NightIcon"),
+            CategoryItem(item: "일상 속 공간", images: "HouseIcon"),
+            CategoryItem(item: "싱그러운 자연", images: "NatureIcon")
         ]
         
         let recommendItem = RecommendSpotItem()

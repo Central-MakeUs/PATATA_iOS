@@ -63,14 +63,22 @@ struct LoginFeature {
                 
             case let .viewEvent(.tappedAppleLogin(result)):
                 return .run { send in
-                    let identityToken = try await loginManager.appleLoginResult(result: result)
-                    await send(.networkType(.appleLogin(identityToken)))
+                    do {
+                        let identityToken = try await loginManager.appleLoginResult(result: result)
+                        await send(.networkType(.appleLogin(identityToken)))
+                    } catch {
+                        print(error)
+                    }
                 }
                 
             case .viewEvent(.tappedGoogleLogin):
                 return .run { send in
-                    let idToken = try await loginManager.googleLogin()
-                    await send(.networkType(.googleLogin(idToken.tokenString)))
+                    do {
+                        let idToken = try await loginManager.googleLogin()
+                        await send(.networkType(.googleLogin(idToken.tokenString)))
+                    } catch {
+                        print(error)
+                    }
                 }
                 
             case let .networkType(.googleLogin(token)):
