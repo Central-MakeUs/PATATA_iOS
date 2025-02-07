@@ -115,7 +115,8 @@ extension NetworkManager {
     private func getResponse<T:DTO>(dto: T.Type, router: Router, response: DataResponse<T, AFError>, ifRefreshMode: Bool = false) async throws(PAError) -> T {
 //            Logger.warning(response.response)
 //            Logger.warning(response.response ?? "")
-            
+        print("🔍 Response Data:", String(data: response.data ?? Data(), encoding: .utf8) ?? "No data")
+           print("📝 Response Status Code:", response.response?.statusCode ?? -1)
             switch response.result {
             case let .success(data):
 //                Logger.info(data)
@@ -125,6 +126,10 @@ extension NetworkManager {
             case let .failure(patataError):
 //                Logger.error(response.data?.base64EncodedString() ?? "")
 //                Logger.error(GBError)
+                print("❌ Error Response Data:", String(data: response.data ?? Data(), encoding: .utf8) ?? "No data")
+                    print("❌ Error Status Code:", response.response?.statusCode ?? -1)
+                    print("❌ Error Details:", patataError)
+                
                 do {
                     let retryResult = try await retryNetwork(dto: dto, router: router, ifRefresh: ifRefreshMode)
                     

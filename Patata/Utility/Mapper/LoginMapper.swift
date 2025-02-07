@@ -8,13 +8,16 @@
 import Foundation
 import ComposableArchitecture
 
-struct LoginMapper {
+struct LoginMapper: Sendable {
     func dtoToEntity(_ dtos: LoginDTO) -> LoginEntity {
         
         UserDefaultsManager.accessToken = dtos.result.accessToken
         UserDefaultsManager.refreshToken = dtos.result.refreshToken
         
-        return LoginEntity(nickName: dtos.result.nickName, email: dtos.result.email)
+        return LoginEntity(
+            nickName: dtos.result.nickName,
+            email: dtos.result.email
+        )
     }
 }
 

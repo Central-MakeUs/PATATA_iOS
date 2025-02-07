@@ -9,7 +9,7 @@ import SwiftUI
 
 struct CategoryView: View {
     
-    let categoryItem: CategoryItem
+    let categoryItem: CategoryCase
     var isSelected: Bool
     
     let onSelect: () -> Void
@@ -21,7 +21,7 @@ struct CategoryView: View {
 
 extension CategoryView {
     private var contentView: some View {
-        Text(categoryItem.item)
+        Text(categoryItem.getCategoryCase().title)
             .foregroundStyle(isSelected ? .blue100 : .textInfo)
             .padding(.vertical, 8)
             .padding(.horizontal, 16)

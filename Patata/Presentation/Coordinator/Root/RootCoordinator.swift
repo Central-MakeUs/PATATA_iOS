@@ -95,6 +95,7 @@ struct RootCoordinator {
                 
             case .tokenExpired:
                 state.routes.removeAll()
+                state.viewState = .start
                 state.routes.push(.login(LoginFeature.State()))
                 
             default:

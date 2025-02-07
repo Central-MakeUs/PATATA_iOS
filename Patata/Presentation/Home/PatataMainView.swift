@@ -35,6 +35,9 @@ struct PatataMainView: View {
             contentView
                 .background(.gray20)
                 .navigationBarBackButtonHidden()
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
         }
     }
 }
@@ -141,8 +144,8 @@ extension PatataMainView {
             }
             
             HStack(spacing: 8) {
-                ForEach(1..<6) { index in
-                    categoryView(categoryItem: store.categoryItems[index])
+                ForEach(CategoryCase.allCases.filter { $0.id != .all }) { item in
+                    categoryView(categoryItem: item)
                         .frame(maxWidth: .infinity)
                         .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
@@ -167,9 +170,9 @@ extension PatataMainView {
             
             ScrollView(.horizontal) {
                 HStack {
-                    ForEach(Array(store.categoryItems.enumerated()), id: \.element.id) { index, item in
-                        CategoryView(categoryItem: item, isSelected: store.selectedIndex == index) {
-                            store.send(.viewEvent(.selectCategory(index)))
+                    ForEach(CategoryCase.allCases, id: \.id) { item in
+                        CategoryView(categoryItem: item, isSelected: store.selectedIndex == item.rawValue) {
+                            store.send(.viewEvent(.selectCategory(item.rawValue)))
                         }
                     }
                 }
@@ -313,14 +316,14 @@ extension PatataMainView {
         .frame(height: contentHeight * scaleEffect)
     }
     
-    private func categoryView(categoryItem: CategoryItem) -> some View {
+    private func categoryView(categoryItem: CategoryCase) -> some View {
         VStack(alignment: .center, spacing: 8) {
-            Image(categoryItem.images)
+            Image(categoryItem.getCategoryCase().image ?? "ImageDefault")
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 29, height: 36)
             
-            Text(categoryItem.item)
+            Text(categoryItem.getCategoryCase().title)
                 .textStyle(.captionS)
                 .foregroundStyle(.textDefault)
         }

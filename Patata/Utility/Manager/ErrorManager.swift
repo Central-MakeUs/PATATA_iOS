@@ -21,7 +21,7 @@ final class ErrorManager: Sendable {
             if case .token(let tokenError) = apiError {
                 switch tokenError {
                 case .invalidAccessToken:
-                    return false  // 액세스 토큰 만료는 자동 갱신 처리
+                    return true  // 액세스 토큰 만료는 자동 갱신 처리
                 case .tokenNotExist, .invalidTokenFormat, .invalidRefreshToken:
                     return true   // 로그인 화면으로 리다이렉션 필요
                 }

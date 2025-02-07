@@ -30,6 +30,8 @@ struct PatataMainFeature {
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case networkType(NetworkType)
+        case dataTransType(DataTransType)
         case delegate(Delegate)
         
         enum Delegate {
@@ -40,7 +42,7 @@ struct PatataMainFeature {
     }
     
     enum ViewCycle {
-        
+        case onAppear
     }
     
     enum ViewEvent {
@@ -49,6 +51,17 @@ struct PatataMainFeature {
         case tappedAddButton
         case tappedSpot // 보낼때 데이터도 같이
     }
+    
+    enum NetworkType {
+        case fetchCategorySpot
+    }
+    
+    enum DataTransType {
+        case categorySpot([SpotEntity])
+    }
+    
+    @Dependency(\.spotRepository) var spotRepository
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -59,6 +72,11 @@ extension PatataMainFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                return .run { send in
+                    await send(.networkType(.fetchCategorySpot))
+                }
+                
             case let .viewEvent(.selectCategory(index)):
                 state.selectedIndex = index
                 
@@ -70,6 +88,17 @@ extension PatataMainFeature {
                 
             case .viewEvent(.tappedSpot):
                 return .send(.delegate(.tappedSpot))
+                
+            case .networkType(.fetchCategorySpot):
+                return .run { send in
+                    do {
+                        let data = try await spotRepository.fetchSpotCategory(category: .snapSpot)
+                        print("success", data)
+                        await send(.dataTransType(.categorySpot(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
                 
             default:
                 break
