@@ -269,8 +269,16 @@ extension PatataMainView {
                 .padding(.horizontal, sideCardWidth)
                 .frame(height: contentHeight * scaleEffect + 50)
                 .simultaneousGesture(
+
                     DragGesture(minimumDistance: 1)
                         .onChanged { value in
+                            let verticalDrag = abs(value.translation.height)
+                            let horizontalDrag = abs(value.translation.width)
+                            
+                            if verticalDrag > horizontalDrag {
+                                return
+                            }
+                            
                             let velocityThreshold: CGFloat = 800
                             let velocity = abs(value.predictedEndTranslation.width - value.translation.width)
                             
@@ -283,6 +291,16 @@ extension PatataMainView {
                             }
                         }
                         .onEnded { value in
+                            let verticalDrag = abs(value.translation.height)
+                            let horizontalDrag = abs(value.translation.width)
+                            
+                            if verticalDrag > horizontalDrag {
+                                withAnimation(.smooth(duration: 0.3)) {
+                                    dragOffset = 0
+                                }
+                                return
+                            }
+                            
                             withAnimation(.smooth(duration: 0.3)) {
                                 dragOffset = 0
                                 if value.translation.width < -30 {

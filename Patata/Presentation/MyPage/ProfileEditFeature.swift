@@ -77,7 +77,6 @@ extension ProfileEditFeature {
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
             case .viewEvent(.tappedConfirmButton):
-                print("tap")
                 return .run { send in
                     await send(.networkType(.changeNickname))
                 }
@@ -85,7 +84,6 @@ extension ProfileEditFeature {
             case .networkType(.changeNickname):
                 return .run { [state = state] send in
                     do {
-                        print("network")
                         let result = try await myPageRepository.chageNickname(nickname: state.nickname)
                         
                         await send(.dataTransType(.nicknameData(result)))
@@ -96,10 +94,8 @@ extension ProfileEditFeature {
                 
             case let .dataTransType(.nicknameData(isValid)):
                 if isValid {
-                    print("success")
+                    UserDefaultsManager.nickname = state.nickname
                     return .send(.delegate(.successChangeNickname))
-                } else {
-                    print("fail")
                 }
                 
             case let .validCheckText(nickname):
