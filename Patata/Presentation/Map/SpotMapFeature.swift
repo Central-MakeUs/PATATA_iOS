@@ -19,6 +19,7 @@ struct SpotMapFeature {
     struct State: Equatable {
         var coord: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
         var selectedMenuIndex: Int = 0
+        var spotReloadButton: Bool = false
         
         let categoryItems = [
             CategoryItem(
@@ -49,6 +50,7 @@ struct SpotMapFeature {
     }
     
     enum Action {
+        case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
         case delegate(Delegate)
         
@@ -63,12 +65,17 @@ struct SpotMapFeature {
         case bindingArchive(Bool)
     }
     
+    enum ViewCycle {
+        case onAppear
+    }
+    
     enum ViewEvent {
         case tappedMenu(Int)
         case tappedMarker
         case tappedSpotAddButton
         case tappedSideButton
         case bottomSheetDismiss
+        case changeMapLocation
     }
     
     var body: some ReducerOf<Self> {
@@ -80,6 +87,9 @@ extension SpotMapFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                state.spotReloadButton = false
+                
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
                 
@@ -95,8 +105,10 @@ extension SpotMapFeature {
                 return .send(.delegate(.tappedSideButton))
                 
             case .viewEvent(.bottomSheetDismiss):
-                print("onDissmsmsmsms")
                 return .send(.delegate(.bottomSheetDismiss))
+                
+            case .viewEvent(.changeMapLocation):
+                state.spotReloadButton = true
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented

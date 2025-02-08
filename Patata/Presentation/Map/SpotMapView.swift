@@ -25,9 +25,11 @@ struct SpotMapView: View {
                 }, content: {
                     AnyView(spotDetailSheet)
                 }, onDismiss: {
-                    print("tap")
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
         }
     }
 }
@@ -39,6 +41,7 @@ extension SpotMapView {
                 fakeNavgationBar
                     .padding(.horizontal, 15)
                     .padding(.bottom, 12)
+                
             }
             .frame(maxWidth: .infinity)
             .background(Color.white)
@@ -47,6 +50,8 @@ extension SpotMapView {
             ZStack {
                 UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
+                } onLocationChange: {
+                    store.send(.viewEvent(.changeMapLocation))
                 }
                 
                 VStack {
@@ -96,25 +101,46 @@ extension SpotMapView {
     private var mapMenuView: some View {
         ScrollView(.horizontal) {
             HStack {
-                ForEach(Array(store.categoryItems.enumerated()), id: \.element.id) { index, item in
-                    categoryMenuView(categoryItem: item, index: index)
+                ForEach(CategoryCase.allCases, id: \.id) { item in
+                    categoryMenuView(categoryItem: item)
                         .onTapGesture {
-                            store.send(.viewEvent(.tappedMenu(index)))
+                            store.send(.viewEvent(.tappedMenu(item.rawValue)))
                         }
                 }
             }
-            .padding(.leading, 15)
+            .padding(.horizontal, 15)
         }
     }
     
     private var mapBottomView: some View {
-        ZStack {
-//            Text("장소 추가하기")
-//                .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
-//                .padding(.bottom, 16)
-//                .asButton {
-//                    store.send(.viewEvent(.tappedSpotAddButton))
-//                }
+        ZStack(alignment: .bottom) {
+            
+            if store.spotReloadButton {
+                VStack {
+                    HStack(spacing: 4) {
+                        Image("ReloadIcon")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 14, height: 14)
+                        
+                        Text("이 지역에서 탐색")
+                            .textStyle(.subtitleS)
+                        
+                    }
+                    .padding(.vertical, 12)
+                    .padding(.horizontal, 20)
+                    .foregroundStyle(.navy100)
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 20))
+                    .shadow(color: .shadowColor, radius: 8)
+                    .asButton {
+                        print("tap")
+                    }
+                }
+                .padding(.bottom, 12)
+            }
+            
+            
             VStack(spacing: 8) {
                 HStack {
                     Spacer()
@@ -133,7 +159,7 @@ extension SpotMapView {
                             store.send(.viewEvent(.tappedSpotAddButton))
                         }
                 }
-                
+                .shadow(color: .shadowColor, radius: 8)
                 
                 HStack {
                     Spacer()
@@ -149,6 +175,7 @@ extension SpotMapView {
                         .padding(.trailing, 15)
                 }
                 .padding(.bottom, 15)
+                .shadow(color: .shadowColor, radius: 8)
             }
         }
     }
@@ -210,24 +237,24 @@ extension SpotMapView {
 }
 
 extension SpotMapView {
-    private func categoryMenuView(categoryItem: CategoryItem, index: Int) -> some View {
+    private func categoryMenuView(categoryItem: CategoryCase) -> some View {
         HStack {
-            if categoryItem.item != "전체" {
-                Image(categoryItem.images)
+            if let image = categoryItem.getCategoryCase().image {
+                Image(image)
                     .resizable()
                     .frame(width: 18, height: 18)
             }
             
-            Text(categoryItem.item)
-                .textStyle(store.selectedMenuIndex == index ? .subtitleXS : .captionM)
-                .foregroundStyle(store.selectedMenuIndex == index ? .white : .textInfo)
+            Text(categoryItem.getCategoryCase().title)
+                .textStyle(store.selectedMenuIndex == categoryItem.rawValue ? .subtitleXS : .captionM)
+                .foregroundStyle(store.selectedMenuIndex == categoryItem.rawValue ? .white : .textInfo)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(store.selectedMenuIndex == index ? .clear : .gray30, lineWidth: 2)
-                .background(store.selectedMenuIndex == index ? .black : .white)
+                .strokeBorder(store.selectedMenuIndex == categoryItem.rawValue ? .clear : .gray30, lineWidth: 2)
+                .background(store.selectedMenuIndex == categoryItem.rawValue ? .black : .white)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         )
     }
