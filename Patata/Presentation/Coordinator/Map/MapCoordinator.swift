@@ -13,6 +13,7 @@ import ComposableArchitecture
 enum MapScreen {
     case spotMap(SpotMapFeature)
     case mySpotList(MySpotListFeature)
+    case spotEditorView(SpotEditorFeature)
 }
 
 @Reducer
@@ -39,16 +40,25 @@ extension MapCoordinator {
         Reduce { state, action in
             switch action {
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSideButton)))):
+                state.isHideTabBar = true
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
+                
+            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton)))):
+                state.isHideTabBar = true
+                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add)))
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.bottomSheetDismiss)))):
-                print("onDismiss")
                 state.isHideTabBar = false
                 
             case .router(.routeAction(id: _, action: .mySpotList(.delegate(.tappedBackButton)))):
+                state.isHideTabBar = false
+                state.routes.pop()
+                
+            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.tappedBackButton)))):
+                state.isHideTabBar = false
                 state.routes.pop()
                 
             default:

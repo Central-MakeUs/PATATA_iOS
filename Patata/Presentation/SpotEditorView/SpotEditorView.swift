@@ -27,6 +27,8 @@ struct SpotEditorView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .hideTabBar(true)
+                .navigationBarBackButtonHidden()
                 .background(
                     Color.clear
                         .contentShape(Rectangle())
@@ -101,7 +103,7 @@ extension SpotEditorView {
         ZStack {
             HStack {
                 NavBackButton {
-                    print("back")
+                    store.send(.viewEvent(.tappedBackButton))
                     hideKeyboard()
                 }
                 .padding(.leading, 15)

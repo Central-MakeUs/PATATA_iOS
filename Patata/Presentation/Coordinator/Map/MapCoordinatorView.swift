@@ -23,7 +23,11 @@ struct MapCoordinatorView: View {
                     
                 case let .mySpotList(mySpotListStore):
                     MySpotListView(store: mySpotListStore)
-                        .hideTabBar(true)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .spotEditorView(spotEditorStore):
+                    SpotEditorView(store: spotEditorStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
         }
@@ -37,12 +41,15 @@ extension MapScreen.State: Identifiable {
             return ID.spotMap
         case .mySpotList:
             return ID.mySpotList
+        case .spotEditorView:
+            return ID.spotEditorView
         }
     }
     
     enum ID: Identifiable {
         case spotMap
         case mySpotList
+        case spotEditorView
         
         var id: ID {
             return self

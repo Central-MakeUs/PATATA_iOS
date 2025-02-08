@@ -36,6 +36,11 @@ struct SpotEditorFeature {
     enum Action {
         case textValidation(TextValidation)
         case viewEvent(ViewEvent)
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case tappedBackButton
+        }
         
         // bindingAction
         case bindingTitle(String)
@@ -56,6 +61,7 @@ struct SpotEditorFeature {
     
     enum ViewEvent {
         case tappedBottomSheet(String)
+        case tappedBackButton
         case openBottomSheet(Bool)
         case closeBottomSheet(Bool)
         case hashTagOnSubmit
@@ -94,6 +100,9 @@ extension SpotEditorFeature {
                 state.hashTags.remove(at: index)
                 
                 validateEditorState(&state)
+                
+            case .viewEvent(.tappedBackButton):
+                return .send(.delegate(.tappedBackButton))
                 
             case let .textValidation(.titleValidation(titleText)):
                 let limitedText = String(titleText.prefix(15))

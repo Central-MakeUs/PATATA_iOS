@@ -56,6 +56,7 @@ struct SpotMapFeature {
             case tappedSideButton
             case tappedMarker
             case bottomSheetDismiss
+            case tappedSpotAddButton
         }
         // bindingAction
         case bindingIsPresented(Bool)
@@ -88,6 +89,7 @@ extension SpotMapFeature {
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
+                return .send(.delegate(.tappedSpotAddButton))
                 
             case .viewEvent(.tappedSideButton):
                 return .send(.delegate(.tappedSideButton))

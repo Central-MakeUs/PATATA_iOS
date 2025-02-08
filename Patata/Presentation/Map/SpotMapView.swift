@@ -109,27 +109,47 @@ extension SpotMapView {
     
     private var mapBottomView: some View {
         ZStack {
-            Text("장소 추가하기")
-                .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
-                .padding(.bottom, 16)
-                .asButton {
-                    store.send(.viewEvent(.tappedSpotAddButton))
+//            Text("장소 추가하기")
+//                .hashTagStyle(backgroundColor: .blue100, textColor: .white, font: .subtitleS, verticalPadding: 10, horizontalPadding: 30, cornerRadius: 20)
+//                .padding(.bottom, 16)
+//                .asButton {
+//                    store.send(.viewEvent(.tappedSpotAddButton))
+//                }
+            VStack(spacing: 8) {
+                HStack {
+                    Spacer()
+                    
+                    Circle()
+                        .fill(.blue100)
+                        .frame(width: 48, height: 48)
+                        .overlay(alignment: .center) {
+                            Image(systemName: "plus")
+                                .resizable()
+                                .frame(width: 20, height: 20)
+                                .foregroundStyle(.white)
+                        }
+                        .padding(.trailing, 15)
+                        .asButton {
+                            store.send(.viewEvent(.tappedSpotAddButton))
+                        }
                 }
-            
-            HStack {
-                Spacer()
                 
-                Circle()
-                    .fill(.white)
-                    .frame(width: 48, height: 48)
-                    .overlay(alignment: .center) {
-                        Image("LocationActive")
-                            .resizable()
-                            .frame(width: 24, height: 24)
-                    }
-                    .padding(.trailing, 15)
+                
+                HStack {
+                    Spacer()
+                    
+                    Circle()
+                        .fill(.white)
+                        .frame(width: 48, height: 48)
+                        .overlay(alignment: .center) {
+                            Image("LocationActive")
+                                .resizable()
+                                .frame(width: 24, height: 24)
+                        }
+                        .padding(.trailing, 15)
+                }
+                .padding(.bottom, 15)
             }
-            .padding(.bottom, 15)
         }
     }
     
