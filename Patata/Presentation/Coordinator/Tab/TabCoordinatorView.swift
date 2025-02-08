@@ -34,9 +34,34 @@ struct TabCoordinatorView: View {
                         ) {
                             MapCoordinatorView(store: store.scope(state: \.mapTabState, action: \.mapTabAction))
                                 .tag(TabCase.map)
+                                .ignoresSafeArea(.all, edges: .bottom)
                         }
                     }
                     .tint(.textDefault)
+                    .onAppear {
+                        let image = UIImage.gradientImageWithBounds(
+                            bounds: CGRect( x: 0, y: 0, width: UIScreen.main.scale, height: 8),
+                            colors: [
+                                UIColor.clear.cgColor,
+                                UIColor.black.withAlphaComponent(0.05).cgColor
+                            ]
+                        )
+                        
+                        let standardAppearance = UITabBarAppearance()
+                        standardAppearance.configureWithDefaultBackground()
+                        standardAppearance.backgroundColor = .white
+                        standardAppearance.backgroundImage = UIImage()
+                        standardAppearance.shadowImage = image
+                        
+                        let scrollEdgeAppearance = UITabBarAppearance()
+                        scrollEdgeAppearance.configureWithTransparentBackground()
+                        scrollEdgeAppearance.backgroundColor = .white
+                        scrollEdgeAppearance.backgroundImage = UIImage()
+                        scrollEdgeAppearance.shadowImage = image
+                        
+                        UITabBar.appearance().standardAppearance = standardAppearance
+                        UITabBar.appearance().scrollEdgeAppearance = scrollEdgeAppearance
+                    }
                 } else {
                     TabView(selection: $store.tabState.sending(\.bindingTab)) {
                         HomeCoordinatorView(store: store.scope(state: \.homeTabState, action: \.homeTabAction))
@@ -44,11 +69,38 @@ struct TabCoordinatorView: View {
                                 Image(store.tabState == .home ? "HomeActive" : "HomeInActive")
                             }
                             .tag(TabCase.home)
+                            
                         MapCoordinatorView(store: store.scope(state: \.mapTabState, action: \.mapTabAction))
                             .tabItem {
                                 Image(store.tabState == .map ?  "SpotActive" : "SpotInActive")
                             }
                             .tag(TabCase.map)
+                            .ignoresSafeArea(.all, edges: .bottom)
+                    }
+                    .tint(.textDefault)
+                    .onAppear {
+                        let image = UIImage.gradientImageWithBounds(
+                            bounds: CGRect( x: 0, y: 0, width: UIScreen.main.scale, height: 8),
+                            colors: [
+                                UIColor.clear.cgColor,
+                                UIColor.black.withAlphaComponent(0.05).cgColor
+                            ]
+                        )
+                        
+                        let standardAppearance = UITabBarAppearance()
+                        standardAppearance.configureWithDefaultBackground()
+                        standardAppearance.backgroundColor = .white
+                        standardAppearance.backgroundImage = UIImage()
+                        standardAppearance.shadowImage = image
+                        
+                        let scrollEdgeAppearance = UITabBarAppearance()
+                        scrollEdgeAppearance.configureWithTransparentBackground()
+                        scrollEdgeAppearance.backgroundColor = .white
+                        scrollEdgeAppearance.backgroundImage = UIImage()
+                        scrollEdgeAppearance.shadowImage = image
+                        
+                        UITabBar.appearance().standardAppearance = standardAppearance
+                        UITabBar.appearance().scrollEdgeAppearance = scrollEdgeAppearance
                     }
                 }
             }

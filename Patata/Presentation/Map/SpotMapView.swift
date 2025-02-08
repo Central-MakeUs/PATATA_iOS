@@ -20,6 +20,7 @@ struct SpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
@@ -36,6 +37,7 @@ struct SpotMapView: View {
 
 extension SpotMapView {
     private var contentView: some View {
+        
         VStack(spacing: 0) {
             VStack {
                 fakeNavgationBar
@@ -44,15 +46,20 @@ extension SpotMapView {
                 
             }
             .frame(maxWidth: .infinity)
-            .background(Color.white)
-            .shadow(color: .black.opacity(0.1), radius: 4, y: 2)
-             
-            ZStack {
+            .background(.white)
+            
+            ZStack(alignment: .top) {
                 UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
                     store.send(.viewEvent(.changeMapLocation))
                 }
+                .ignoresSafeArea(edges: [.bottom])
+                
+                Color.black
+                    .opacity(0.1)
+                    .frame(height: 4)
+                    .blur(radius: 3)
                 
                 VStack {
                     mapMenuView
@@ -65,6 +72,7 @@ extension SpotMapView {
                 }
             }
         }
+        
     }
     
     private var fakeNavgationBar: some View {
@@ -132,7 +140,7 @@ extension SpotMapView {
                     .foregroundStyle(.navy100)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
-                    .shadow(color: .shadowColor, radius: 8)
+                    .shadow(color: .shadowColor, radius: 5)
                     .asButton {
                         print("tap")
                     }
@@ -148,6 +156,7 @@ extension SpotMapView {
                     Circle()
                         .fill(.blue100)
                         .frame(width: 48, height: 48)
+                        .shadow(color: .shadowColor, radius: 2)
                         .overlay(alignment: .center) {
                             Image(systemName: "plus")
                                 .resizable()
@@ -159,7 +168,7 @@ extension SpotMapView {
                             store.send(.viewEvent(.tappedSpotAddButton))
                         }
                 }
-                .shadow(color: .shadowColor, radius: 8)
+                
                 
                 HStack {
                     Spacer()
@@ -167,6 +176,7 @@ extension SpotMapView {
                     Circle()
                         .fill(.white)
                         .frame(width: 48, height: 48)
+                        .shadow(color: .shadowColor, radius: 2)
                         .overlay(alignment: .center) {
                             Image("LocationActive")
                                 .resizable()
@@ -175,7 +185,7 @@ extension SpotMapView {
                         .padding(.trailing, 15)
                 }
                 .padding(.bottom, 15)
-                .shadow(color: .shadowColor, radius: 8)
+                
             }
         }
     }
@@ -253,7 +263,7 @@ extension SpotMapView {
         .padding(.horizontal, 12)
         .background(
             RoundedRectangle(cornerRadius: 20)
-                .strokeBorder(store.selectedMenuIndex == categoryItem.rawValue ? .clear : .gray30, lineWidth: 2)
+                .strokeBorder(store.selectedMenuIndex == categoryItem.rawValue ? .clear : .gray30, lineWidth: 1)
                 .background(store.selectedMenuIndex == categoryItem.rawValue ? .black : .white)
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         )
