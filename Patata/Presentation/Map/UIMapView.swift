@@ -69,7 +69,8 @@ struct UIMapView: UIViewRepresentable {
         view.mapView.positionMode = .direction
         view.mapView.zoomLevel = 17
         view.mapView.addCameraDelegate(delegate: context.coordinator)
-      
+        view.mapView.positionMode = .normal
+        
         return view
     }
     
