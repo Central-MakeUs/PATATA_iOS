@@ -1,26 +1,21 @@
 //
-//  SpotMapView.swift
+//  SearchMapView.swift
 //  Patata
 //
-//  Created by 김진수 on 1/23/25.
+//  Created by 김진수 on 2/9/25.
 //
 
 import SwiftUI
 import ComposableArchitecture
 
-// 지도 뷰를 그리기 전에 먼저 통신을 해서 기억하고 있는 좌표가 있는지 체크
-// 없다면 그냥 지도 그리고
-// 있다면 일단 해당 값 카테고리를 체크후 해당하는 마커를 만들고 좌표값을 넣어 맵 뷰에 넣는다.
-// 그리고 지도를 그린다.
-// 예시로 버튼을 누를때마다 카메라가 바라보는 좌표에 마커를 추가하는 걸 해보자
-struct SpotMapView: View {
+struct SearchMapView: View {
     
-    @Perception.Bindable var store: StoreOf<SpotMapFeature>
+    @Perception.Bindable var store: StoreOf<SearchMapFeature>
 
     var body: some View {
         WithPerceptionTracking {
             contentView
-                
+                .navigationBarBackButtonHidden()
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
@@ -35,7 +30,7 @@ struct SpotMapView: View {
     }
 }
 
-extension SpotMapView {
+extension SearchMapView {
     private var contentView: some View {
         
         VStack(spacing: 0) {
@@ -99,10 +94,22 @@ extension SpotMapView {
                     }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 20)
+            .padding(.horizontal, 15)
             .padding(.vertical, 15)
             .background(.gray20)
             .clipShape(RoundedRectangle(cornerRadius: 30))
+            .onTapGesture {
+                store.send(.viewEvent(.tappedSearch))
+            }
+            
+            Image("XActive")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 24, height: 24)
+                .asButton {
+                    store.send(.viewEvent(.tappedBackButton))
+                }
+            
         }
     }
     
@@ -246,7 +253,7 @@ extension SpotMapView {
     }
 }
 
-extension SpotMapView {
+extension SearchMapView {
     private func categoryMenuView(categoryItem: CategoryCase) -> some View {
         HStack {
             if let image = categoryItem.getCategoryCase().image {

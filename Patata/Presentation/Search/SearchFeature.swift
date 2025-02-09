@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct SearchFeature {
     @ObservableState
     struct State: Equatable {
+        var beforeViewState: BeforeViewState
         var searchText: String = ""
         var searchResult: Bool = true
         var viewState: ViewState = .search
@@ -21,6 +22,11 @@ struct SearchFeature {
         case loading
         case search
         case searchResult
+    }
+    
+    enum BeforeViewState {
+        case home
+        case map
     }
     
     enum Action {
@@ -61,11 +67,15 @@ extension SearchFeature {
                 // network후 결과에 따라서 실패시 hidden 풀고
                 // 성공시 화면 변경
                 // 임시로 성공시 바로 delegate 전달로
-                state.viewState = .loading
-                
-                return .run { send in
-                    try? await Task.sleep(for: .seconds(2))
-                    await send(.switchViewState)
+                if state.beforeViewState == .home {
+                    state.viewState = .loading
+                    
+                    return .run { send in
+                        try? await Task.sleep(for: .seconds(2))
+                        await send(.switchViewState)
+                    }
+                } else {
+                    return .send(.delegate(.successSearch))
                 }
                 
             case .viewEvent(.searchStart):

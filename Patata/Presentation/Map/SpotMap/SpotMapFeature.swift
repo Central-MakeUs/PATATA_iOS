@@ -21,29 +21,6 @@ struct SpotMapFeature {
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         
-        let categoryItems = [
-            CategoryItem(
-                item: "전체",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "작가 추천",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "스냅스팟",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "시크한 야경",
-                images: "RecommendIcon"
-            ),
-            CategoryItem(
-                item: "싱그러운 자연",
-                images: "RecommendIcon"
-            )
-        ]
-        
         // bindingState
         var isPresented: Bool = false
         var archive: Bool = false
@@ -59,6 +36,7 @@ struct SpotMapFeature {
             case tappedMarker
             case bottomSheetDismiss
             case tappedSpotAddButton
+            case tappedSearch
         }
         // bindingAction
         case bindingIsPresented(Bool)
@@ -74,6 +52,7 @@ struct SpotMapFeature {
         case tappedMarker
         case tappedSpotAddButton
         case tappedSideButton
+        case tappedSearch
         case bottomSheetDismiss
         case changeMapLocation
     }
@@ -106,6 +85,9 @@ extension SpotMapFeature {
                 
             case .viewEvent(.bottomSheetDismiss):
                 return .send(.delegate(.bottomSheetDismiss))
+                
+            case .viewEvent(.tappedSearch):
+                return .send(.delegate(.tappedSearch))
                 
             case .viewEvent(.changeMapLocation):
                 state.spotReloadButton = true

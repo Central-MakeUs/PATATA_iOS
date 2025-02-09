@@ -28,6 +28,15 @@ struct MapCoordinatorView: View {
                 case let .spotEditorView(spotEditorStore):
                     SpotEditorView(store: spotEditorStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .search(searchStore):
+                    SearchView(store: searchStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .searchMap(searchMapStore):
+                    SearchMapView(store: searchMapStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
                 }
             }
         }
@@ -43,6 +52,10 @@ extension MapScreen.State: Identifiable {
             return ID.mySpotList
         case .spotEditorView:
             return ID.spotEditorView
+        case .search:
+            return ID.search
+        case .searchMap:
+            return ID.searchMap
         }
     }
     
@@ -50,6 +63,8 @@ extension MapScreen.State: Identifiable {
         case spotMap
         case mySpotList
         case spotEditorView
+        case search
+        case searchMap
         
         var id: ID {
             return self

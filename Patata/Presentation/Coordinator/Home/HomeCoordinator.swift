@@ -82,7 +82,7 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case .navigationAction(.pushSearch):
-                state.routes.push(.search(SearchFeature.State()))
+                state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))
                 
             default:
                 break

@@ -46,11 +46,12 @@ extension SearchView {
                 .padding(.horizontal, 15)
             
             Spacer()
-            
-            searchFailView
-                .opacity(store.searchResult ? 0 : 1)
-            
-            Spacer()
+            if store.beforeViewState == .home {
+                searchFailView
+                    .opacity(store.searchResult ? 0 : 1)
+                
+                Spacer()
+            }
         }
     }
     
