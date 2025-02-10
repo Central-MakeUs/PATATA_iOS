@@ -17,47 +17,32 @@ import NMapsMap
 
 // 초기값으로는 좌표값과 카테고리가 있어야지
 
-final class MapState: @unchecked Sendable {
-    var markerImages: [String: NMFOverlayImage] = [:]
-    var currentMarkers: [NMFMarker] = []
-    
-    private init() { }
-    
-    func clearMarkers() {
-        currentMarkers.forEach {
-            $0.mapView = nil
-        }
-        currentMarkers.removeAll()
-    }
-}
-
-extension MapState {
-    static let shared = MapState()
-}
-
 struct UIMapView: UIViewRepresentable {
-    let coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
-    let markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
+    @ObservedObject var mapState: MapStateEntity
     let onMarkerTap: ((Double, Double) -> Void)?
-    let mapState = MapState.shared
     let onLocationChange: (() -> Void)?
+    let locationToAddress: ((Double, Double) -> Void)?
     
     init(
-        coord: (Double, Double),
-        markers: [(coordinate: (long: Double, lat: Double), category: String)],
+        mapState: MapStateEntity,
         onMarkerTap: ((Double, Double) -> Void)? = nil,
-        onLocationChange: (() -> Void)? = nil
+        onLocationChange: (() -> Void)? = nil,
+        locationToAddress: ((Double, Double) -> Void)? = nil
     ) {
-        self.coord = coord
-        self.markers = markers
+        self.mapState = mapState
         self.onMarkerTap = onMarkerTap
         self.onLocationChange = onLocationChange
+        self.locationToAddress = locationToAddress
     }
     
     func makeCoordinator() -> Coordinator {
         Coordinator {
             if let onLocationChange {
                 onLocationChange()
+            }
+        } locationToAddress: { lat, long in
+            if let locationToAddress {
+                locationToAddress(lat, long)
             }
         }
     }
@@ -76,13 +61,11 @@ struct UIMapView: UIViewRepresentable {
     
     // 여기서에서 마커 추가하는 로직 (좌표와 카테고리 이미지를 받으면서 마커 찍기)
     func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
-        let coord = NMGLatLng(lat: coord.1, lng: coord.0)
-        let cameraUpdate = NMFCameraUpdate(scrollTo: coord) // 유저 초기화면
         
-        context.coordinator.resetState()
+        moveToCamera(coord: Coordinate(latitude: mapState.coord.1, longitude: mapState.coord.0), uiView: uiView)
         
         Task {
-            let newMarkers = markers.map { marker in
+            let newMarkers = mapState.markers.map { marker in
                 addMarker(
                     lat: marker.coordinate.lat,
                     long: marker.coordinate.long,
@@ -91,50 +74,34 @@ struct UIMapView: UIViewRepresentable {
                 )
             }
             
+            
             await MainActor.run {
-                mapState.clearMarkers()
+                clearMarkers(mapState: mapState)
                 mapState.currentMarkers = newMarkers
-                newMarkers.forEach { $0.mapView = uiView.mapView }
+                mapState.currentMarkers.forEach { $0.mapView = uiView.mapView }
             }
         }
-        
-        cameraUpdate.animation = .fly
-        cameraUpdate.animationDuration = 1
-        
-        Task {
-            try? await Task.sleep(for: .seconds(1))
-            context.coordinator.startDetectingCameraMovement()
-        }
-        
-        uiView.mapView.moveCamera(cameraUpdate)
     }
     
     class Coordinator: NSObject, NMFMapViewCameraDelegate {
-        private var isReadyToDetect = false
-        private var hasMovedCamera = false
         let onLocationChange: (() -> Void)?
+        let locationToAddress: ((Double, Double) -> Void)?
         
-        init(onLocationChange: (() -> Void)?) {
+        init(onLocationChange: (() -> Void)?, locationToAddress: ((Double, Double) -> Void)?) {
             self.onLocationChange = onLocationChange
+            self.locationToAddress = locationToAddress
             super.init()
         }
         
-        func startDetectingCameraMovement() {
-            isReadyToDetect = true
-        }
-        
-        func resetState() {
-            isReadyToDetect = false
-            hasMovedCamera = false
-        }
-        
         func mapView(_ mapView: NMFMapView, cameraWillChangeByReason reason: Int, animated: Bool) {
-            guard isReadyToDetect else { return }
-            
-            if !hasMovedCamera {
-                hasMovedCamera = true
+            if reason != 0 && !animated {
                 onLocationChange?()
             }
+        }
+        
+        func mapViewCameraIdle(_ mapView: NMFMapView) {
+            print("herer")
+            locationToAddress?(mapView.latitude, mapView.longitude)
         }
     }
 }
@@ -142,7 +109,6 @@ struct UIMapView: UIViewRepresentable {
 extension UIMapView {
     private func addMarker(lat: Double, long: Double, mapView: NMFMapView, category: String) -> NMFMarker {
         let marker = NMFMarker()
-        
         marker.position = NMGLatLng(lat: lat, lng: long)
         marker.touchHandler = { (overlay) -> Bool in
             onMarkerTap?(lat, long)
@@ -160,5 +126,26 @@ extension UIMapView {
         }
         
         return marker
+    }
+    
+    private func clearMarkers(mapState: MapStateEntity) {
+        mapState.currentMarkers.forEach {
+            $0.mapView = nil
+        }
+        mapState.currentMarkers.removeAll()
+    }
+    
+    private func moveToCamera(coord: Coordinate, uiView: NMFNaverMapView) {
+        let coord = NMGLatLng(lat: coord.latitude, lng: coord.longitude)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: coord) // 유저 초기화면
+        
+        cameraUpdate.animation = .fly
+        cameraUpdate.animationDuration = 1
+
+        if !mapState.first {
+            uiView.mapView.moveCamera(cameraUpdate)
+        }
+        
+        mapState.first = true
     }
 }

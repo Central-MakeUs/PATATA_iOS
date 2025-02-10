@@ -28,6 +28,7 @@ struct SpotMapView: View {
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })
                 .onAppear {
+                    print("onAppear")
                     store.send(.viewCycle(.onAppear))
                 }
         }
@@ -48,10 +49,12 @@ extension SpotMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
+                UIMapView(mapState: store.mapState){ lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
-                    store.send(.viewEvent(.changeMapLocation))
+                    if store.spotReloadButton == false {
+                        store.send(.viewEvent(.changeMapLocation))
+                    }
                 }
                 .ignoresSafeArea(edges: [.bottom])
                 
@@ -93,9 +96,6 @@ extension SpotMapView {
                 
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.gray70)
-                    .asButton {
-                        print("imageOnSubmit")
-                    }
             }
             .frame(maxWidth: .infinity)
             .padding(.horizontal, 15)

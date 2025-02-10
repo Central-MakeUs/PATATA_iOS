@@ -43,11 +43,29 @@ extension AddressManager {
         if let admin = placemark.administrativeArea {
             components.append(admin)
         }
+        
         if let locality = placemark.locality {
-            components.append(locality)
+            if !components.contains(locality) {
+                components.append(locality)
+            }
         }
+        
+        if let subLocality = placemark.subLocality {
+            if !components.contains(subLocality) {
+                components.append(subLocality)
+            }
+        }
+        
         if let thoroughfare = placemark.thoroughfare {
-            components.append(thoroughfare)
+            if !components.contains(thoroughfare) {
+                components.append(thoroughfare)
+            }
+        }
+        
+        if let subThoroughfare = placemark.subThoroughfare {
+            if !components.contains(subThoroughfare) {
+                components.append(subThoroughfare)
+            }
         }
         
         return components.joined(separator: " ")

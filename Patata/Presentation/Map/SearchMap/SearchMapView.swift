@@ -44,7 +44,7 @@ extension SearchMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(coord: (store.coord.latitude, store.coord.longitude), markers: [((store.coord.latitude, store.coord.longitude), SpotMarkerImage.housePin)]) { lat, long in
+                UIMapView(mapState: store.mapState) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
                     store.send(.viewEvent(.changeMapLocation))

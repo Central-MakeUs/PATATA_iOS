@@ -53,6 +53,10 @@ extension ErrorManager {
         case .routerError(let routerError):
             return handleRouterError(routerError)
             
+        case .locationError(let locationError):
+            print("loactionError", locationError)
+            return "잠시후 다시 이용해주세요"
+            
         case .unknown(let errorStr):
             print("해결 시급합니다!! \(errorStr)")
             return "알 수 없는 오류가 발생했습니다."

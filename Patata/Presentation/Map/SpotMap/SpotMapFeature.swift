@@ -17,7 +17,7 @@ struct Coordinate: Equatable {
 struct SpotMapFeature {
     @ObservableState
     struct State: Equatable {
-        var coord: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
+        var mapState: MapStateEntity = MapStateEntity(coord: (126.9784147, 37.5666885), markers: [((126.9784147, 37.5666885), SpotMarkerImage.housePin)])
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         

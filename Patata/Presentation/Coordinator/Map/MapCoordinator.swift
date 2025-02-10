@@ -22,6 +22,7 @@ enum MapScreen {
     case spotEditorView(SpotEditorFeature)
     case search(SearchFeature)
     case searchMap(SearchMapFeature)
+    case addSpotMap(AddSpotMapFeature)
 }
 
 @Reducer
@@ -53,7 +54,7 @@ extension MapCoordinator {
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton)))):
                 state.isHideTabBar = true
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State()))
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -82,10 +83,8 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedBackButton)))):
-                print("Before pop - Routes count: \(state.routes.count)")
-                    state.isHideTabBar = false
-                    state.routes.popToRoot()
-                    print("After pop - Routes count: \(state.routes.count)")
+                state.isHideTabBar = false
+                state.routes.popToRoot()
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSearch)))):
                 state.isHideTabBar = true
@@ -100,10 +99,13 @@ extension MapCoordinator {
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSpotAddButton)))):
                 state.isHideTabBar = true
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State()))
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
+                
+            case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedBackButton)))):
+                state.routes.pop()
                 
             default:
                 break
