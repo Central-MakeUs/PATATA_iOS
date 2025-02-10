@@ -105,6 +105,9 @@ extension AddSpotMapView {
             }
             .background(.gray50)
             .clipShape(RoundedRectangle(cornerRadius: 38))
+            .asButton {
+                store.send(.viewEvent(.tappedAddConfirmButton))
+            }
         }
     }
 }

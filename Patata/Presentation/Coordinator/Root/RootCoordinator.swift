@@ -24,6 +24,8 @@ struct RootCoordinator {
 
         var routes: IdentifiedArrayOf<Route<RootScreen.State>>
         var viewState: RootCoordinatorViewState = .start
+        var isLocationPermissionGranted: Bool = false
+        var isPresent: Bool = false
         
         var tabCoordinator: TabCoordinator.State = TabCoordinator.State.initialState
     }
@@ -39,14 +41,30 @@ struct RootCoordinator {
         case tabCoordinatorAction(TabCoordinator.Action)
         case tokenExpired
         case viewCycle(ViewCycle)
+        case appLifecycle(AppLifecycle)
+        case locationAction(LocationAction)
+        
+        case bindingIsPresent(Bool)
     }
     
     enum ViewCycle {
         case onAppear
     }
     
+    enum AppLifecycle {
+        case background
+        case willEnterForeground
+        case active
+        case inactive
+    }
+    
+    enum LocationAction: Equatable {
+        case permissionResponse(Bool)
+    }
+    
     @Dependency(\.networkManager) var networkManager
     @Dependency(\.errorManager) var errorManager
+    @Dependency(\.locationManager) var locationManager
 
     var body: some ReducerOf<Self> {
         Scope(state: \.tabCoordinator, action: \.tabCoordinatorAction) {
@@ -56,17 +74,49 @@ struct RootCoordinator {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
-                return .run { send in
-                    for await error in networkManager.getNetworkError() {
-                        if errorManager.checkTokenError(error) {
-                            await send(.tokenExpired)
+                return .merge(
+                    .run { send in
+                        let permission = await locationManager.checkLocationPermission()
+                        
+                        await send(.locationAction(.permissionResponse(permission)))
+                    },
+                    .run { send in
+                        for await error in networkManager.getNetworkError() {
+                            if errorManager.checkTokenError(error) {
+                                await send(.tokenExpired)
+                            }
                         }
                     }
+                )
+                
+            case .appLifecycle(.background):
+                return .run { _ in
+                    locationManager.stopUpdatingLocation()
+                }
+                
+            case .appLifecycle(.active):
+                return .run { send in
+                    let hasPermission = await locationManager.checkLocationPermission()
+                    await send(.locationAction(.permissionResponse(hasPermission)))
+                }
+                
+            case .appLifecycle(.inactive):
+                return .run { _ in
+                    locationManager.stopUpdatingLocation()
+                }
+                
+            case let .locationAction(.permissionResponse(hasPermission)):
+                state.isLocationPermissionGranted = hasPermission
+                state.isPresent = !hasPermission
+                
+                if hasPermission {
+                    locationManager.startUpdatingLocation()
+                } else {
+                    locationManager.stopUpdatingLocation()
                 }
                 
             case let .router(.routeAction(id: _, action: .splash(.delegate(.isFirstUser(trigger))))):
-                // 로그인을 했는데 닉네임을 설정하지 않고 그냥 앱을 껐을경우
-                // 로그인을 하지않고 앱을 껐을경우
+                
                 if trigger {
                     state.routes.push(.onboarding(OnboardPageFeature.State()))
                 } else if UserDefaultsManager.nickname.isEmpty {
@@ -97,6 +147,9 @@ struct RootCoordinator {
                 state.routes.removeAll()
                 state.viewState = .start
                 state.routes.push(.login(LoginFeature.State()))
+                
+            case let .bindingIsPresent(isValid):
+                state.isPresent = isValid
                 
             default:
                 break

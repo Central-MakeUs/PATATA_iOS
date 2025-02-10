@@ -22,7 +22,6 @@ struct SplashView: View {
                     .padding(.top, 120)
                     .padding(.leading, 30)
                     .onAppear {
-                        print("onAppear")
                         store.send(.onAppear)
                     }
             }

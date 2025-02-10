@@ -25,12 +25,14 @@ struct AddSpotMapFeature {
         
         enum Delegate {
             case tappedBackButton
+            case tappedAddConfirmButton
         }
     }
     
     enum ViewEvent {
         case tappedBackButton
         case locationToAddress(lat: Double, long: Double)
+        case tappedAddConfirmButton
     }
     
     enum DataTransType {
@@ -61,6 +63,9 @@ extension AddSpotMapFeature {
                         print(error)
                     }
                 }
+                
+            case .viewEvent(.tappedAddConfirmButton):
+                return .send(.delegate(.tappedAddConfirmButton))
                 
             case let .dataTransType(.locationText(location)):
                 state.address = location

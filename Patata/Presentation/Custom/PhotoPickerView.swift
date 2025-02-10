@@ -71,6 +71,12 @@ public struct PhotoPickerView<Content: View>: View {
                 showPermissionAlert = !granted
             }
         }
+        .onTapGesture {
+            permissionManager.checkPhotoPermission { granted in
+                isPhotoLibraryAuthorized = granted
+                showPermissionAlert = !granted
+            }
+        }
     }
 
 }

@@ -11,7 +11,8 @@ import ComposableArchitecture
 
 @main
 struct PatataApp: App {
-
+    @Environment(\.scenePhase) private var scenePhase
+    
     var body: some Scene {
         WindowGroup {
             RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {

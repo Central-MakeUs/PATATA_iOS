@@ -107,6 +107,9 @@ extension MapCoordinator {
             case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
+            case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton)))):
+                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add)))
+                
             default:
                 break
             }

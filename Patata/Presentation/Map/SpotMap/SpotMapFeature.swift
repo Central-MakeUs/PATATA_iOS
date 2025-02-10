@@ -29,6 +29,7 @@ struct SpotMapFeature {
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case locationAction(LocationAction)
         case delegate(Delegate)
         
         enum Delegate {
@@ -55,6 +56,12 @@ struct SpotMapFeature {
         case tappedSearch
         case bottomSheetDismiss
         case changeMapLocation
+    }
+    
+    enum LocationAction {
+        case checkLocationPermission
+        case locationPermissionResponse(Bool)
+        case updateLocation(Coordinate)
     }
     
     var body: some ReducerOf<Self> {
@@ -91,6 +98,26 @@ extension SpotMapFeature {
                 
             case .viewEvent(.changeMapLocation):
                 state.spotReloadButton = true
+                
+//            case .locationAction(.checkLocationPermission):
+//                return .run { send in
+//                    let hasPermission = await locationClient.checkPermission()
+//                    await send(.locationManager(.locationPermissionResponse(hasPermission)))
+//                }
+//                
+//            case let .locationAction(.locationPermissionResponse(hasPermission)):
+//                state.isLocationPermissionGranted = hasPermission
+//                guard hasPermission else { return .none }
+//                return .run { send in
+//                    for await location in await locationClient.locations() {
+//                        await send(.locationManager(.updateLocation(location)))
+//                    }
+//                }
+                
+//            case let .locationAction(.updateLocation(coordinate)):
+//                state.currentLocation = coordinate
+//                state.mapState.coord = (coordinate.longitude, coordinate.latitude)
+//                return .none
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented
