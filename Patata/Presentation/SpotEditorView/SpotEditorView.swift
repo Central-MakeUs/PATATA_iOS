@@ -44,10 +44,10 @@ struct SpotEditorView: View {
                 }
                 .customAlert(
                     isPresented: $store.showPermissionAlert.sending(\.bindingPermission),
-                    title: "권한 필요",
-                    message: "사진 접근 권한이 필요합니다.\n설정에서 권한을 허용해주세요.",
-                    cancelText: "취소",
-                    confirmText: "설정으로 이동"
+                    title: AlertMessage.imagePermission.title,
+                    message: AlertMessage.imagePermission.message,
+                    cancelText: AlertMessage.imagePermission.cancelTitle,
+                    confirmText: AlertMessage.imagePermission.actionTitle
                 ) {
                     if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
                         UIApplication.shared.open(settingsUrl)

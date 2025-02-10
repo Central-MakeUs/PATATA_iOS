@@ -9,13 +9,14 @@ import PhotosUI
 import SwiftUI
 
 public struct PhotoPickerView<Content: View>: View {
+    @State private var isPhotoLibraryAuthorized: Bool = false
     @State private var selectedPhotos: [PhotosPickerItem]
+    @Binding private var showPermissionAlert: Bool
     @Binding private var selectedImages: [UIImage]
     @Binding private var isPresentedError: Bool
-    @Binding private var showPermissionAlert: Bool
-    @State private var isPhotoLibraryAuthorized: Bool = false
     
     private let maxSelectedCount: Int
+    private var permissionManager = PermissionManager.shared
     private var disabled: Bool {
         selectedImages.count >= maxSelectedCount || !isPhotoLibraryAuthorized
     }
@@ -30,7 +31,7 @@ public struct PhotoPickerView<Content: View>: View {
         selectedPhotos: [PhotosPickerItem] = [],
         selectedImages: Binding<[UIImage]>,
         isPresentedError: Binding<Bool> = .constant(false),
-        showPermissionAlert: Binding<Bool>, // 새로운 파라미터 추가
+        showPermissionAlert: Binding<Bool>,
         maxSelectedCount: Int = 3,
         matching: PHPickerFilter = .images,
         photoLibrary: PHPhotoLibrary = .shared(),
@@ -39,11 +40,11 @@ public struct PhotoPickerView<Content: View>: View {
         self.selectedPhotos = selectedPhotos
         self._selectedImages = selectedImages
         self._isPresentedError = isPresentedError
+        self._showPermissionAlert = showPermissionAlert
         self.maxSelectedCount = maxSelectedCount
         self.matching = matching
         self.photoLibrary = photoLibrary
         self.content = content
-        self._showPermissionAlert = showPermissionAlert
     }
     
     public var body: some View {
@@ -65,53 +66,16 @@ public struct PhotoPickerView<Content: View>: View {
             handleSelectedPhotos(newValue)
         }
         .onAppear {
-            checkAndRequestPhotoLibraryPermission()
+            permissionManager.checkPhotoPermission { granted in
+                isPhotoLibraryAuthorized = granted
+                showPermissionAlert = !granted
+            }
         }
     }
 
 }
 
 extension PhotoPickerView {
-    private func checkAndRequestPhotoLibraryPermission() {
-        let current = PHPhotoLibrary.authorizationStatus(for: .readWrite)
-        
-        switch current {
-        case .authorized, .limited:
-            isPhotoLibraryAuthorized = true
-            requestPhotoLibraryPermission()
-            
-        case .denied, .restricted:
-            isPhotoLibraryAuthorized = false
-            showPermissionAlert = true
-            
-        case .notDetermined:
-            requestPhotoLibraryPermission()
-            
-        @unknown default:
-            isPhotoLibraryAuthorized = false
-        }
-    }
-    
-    private func requestPhotoLibraryPermission() {
-        PHPhotoLibrary.requestAuthorization(for: .readWrite) { status in
-            DispatchQueue.main.async {
-                switch status {
-                case .authorized, .limited:
-                    isPhotoLibraryAuthorized = true
-                    
-                case .denied, .restricted:
-                    isPhotoLibraryAuthorized = false
-                    showPermissionAlert = true
-                    
-                case .notDetermined:
-                    isPhotoLibraryAuthorized = false
-                @unknown default:
-                    isPhotoLibraryAuthorized = false
-                }
-            }
-        }
-    }
-    
     private func handleSelectedPhotos(_ newPhotos: [PhotosPickerItem]) {
         Task {
             do {
