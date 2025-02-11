@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		DF0715722D5B77B0001CFF31 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DF0715712D5B77B0001CFF31 /* RealmSwift */; };
+		DF0715732D5B7874001CFF31 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = DF0715712D5B77B0001CFF31 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = DF1764902D5139F9003FA3B3 /* PopupView */; };
 		DF8D2B392D527EC10081561A /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = DF8D2B382D527EC10081561A /* Logging */; };
 		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
@@ -18,6 +20,20 @@
 		DFA57A912D355A13001E785A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A902D355A13001E785A /* GoogleSignIn */; };
 		DFA57A932D355A13001E785A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A922D355A13001E785A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		DF0715612D5B734F001CFF31 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				DF0715732D5B7874001CFF31 /* RealmSwift in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		DFA57A602D35214B001E785A /* Patata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Patata.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -58,6 +74,7 @@
 				DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */,
 				DFA57A932D355A13001E785A /* GoogleSignInSwift in Frameworks */,
 				DFA57A892D352840001E785A /* TCACoordinators in Frameworks */,
+				DF0715722D5B77B0001CFF31 /* RealmSwift in Frameworks */,
 				DFA57A862D35282C001E785A /* ComposableArchitecture in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -92,6 +109,7 @@
 				DFA57A5C2D35214B001E785A /* Sources */,
 				DFA57A5D2D35214B001E785A /* Frameworks */,
 				DFA57A5E2D35214B001E785A /* Resources */,
+				DF0715612D5B734F001CFF31 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -111,6 +129,7 @@
 				DF9D5F762D42572F00042314 /* NMapsMap */,
 				DF1764902D5139F9003FA3B3 /* PopupView */,
 				DF8D2B382D527EC10081561A /* Logging */,
+				DF0715712D5B77B0001CFF31 /* RealmSwift */,
 			);
 			productName = Patata;
 			productReference = DFA57A602D35214B001E785A /* Patata.app */;
@@ -149,6 +168,7 @@
 				DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */,
 				DF8D2B372D527EC10081561A /* XCRemoteSwiftPackageReference "swift-log" */,
+				DF0715702D5B77B0001CFF31 /* XCRemoteSwiftPackageReference "realm-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = DFA57A612D35214B001E785A /* Products */;
@@ -314,13 +334,14 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "해당앱은";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "권한주세요";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 현재 위치를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진을 선택하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -354,13 +375,14 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
-				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "해당앱은";
-				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "권한주세요";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 현재 위치를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사진을 선택하기 위해 사진 라이브러리 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
@@ -405,6 +427,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		DF0715702D5B77B0001CFF31 /* XCRemoteSwiftPackageReference "realm-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/realm/realm-swift.git";
+			requirement = {
+				kind = exactVersion;
+				version = 10.54.0;
+			};
+		};
 		DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/exyte/PopupView.git";
@@ -472,6 +502,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		DF0715712D5B77B0001CFF31 /* RealmSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = DF0715702D5B77B0001CFF31 /* XCRemoteSwiftPackageReference "realm-swift" */;
+			productName = RealmSwift;
+		};
 		DF1764902D5139F9003FA3B3 /* PopupView */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */;

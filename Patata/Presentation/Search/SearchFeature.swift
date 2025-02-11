@@ -16,6 +16,7 @@ struct SearchFeature {
         var searchText: String = ""
         var searchResult: Bool = true
         var viewState: ViewState = .search
+        var userLocation: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
     }
     
     enum ViewState {
@@ -33,6 +34,8 @@ struct SearchFeature {
         case viewEvent(ViewEvent)
         case switchViewState
         case delegate(Delegate)
+        case parentAction(ParentAction)
+        
         // bindingAction
         case bindingSearchText(String)
         
@@ -41,6 +44,10 @@ struct SearchFeature {
             // 이때 전달시 결과값들이 있으면 같이 전달
             case successSearch
             case tappedSpotDetail
+        }
+        
+        enum ParentAction {
+            case userLocation(Coordinate)
         }
     }
     
@@ -84,6 +91,9 @@ extension SearchFeature {
                 
             case .viewEvent(.tappedSpotDetail):
                 return .send(.delegate(.tappedSpotDetail))
+                
+            case let .parentAction(.userLocation(coord)):
+                state.userLocation = coord
                 
             case .switchViewState:
                 state.viewState = .searchResult

@@ -23,9 +23,14 @@ struct TabCoordinator {
     enum Action {
         case homeTabAction(HomeCoordinator.Action)
         case mapTabAction(MapCoordinator.Action)
+        case parentAction(ParentAction)
         
         // binding
         case bindingTab(TabCase)
+        
+        enum ParentAction {
+            case userLocation(Coordinate)
+        }
     }
     
     var body: some ReducerOf<Self> {
@@ -47,6 +52,15 @@ extension TabCoordinator {
             switch action {
             case let .bindingTab(tab):
                 state.tabState = tab
+                
+            case let .parentAction(.userLocation(coord)):
+                if state.tabState == .home {
+                    return .send(.homeTabAction(.parentAction(.userLocation(coord))))
+                }
+                
+                if state.tabState == .map {
+                    return .send(.mapTabAction(.parentAction(.userLocation(coord))))
+                }
                 
             default:
                 break

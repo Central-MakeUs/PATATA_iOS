@@ -12,15 +12,19 @@ import ComposableArchitecture
 @preconcurrency import Combine
 
 final class LocationManager: NSObject, Sendable {
-    private let locationUpdateSubject = PassthroughSubject<Coordinate, Never>()
     let locationManager = CLLocationManager()
+    
+    private let locationUpdateSubject = PassthroughSubject<Coordinate, Never>()
     private let cancelStoreActor = AnyValueActor(Set<AnyCancellable>())
+    private let defaultLocation = CLLocationCoordinate2D(latitude: 37.5666791, longitude: 126.9782914)
+    private let dataSourceActor = DataSourceActor()
     
     private override init() {
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
         super.init()
-        locationManager.delegate = self
         
+        locationManager.delegate = self
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest
+        locationManager.distanceFilter = kCLDistanceFilterNone
 //         백그라운드 위치 업데이트 설정
 //        if Bundle.main.backgroundModes.contains("location") {
 //            locationManager.allowsBackgroundLocationUpdates = true
@@ -32,6 +36,54 @@ final class LocationManager: NSObject, Sendable {
         await withCheckedContinuation { continuation in
             PermissionManager.shared.checkLocationPermission { hasPermission in
                 continuation.resume(returning: hasPermission)
+                
+                if let coordinate = self.locationManager.location?.coordinate {
+                    
+                    let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
+                    
+                    print("locationPermission Success", coord)
+                    
+                    Task {
+                        do {
+                            try await self.createCoord(coord: coord)
+                            let a = await self.dataSourceActor.fetch()
+                            print("locationPermission dffdsfafads", a)
+                        } catch {
+                            // 에러 발생 시 처리
+                            print("Failed to create coordinate:", error)
+                            // 실패 시 기본 좌표 사용
+                            let defaultCoordinate = Coordinate(
+                                latitude: self.defaultLocation.latitude,
+                                longitude: self.defaultLocation.longitude
+                            )
+                            
+                            self.locationUpdateSubject.send(defaultCoordinate)
+                        }
+                    }
+                    
+                } else {
+                    let defaultCoordinate = Coordinate(
+                        latitude: self.defaultLocation.latitude,
+                        longitude: self.defaultLocation.longitude
+                    )
+                    print("locationPermission fail")
+                    Task {
+                        do {
+                            try await self.createCoord(coord: defaultCoordinate)
+                        } catch {
+                            // 에러 발생 시 처리
+                            print("Failed to create coordinate:", error)
+                            // 실패 시 기본 좌표 사용
+                            let defaultCoordinate = Coordinate(
+                                latitude: self.defaultLocation.latitude,
+                                longitude: self.defaultLocation.longitude
+                            )
+                            
+                            self.locationUpdateSubject.send(defaultCoordinate)
+                        }
+                    }
+                    
+                }
             }
         }
     }
@@ -69,8 +121,20 @@ final class LocationManager: NSObject, Sendable {
 }
 
 extension LocationManager: CLLocationManagerDelegate {
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+            print("Authorization changed:", manager.authorizationStatus.rawValue)
+        }
+        
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print("Location Error:", error.localizedDescription)
+    }
+    
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        print("didUpdateLocations", locations)
         guard let location = locations.last else { return }
+        
+        print("didUpdateLocations", location)
         
         let coordinate = Coordinate(
             latitude: location.coordinate.latitude,
@@ -78,6 +142,13 @@ extension LocationManager: CLLocationManagerDelegate {
         )
         
         locationUpdateSubject.send(coordinate)
+    }
+}
+
+extension LocationManager {
+    private func createCoord(coord: Coordinate) async throws {
+        try await self.dataSourceActor.coordCreate(coord: coord)
+        self.locationUpdateSubject.send(coord)
     }
 }
 

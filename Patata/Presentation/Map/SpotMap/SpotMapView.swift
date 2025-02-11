@@ -28,7 +28,6 @@ struct SpotMapView: View {
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })
                 .onAppear {
-                    print("onAppear")
                     store.send(.viewCycle(.onAppear))
                 }
         }
@@ -185,6 +184,9 @@ extension SpotMapView {
                                 .frame(width: 24, height: 24)
                         }
                         .padding(.trailing, 15)
+                        .asButton {
+                            store.send(.viewEvent(.tappedMoveToUserLocationButton))
+                        }
                 }
                 .padding(.bottom, 15)
                 

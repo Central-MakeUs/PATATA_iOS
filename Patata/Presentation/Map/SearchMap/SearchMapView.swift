@@ -190,6 +190,9 @@ extension SearchMapView {
                                 .frame(width: 24, height: 24)
                         }
                         .padding(.trailing, 15)
+                        .asButton {
+                            store.send(.viewEvent(.tappedMoveToUserLocationButton))
+                        }
                 }
                 .padding(.bottom, 15)
                 

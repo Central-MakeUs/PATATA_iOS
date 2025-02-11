@@ -61,14 +61,13 @@ struct UIMapView: UIViewRepresentable {
     
     // 여기서에서 마커 추가하는 로직 (좌표와 카테고리 이미지를 받으면서 마커 찍기)
     func updateUIView(_ uiView: NMFNaverMapView, context: Context) {
-        
-        moveToCamera(coord: Coordinate(latitude: mapState.coord.1, longitude: mapState.coord.0), uiView: uiView)
+        moveToCamera(coord: mapState.coord, uiView: uiView)
         
         Task {
             let newMarkers = mapState.markers.map { marker in
                 addMarker(
-                    lat: marker.coordinate.lat,
-                    long: marker.coordinate.long,
+                    lat: marker.coordinate.latitude,
+                    long: marker.coordinate.longitude,
                     mapView: uiView.mapView,
                     category: marker.category
                 )
@@ -142,9 +141,9 @@ extension UIMapView {
         cameraUpdate.animation = .fly
         cameraUpdate.animationDuration = 1
 
-        if !mapState.first {
+//        if !mapState.first {
             uiView.mapView.moveCamera(cameraUpdate)
-        }
+//        }
         
         mapState.first = true
     }

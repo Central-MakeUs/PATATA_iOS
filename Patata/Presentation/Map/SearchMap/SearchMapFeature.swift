@@ -12,7 +12,8 @@ import ComposableArchitecture
 struct SearchMapFeature {
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: (126.9784147, 37.5666885), markers: [((126.9784147, 37.5666885), SpotMarkerImage.housePin)])
+        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 126.9784147, longitude: 37.5666885), markers: [(Coordinate(latitude: 126.9784147, longitude: 37.5666885), SpotMarkerImage.housePin)])
+        var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         
@@ -25,6 +26,11 @@ struct SearchMapFeature {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
         case delegate(Delegate)
+        case parentAction(ParentAction)
+        
+        // bindingAction
+        case bindingIsPresented(Bool)
+        case bindingArchive(Bool)
         
         enum Delegate {
             case tappedSideButton
@@ -34,9 +40,10 @@ struct SearchMapFeature {
             case tappedBackButton
             case tappedSearch
         }
-        // bindingAction
-        case bindingIsPresented(Bool)
-        case bindingArchive(Bool)
+        
+        enum ParentAction {
+            case userLocation(Coordinate)
+        }
     }
     
     enum ViewCycle {
@@ -50,6 +57,7 @@ struct SearchMapFeature {
         case tappedSideButton
         case tappedBackButton
         case tappedSearch
+        case tappedMoveToUserLocationButton
         case bottomSheetDismiss
         case changeMapLocation
     }
@@ -92,6 +100,12 @@ extension SearchMapFeature {
                 
             case .viewEvent(.changeMapLocation):
                 state.spotReloadButton = true
+                
+            case .viewEvent(.tappedMoveToUserLocationButton):
+                state.mapState.coord = state.userLocation
+                
+            case let .parentAction(.userLocation(coord)):
+                state.userLocation = coord
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented

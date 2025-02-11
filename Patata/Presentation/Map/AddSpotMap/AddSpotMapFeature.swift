@@ -14,7 +14,7 @@ struct AddSpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: (126.9784147, 37.5666885), markers: [])
+        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 126.9784147, longitude: 37.5666885), markers: [])
         var address: String = ""
     }
     

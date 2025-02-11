@@ -8,16 +8,14 @@
 import Foundation
 import ComposableArchitecture
 
-struct Coordinate: Equatable {
-    var latitude: Double
-    var longitude: Double
-}
-
 @Reducer
 struct SpotMapFeature {
+    private let dataSourceActor = DataSourceActor()
+    
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: (126.9784147, 37.5666885), markers: [((126.9784147, 37.5666885), SpotMarkerImage.housePin)])
+        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 37.5666791, longitude: 126.9784147), markers: [(Coordinate(latitude: 37.5666791, longitude: 126.9784147), SpotMarkerImage.housePin)])
+        var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         
@@ -31,6 +29,12 @@ struct SpotMapFeature {
         case viewEvent(ViewEvent)
         case locationAction(LocationAction)
         case delegate(Delegate)
+        case parentAction(ParentAction)
+        case dataTransType(DataTransType)
+        
+        // bindingAction
+        case bindingIsPresented(Bool)
+        case bindingArchive(Bool)
         
         enum Delegate {
             case tappedSideButton
@@ -39,9 +43,10 @@ struct SpotMapFeature {
             case tappedSpotAddButton
             case tappedSearch
         }
-        // bindingAction
-        case bindingIsPresented(Bool)
-        case bindingArchive(Bool)
+        
+        enum ParentAction {
+            case userLocation(Coordinate)
+        }
     }
     
     enum ViewCycle {
@@ -54,6 +59,7 @@ struct SpotMapFeature {
         case tappedSpotAddButton
         case tappedSideButton
         case tappedSearch
+        case tappedMoveToUserLocationButton
         case bottomSheetDismiss
         case changeMapLocation
     }
@@ -63,6 +69,13 @@ struct SpotMapFeature {
         case locationPermissionResponse(Bool)
         case updateLocation(Coordinate)
     }
+    
+    enum DataTransType {
+        case fetchRealm
+        case userLocation(Coordinate)
+    }
+    
+    @Dependency(\.locationManager) var locationManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -75,6 +88,13 @@ extension SpotMapFeature {
             switch action {
             case .viewCycle(.onAppear):
                 state.spotReloadButton = false
+                
+                return .run { send in
+                    await send(.dataTransType(.fetchRealm))
+                    for await location in locationManager.getLocationUpdates() {
+                        await send(.dataTransType(.userLocation(location)))
+                    }
+                }
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
@@ -99,25 +119,23 @@ extension SpotMapFeature {
             case .viewEvent(.changeMapLocation):
                 state.spotReloadButton = true
                 
-//            case .locationAction(.checkLocationPermission):
-//                return .run { send in
-//                    let hasPermission = await locationClient.checkPermission()
-//                    await send(.locationManager(.locationPermissionResponse(hasPermission)))
-//                }
-//                
-//            case let .locationAction(.locationPermissionResponse(hasPermission)):
-//                state.isLocationPermissionGranted = hasPermission
-//                guard hasPermission else { return .none }
-//                return .run { send in
-//                    for await location in await locationClient.locations() {
-//                        await send(.locationManager(.updateLocation(location)))
-//                    }
-//                }
+            case .viewEvent(.tappedMoveToUserLocationButton):
+                state.mapState.coord = state.userLocation
                 
-//            case let .locationAction(.updateLocation(coordinate)):
-//                state.currentLocation = coordinate
-//                state.mapState.coord = (coordinate.longitude, coordinate.latitude)
-//                return .none
+            case .dataTransType(.fetchRealm):
+                return .run { send in
+                    let coord = await dataSourceActor.fetch()
+                    await send(.dataTransType(.userLocation(coord)))
+                }
+                
+            case let .dataTransType(.userLocation(coord)):
+                state.userLocation = coord
+                state.mapState.coord = coord
+                print("SpotuserLocation", state.mapState.coord)
+                
+            case let .parentAction(.userLocation(coord)):
+                print("parent", coord)
+                state.mapState.coord = coord
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented

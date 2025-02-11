@@ -12,11 +12,11 @@ final class MapStateEntity: @unchecked Sendable, ObservableObject, Equatable {
     let id = UUID()
     var markerImages: [String: NMFOverlayImage] = [:]
     var currentMarkers: [NMFMarker] = []
-    var coord: (Double, Double) // 유저의 현 위치 혹은 디폴트된 좌표
-    let markers: [(coordinate: (long: Double, lat: Double), category: String)] // 스팟들의 위치 저장 변수
+    var coord: Coordinate // 유저의 현 위치 혹은 디폴트된 좌표
+    let markers: [(coordinate: Coordinate, category: String)] // 스팟들의 위치 저장 변수
     var first: Bool = false
     
-    init(markerImages: [String : NMFOverlayImage] = [:], currentMarkers: [NMFMarker] = [], coord: (Double, Double), markers: [(coordinate: (long: Double, lat: Double), category: String)]) {
+    init(markerImages: [String : NMFOverlayImage] = [:], currentMarkers: [NMFMarker] = [], coord: Coordinate, markers: [(coordinate: Coordinate, category: String)]) {
         self.markerImages = markerImages
         self.currentMarkers = currentMarkers
         self.coord = coord

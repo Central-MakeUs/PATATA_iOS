@@ -24,7 +24,6 @@ struct RootCoordinator {
 
         var routes: IdentifiedArrayOf<Route<RootScreen.State>>
         var viewState: RootCoordinatorViewState = .start
-        var isLocationPermissionGranted: Bool = false
         var isPresent: Bool = false
         
         var tabCoordinator: TabCoordinator.State = TabCoordinator.State.initialState
@@ -43,6 +42,7 @@ struct RootCoordinator {
         case viewCycle(ViewCycle)
         case appLifecycle(AppLifecycle)
         case locationAction(LocationAction)
+        case dataTransType(DataTransType)
         
         case bindingIsPresent(Bool)
     }
@@ -62,6 +62,10 @@ struct RootCoordinator {
         case permissionResponse(Bool)
     }
     
+    enum DataTransType {
+        case location(Coordinate)
+    }
+    
     @Dependency(\.networkManager) var networkManager
     @Dependency(\.errorManager) var errorManager
     @Dependency(\.locationManager) var locationManager
@@ -75,6 +79,11 @@ struct RootCoordinator {
             switch action {
             case .viewCycle(.onAppear):
                 return .merge(
+                    .run { send in
+                        for await location in locationManager.getLocationUpdates() {
+                            await send(.dataTransType(.location(location)))
+                        }
+                    },
                     .run { send in
                         let permission = await locationManager.checkLocationPermission()
                         
@@ -106,14 +115,19 @@ struct RootCoordinator {
                 }
                 
             case let .locationAction(.permissionResponse(hasPermission)):
-                state.isLocationPermissionGranted = hasPermission
                 state.isPresent = !hasPermission
                 
-                if hasPermission {
-                    locationManager.startUpdatingLocation()
-                } else {
-                    locationManager.stopUpdatingLocation()
+                return .run { _ in
+                    if hasPermission {
+                        locationManager.startUpdatingLocation()
+                    } else {
+                        locationManager.stopUpdatingLocation()
+                    }
                 }
+                
+            case let .dataTransType(.location(coord)):
+                print("RootuserLocation", coord)
+                return .send(.tabCoordinatorAction(.parentAction(.userLocation(coord))))
                 
             case let .router(.routeAction(id: _, action: .splash(.delegate(.isFirstUser(trigger))))):
                 
