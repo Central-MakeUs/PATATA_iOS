@@ -20,6 +20,7 @@ struct SearchFeature {
         var beforeViewState: BeforeViewState
         var searchText: String = ""
         var searchResult: Bool = true
+        var listLoadTrigger: Bool = true
         var viewState: ViewState = .search
         var userLocation: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
     }
@@ -64,17 +65,18 @@ struct SearchFeature {
         case searchStart
         case tappedSpotDetail // 나중에 탭하면서 서버에서 준 데이터도 같이 보내자
         case tappedArchiveButton(Int)
+        case nextPage
     }
     
     enum NetworkType {
-        case searchSpot(page: Int, filter: FilterCase)
+        case searchSpot(page: Int, filter: FilterCase, scroll: Bool)
         case patchArchiveState(Int)
     }
     
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
-        case searchSpot(SearchSpotCountEntity)
+        case searchSpot(SearchSpotCountEntity, Bool)
         case archiveState(ArchiveEntity, Int)
         case error
     }
@@ -100,6 +102,8 @@ extension SearchFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
+                state.listLoadTrigger = false
+                
                 return .run { send in
                     await send(.dataTransType(.fetchRealm))
                     
@@ -117,7 +121,7 @@ extension SearchFeature {
                 }
                 
                 return .run { send in
-                    await send(.networkType(.searchSpot(page: 0, filter: .recommend)))
+                    await send(.networkType(.searchSpot(page: 0, filter: .recommend, scroll: false)))
                 }
                 
             case .viewEvent(.searchStart):
@@ -132,12 +136,19 @@ extension SearchFeature {
                     await send(.networkType(.patchArchiveState(index)))
                 }
                 
-            case let .networkType(.searchSpot(page, filer)):
+            case .viewEvent(.nextPage):
+                state.listLoadTrigger = false
+                
+                return .run { [state = state] send in
+                    await send(.networkType(.searchSpot(page: state.pageTotalCount + 1, filter: .recommend, scroll: true)))
+                }
+                
+            case let .networkType(.searchSpot(page, filer, scroll)):
                 return .run { [state = state] send in
                     do {
                         let data = try await spotRepository.fetchSearch(searchText: state.searchText, page: page, sortBy: filer)
                         
-                        await send(.dataTransType(.searchSpot(data)))
+                        await send(.dataTransType(.searchSpot(data, scroll)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                         await send(.dataTransType(.error))
@@ -164,16 +175,26 @@ extension SearchFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
-            case let .dataTransType(.searchSpot(data)):
+            case let .dataTransType(.searchSpot(data, scroll)):
                 if data.totalCount != 0 {
-                    state.searchResult = true
-                    state.itemTotalCount = data.totalCount
-                    state.pageTotalCount = data.totalPages
-                    state.searchSpotItems.append(contentsOf: data.spots)
-                    
+                    if scroll {
+                        state.searchResult = true
+                        state.itemTotalCount = data.totalCount
+                        state.pageTotalCount = data.totalPages
+                        state.searchSpotItems.append(contentsOf: data.spots)
+                        state.listLoadTrigger = true
+                        
+                    } else {
+                        state.searchResult = true
+                        state.itemTotalCount = data.totalCount
+                        state.pageTotalCount = data.totalPages
+                        state.searchSpotItems = data.spots
+                        state.listLoadTrigger = true
+                    }
                     if state.beforeViewState == .home && state.viewState == .loading {
                         return .send(.switchViewState)
                     }
+                        
                 } else {
                     state.viewState = .search
                     state.searchResult = false

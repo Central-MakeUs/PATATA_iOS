@@ -125,6 +125,11 @@ extension SearchResultView {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.spotId) { index, item in
                 spotView(item: item, index: index)
+                    .onAppear {
+                        if store.pageTotalCount != 1 && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
+                            store.send(.viewEvent(.nextPage))
+                        }
+                    }
             }
         }
         .padding(16)
