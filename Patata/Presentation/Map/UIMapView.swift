@@ -22,17 +22,20 @@ struct UIMapView: UIViewRepresentable {
     let onMarkerTap: ((Double, Double) -> Void)?
     let onLocationChange: (() -> Void)?
     let locationToAddress: ((Double, Double) -> Void)?
+    let onCameraIdle: ((Coordinate) -> Void)?
     
     init(
         mapState: MapStateEntity,
         onMarkerTap: ((Double, Double) -> Void)? = nil,
         onLocationChange: (() -> Void)? = nil,
-        locationToAddress: ((Double, Double) -> Void)? = nil
+        locationToAddress: ((Double, Double) -> Void)? = nil,
+        onCameraIdle: ((Coordinate) -> Void)? = nil
     ) {
         self.mapState = mapState
         self.onMarkerTap = onMarkerTap
         self.onLocationChange = onLocationChange
         self.locationToAddress = locationToAddress
+        self.onCameraIdle = onCameraIdle
     }
     
     func makeCoordinator() -> Coordinator {
@@ -43,6 +46,10 @@ struct UIMapView: UIViewRepresentable {
         } locationToAddress: { lat, long in
             if let locationToAddress {
                 locationToAddress(lat, long)
+            }
+        } onCameraIdle: { coord in
+            if let onCameraIdle {
+                onCameraIdle(coord)
             }
         }
     }
@@ -85,10 +92,12 @@ struct UIMapView: UIViewRepresentable {
     class Coordinator: NSObject, NMFMapViewCameraDelegate {
         let onLocationChange: (() -> Void)?
         let locationToAddress: ((Double, Double) -> Void)?
+        let onCameraIdle: ((Coordinate) -> Void)?
         
-        init(onLocationChange: (() -> Void)?, locationToAddress: ((Double, Double) -> Void)?) {
+        init(onLocationChange: (() -> Void)?, locationToAddress: ((Double, Double) -> Void)?, onCameraIdle: ((Coordinate) -> Void)?) {
             self.onLocationChange = onLocationChange
             self.locationToAddress = locationToAddress
+            self.onCameraIdle = onCameraIdle
             super.init()
         }
         
@@ -99,7 +108,12 @@ struct UIMapView: UIViewRepresentable {
         }
         
         func mapViewCameraIdle(_ mapView: NMFMapView) {
-            print("herer")
+            let currentCoord = Coordinate(
+                latitude: mapView.latitude,
+                longitude: mapView.longitude
+            )
+                    
+            onCameraIdle?(currentCoord)
             locationToAddress?(mapView.latitude, mapView.longitude)
         }
     }
@@ -140,11 +154,13 @@ extension UIMapView {
         
         cameraUpdate.animation = .fly
         cameraUpdate.animationDuration = 1
-
-//        if !mapState.first {
-            uiView.mapView.moveCamera(cameraUpdate)
-//        }
         
-        mapState.first = true
+        if !mapState.first {
+            uiView.mapView.moveCamera(cameraUpdate)
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            mapState.first = true
+        }
     }
 }

@@ -31,14 +31,9 @@ struct HomeCoordinator {
         case router(IdentifiedRouterActionOf<HomeScreen>)
         case navigationAction(NavigationAction)
         case delegate(Delegate)
-        case parentAction(ParentAction)
         
         enum Delegate {
             case tappedSearch
-        }
-        
-        enum ParentAction {
-            case userLocation(Coordinate)
         }
     }
     
@@ -55,16 +50,6 @@ extension HomeCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case let .parentAction(.userLocation(coord)):
-                
-                if state.routes.contains(where: { $0.id == .search }) {
-                    return .send(.router(.routeAction(id: .search, action: .search(.parentAction(.userLocation(coord))))))
-                }
-                
-                if state.routes.contains(where: { $0.id == .mySpotList }) {
-                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.parentAction(.userLocation(coord))))))
-                }
-                
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSearch)))):
                 return .concatenate(
                     .send(.delegate(.tappedSearch)),

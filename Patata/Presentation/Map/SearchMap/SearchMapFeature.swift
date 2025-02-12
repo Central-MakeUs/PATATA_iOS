@@ -8,12 +8,16 @@
 import Foundation
 import ComposableArchitecture
 
+// 서치해서 받은 좌표를 mapState에서 넣어줘야된다
 @Reducer
 struct SearchMapFeature {
+    private let dataSourceActor = DataSourceActor()
+    
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 126.9784147, longitude: 37.5666885), markers: [(Coordinate(latitude: 126.9784147, longitude: 37.5666885), SpotMarkerImage.housePin)])
+        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 37.5666885, longitude: 126.9784147), markers: [(Coordinate(latitude: 37.5666885, longitude: 126.9784147), SpotMarkerImage.housePin)])
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
+        var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         
@@ -26,7 +30,7 @@ struct SearchMapFeature {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
         case delegate(Delegate)
-        case parentAction(ParentAction)
+        case dataTransType(DataTransType)
         
         // bindingAction
         case bindingIsPresented(Bool)
@@ -36,13 +40,9 @@ struct SearchMapFeature {
             case tappedSideButton
             case tappedMarker
             case bottomSheetDismiss
-            case tappedSpotAddButton
+            case tappedSpotAddButton(Coordinate)
             case tappedBackButton
             case tappedSearch
-        }
-        
-        enum ParentAction {
-            case userLocation(Coordinate)
         }
     }
     
@@ -60,7 +60,15 @@ struct SearchMapFeature {
         case tappedMoveToUserLocationButton
         case bottomSheetDismiss
         case changeMapLocation
+        case onCameraIdle(Coordinate)
     }
+    
+    enum DataTransType {
+        case fetchRealm
+        case userLocation(Coordinate)
+    }
+    
+    @Dependency(\.locationManager) var locationManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -73,7 +81,17 @@ extension SearchMapFeature {
             switch action {
             case .viewCycle(.onAppear):
                 state.spotReloadButton = false
-                return .send(.viewEvent(.tappedMarker))
+                
+                return .merge(
+                    .send(.viewEvent(.tappedMarker)),
+                    .run { send in
+                        await send(.dataTransType(.fetchRealm))
+                        
+                        for await location in locationManager.getLocationUpdates() {
+                            await send(.dataTransType(.userLocation(location)))
+                        }
+                    }
+                )
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
@@ -84,7 +102,7 @@ extension SearchMapFeature {
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
-                return .send(.delegate(.tappedSpotAddButton))
+                return .send(.delegate(.tappedSpotAddButton(state.cameraLocation)))
                 
             case .viewEvent(.tappedSideButton):
                 return .send(.delegate(.tappedSideButton))
@@ -102,9 +120,19 @@ extension SearchMapFeature {
                 state.spotReloadButton = true
                 
             case .viewEvent(.tappedMoveToUserLocationButton):
+                state.mapState.first = false
                 state.mapState.coord = state.userLocation
                 
-            case let .parentAction(.userLocation(coord)):
+            case let .viewEvent(.onCameraIdle(coord)):
+                state.cameraLocation = coord
+                
+            case .dataTransType(.fetchRealm):
+                return .run { send in
+                    let coord = await dataSourceActor.fetch()
+                    await send(.dataTransType(.userLocation(coord)))
+                }
+                
+            case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
             case let .bindingIsPresented(isPresented):

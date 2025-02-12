@@ -9,12 +9,13 @@ import Foundation
 import ComposableArchitecture
 import CoreLocation
 
+// 유저가 보고 있는 화면부터 시작
 @Reducer
 struct AddSpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 126.9784147, longitude: 37.5666885), markers: [])
+        var mapState: MapStateEntity
         var address: String = ""
     }
     
@@ -51,18 +52,23 @@ extension AddSpotMapFeature {
         Reduce { state, action in
             switch action {
             case .viewEvent(.tappedBackButton):
-                return .send(.delegate(.tappedBackButton))
+                return .merge(
+                    .cancel(id: "location-lookup"),
+                    .send(.delegate(.tappedBackButton))
+                )
                 
             case let .viewEvent(.locationToAddress(lat, long)):
                 return .run { send in
                     do {
-                        let result = try await addressManager.getAddress(for: CLLocationCoordinate2D(latitude: lat, longitude: long))
-                        
+                        let result = try await addressManager.getAddress(
+                            for: CLLocationCoordinate2D(latitude: lat, longitude: long)
+                        )
                         await send(.dataTransType(.locationText(result)))
                     } catch {
                         print(error)
                     }
                 }
+                .cancellable(id: "location-lookup")
                 
             case .viewEvent(.tappedAddConfirmButton):
                 return .send(.delegate(.tappedAddConfirmButton))

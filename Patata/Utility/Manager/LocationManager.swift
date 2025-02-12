@@ -41,13 +41,9 @@ final class LocationManager: NSObject, Sendable {
                     
                     let coord = Coordinate(latitude: coordinate.latitude, longitude: coordinate.longitude)
                     
-                    print("locationPermission Success", coord)
-                    
                     Task {
                         do {
                             try await self.createCoord(coord: coord)
-                            let a = await self.dataSourceActor.fetch()
-                            print("locationPermission dffdsfafads", a)
                         } catch {
                             // 에러 발생 시 처리
                             print("Failed to create coordinate:", error)
@@ -66,7 +62,7 @@ final class LocationManager: NSObject, Sendable {
                         latitude: self.defaultLocation.latitude,
                         longitude: self.defaultLocation.longitude
                     )
-                    print("locationPermission fail")
+
                     Task {
                         do {
                             try await self.createCoord(coord: defaultCoordinate)

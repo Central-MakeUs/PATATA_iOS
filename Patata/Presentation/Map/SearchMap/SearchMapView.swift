@@ -47,7 +47,11 @@ extension SearchMapView {
                 UIMapView(mapState: store.mapState) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
-                    store.send(.viewEvent(.changeMapLocation))
+                    if store.spotReloadButton == false {
+                        store.send(.viewEvent(.changeMapLocation))
+                    }
+                } onCameraIdle: { coord in
+                    store.send(.viewEvent(.onCameraIdle(coord)))
                 }
                 .ignoresSafeArea(edges: [.bottom])
                 

@@ -48,14 +48,15 @@ extension SpotMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(mapState: store.mapState){ lat, long in
+                UIMapView(mapState: store.mapState) { lat, long in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
                     if store.spotReloadButton == false {
                         store.send(.viewEvent(.changeMapLocation))
                     }
+                } onCameraIdle: { coord in
+                    store.send(.viewEvent(.onCameraIdle(coord)))
                 }
-                .ignoresSafeArea(edges: [.bottom])
                 
                 Color.black
                     .opacity(0.1)

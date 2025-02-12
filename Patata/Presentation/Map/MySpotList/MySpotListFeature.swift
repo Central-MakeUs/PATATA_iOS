@@ -10,6 +10,8 @@ import ComposableArchitecture
 
 @Reducer
 struct MySpotListFeature {
+    private let dataSourceActor = DataSourceActor()
+    
     @ObservableState
     struct State: Equatable {
         let viewState: ViewState
@@ -26,9 +28,10 @@ struct MySpotListFeature {
     }
     
     enum Action {
+        case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case dataTransType(DataTransType)
         case delegate(Delegate)
-        case parentAction(ParentAction)
         
         // bindingAction
         case bindingArchive(Bool)
@@ -36,16 +39,23 @@ struct MySpotListFeature {
         enum Delegate {
             case tappedBackButton
         }
-        
-        enum ParentAction {
-            case userLocation(Coordinate)
-        }
+    }
+    
+    enum ViewCycle {
+        case onAppear
+    }
+    
+    enum DataTransType {
+        case fetchRealm
+        case userLocation(Coordinate)
     }
     
     enum ViewEvent {
         case selectedMenu(Int)
         case tappedBackButton
     }
+    
+    @Dependency(\.locationManager) var locationManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -56,13 +66,28 @@ extension MySpotListFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                return .run { send in
+                    await send(.dataTransType(.fetchRealm))
+                    
+                    for await location in locationManager.getLocationUpdates() {
+                        await send(.dataTransType(.userLocation(location)))
+                    }
+                }
+                
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
                 
-            case let .parentAction(.userLocation(coord)):
+            case .dataTransType(.fetchRealm):
+                return .run { send in
+                    let coord = await dataSourceActor.fetch()
+                    await send(.dataTransType(.userLocation(coord)))
+                }
+                
+            case let .dataTransType(.userLocation(coord)):
                 state.userCoord = coord
                 
             case let .bindingArchive(archive):

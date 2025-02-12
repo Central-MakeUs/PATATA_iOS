@@ -16,6 +16,7 @@ struct SpotMapFeature {
     struct State: Equatable {
         var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 37.5666791, longitude: 126.9784147), markers: [(Coordinate(latitude: 37.5666791, longitude: 126.9784147), SpotMarkerImage.housePin)])
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
+        var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         
@@ -29,7 +30,6 @@ struct SpotMapFeature {
         case viewEvent(ViewEvent)
         case locationAction(LocationAction)
         case delegate(Delegate)
-        case parentAction(ParentAction)
         case dataTransType(DataTransType)
         
         // bindingAction
@@ -40,12 +40,8 @@ struct SpotMapFeature {
             case tappedSideButton
             case tappedMarker
             case bottomSheetDismiss
-            case tappedSpotAddButton
+            case tappedSpotAddButton(Coordinate)
             case tappedSearch
-        }
-        
-        enum ParentAction {
-            case userLocation(Coordinate)
         }
     }
     
@@ -62,6 +58,7 @@ struct SpotMapFeature {
         case tappedMoveToUserLocationButton
         case bottomSheetDismiss
         case changeMapLocation
+        case onCameraIdle(Coordinate)
     }
     
     enum LocationAction {
@@ -91,6 +88,7 @@ extension SpotMapFeature {
                 
                 return .run { send in
                     await send(.dataTransType(.fetchRealm))
+                    
                     for await location in locationManager.getLocationUpdates() {
                         await send(.dataTransType(.userLocation(location)))
                     }
@@ -105,7 +103,7 @@ extension SpotMapFeature {
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
-                return .send(.delegate(.tappedSpotAddButton))
+                return .send(.delegate(.tappedSpotAddButton(state.cameraLocation)))
                 
             case .viewEvent(.tappedSideButton):
                 return .send(.delegate(.tappedSideButton))
@@ -120,7 +118,11 @@ extension SpotMapFeature {
                 state.spotReloadButton = true
                 
             case .viewEvent(.tappedMoveToUserLocationButton):
+                state.mapState.first = false
                 state.mapState.coord = state.userLocation
+                
+            case let .viewEvent(.onCameraIdle(coord)):
+                state.cameraLocation = coord
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
@@ -130,11 +132,6 @@ extension SpotMapFeature {
                 
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
-                state.mapState.coord = coord
-                print("SpotuserLocation", state.mapState.coord)
-                
-            case let .parentAction(.userLocation(coord)):
-                print("parent", coord)
                 state.mapState.coord = coord
                 
             case let .bindingIsPresented(isPresented):

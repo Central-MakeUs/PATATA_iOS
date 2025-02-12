@@ -36,11 +36,6 @@ struct MapCoordinator {
     
     enum Action {
         case router(IdentifiedRouterActionOf<MapScreen>)
-        case parentAction(ParentAction)
-        
-        enum ParentAction {
-            case userLocation(Coordinate)
-        }
     }
     
     var body: some ReducerOf<Self> {
@@ -52,26 +47,13 @@ extension MapCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case let .parentAction(.userLocation(coord)):
-                if state.routes.contains(where: { $0.id == .spotMap }) {
-                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.parentAction(.userLocation(coord))))))
-                }
-                
-                if state.routes.contains(where: { $0.id == .searchMap }) {
-                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.parentAction(.userLocation(coord))))))
-                }
-                
-                if state.routes.contains(where: { $0.id == .mySpotList }) {
-                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.parentAction(.userLocation(coord))))))
-                }
-                
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSideButton)))):
                 state.isHideTabBar = true
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
                 
-            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton)))):
+            case let .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State()))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(mapState: MapStateEntity(coord: coord, markers: []))))
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -114,14 +96,19 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSpotAddButton)))):
+            case let .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State()))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(mapState: MapStateEntity(coord: coord, markers: []))))
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
                 
             case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedBackButton)))):
+                if state.routes.contains(where: { $0.id == .searchMap }) {
+                    state.isHideTabBar = true
+                } else {
+                    state.isHideTabBar = false
+                }
                 state.routes.pop()
                 
             case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton)))):
