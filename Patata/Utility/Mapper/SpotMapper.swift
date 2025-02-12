@@ -35,7 +35,7 @@ extension SpotMapper {
     
     private func dtoToEntity(_ dto: TodaySpotItemDTO) -> TodaySpotEntity {
         TodaySpotEntity(
-            spotId: dto.spotId,
+            spotId: String(dto.spotId),
             spotAddress: dto.spotAddress,
             spotName: dto.spotName,
             category: .getCategory(id: dto.categoryId),

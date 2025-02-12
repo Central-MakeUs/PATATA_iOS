@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct TodayRecommendView: View {
-    @State var isValid: Bool = false // 여기는 걍 스팟 데이터만 받자
     let item: TodaySpotEntity
+    let onToggleScrap: () -> Void
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -43,7 +43,9 @@ extension TodayRecommendView {
                    
                    Spacer()
                    
-                   SpotArchiveButton(height: 24, width: 24, viewState: .home, isSaved: $isValid)
+                   SpotArchiveButton(height: 24, width: 24, viewState: .home, isSaved: item.isScraped) {
+                       onToggleScrap()
+                   }
                }
                .padding(.bottom, 10)
            }

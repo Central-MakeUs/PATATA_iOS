@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CategoryRecommendView: View {
-    @State var isValid: Bool = false
+    var isValid: Bool = false
     let spotItem: SpotEntity
     
     var body: some View {
@@ -25,7 +25,9 @@ extension CategoryRecommendView {
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(alignment: .bottomLeading) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: $isValid)
+                    SpotArchiveButton(height: 24, width: 24, isSaved: isValid) {
+                        print("a")
+                    }
                         .padding(.leading, 10)
                         .padding(.bottom, 10)
                 }

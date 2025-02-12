@@ -10,7 +10,7 @@ import SwiftUI
 struct SpotDetailContentView: View {
     
     @State var currentIndex: Int = 0
-    @State var isSaved: Bool = false
+    var isSaved: Bool = false
     @State var commentText: String = "fdfdf"
     
     var body: some View {
@@ -88,8 +88,10 @@ extension SpotDetailContentView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: $isSaved) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: isSaved) {
                     hideKeyboard()
+                } onToggleScrap: {
+                    print("tap")
                 }
             }
             .padding(.top, 33)

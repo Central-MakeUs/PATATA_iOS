@@ -44,19 +44,23 @@ struct PatataMainFeature {
         case tappedAddButton
         case tappedSpot // 보낼때 데이터도 같이
         case tappedMoreButton
+        case tappedArchiveButton(Int)
     }
     
     enum NetworkType {
         case fetchCategorySpot(Int)
         case fetchTodaySpot
+        case patchArchiveState(Int)
     }
     
     enum DataTransType {
         case categorySpot([SpotEntity])
         case todaySpot([TodaySpotEntity])
+        case archiveState(ArchiveEntity, Int)
     }
     
     @Dependency(\.spotRepository) var spotRepository
+    @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -93,6 +97,11 @@ extension PatataMainFeature {
             case .viewEvent(.tappedMoreButton):
                 return .send(.delegate(.tappedMoreButton))
                 
+            case let .viewEvent(.tappedArchiveButton(index)):
+                return .run { send in
+                    await send(.networkType(.patchArchiveState(index)))
+                }
+                
             case let .networkType(.fetchCategorySpot(index)):
                 return .run { send in
                     do {
@@ -115,11 +124,33 @@ extension PatataMainFeature {
                     }
                 }
                 
+            case let .networkType(.patchArchiveState(index)):
+                return .run { [state = state] send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: state.todaySpotItems[index].spotId)
+                        print("success patchArchiveState", data)
+                        await send(.dataTransType(.archiveState(data, index)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.todaySpot(data)):
                 state.todaySpotItems = data
                 
             case let .dataTransType(.categorySpot(data)):
                 state.spotItems = data
+                
+            case let .dataTransType(.archiveState(data, index)):
+                state.todaySpotItems[index] = TodaySpotEntity(
+                    spotId: state.todaySpotItems[index].spotId,
+                    spotAddress: state.todaySpotItems[index].spotAddress,
+                    spotName: state.todaySpotItems[index].spotName,
+                    category: state.todaySpotItems[index].category,
+                    imageUrl: state.todaySpotItems[index].imageUrl,
+                    isScraped: data.isArchive,
+                    tags: state.todaySpotItems[index].tags
+                )
                 
             default:
                 break

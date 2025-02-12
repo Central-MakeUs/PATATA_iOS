@@ -8,10 +8,6 @@
 import Foundation
 import ComposableArchitecture
 
-//struct Nick: DTO, Encodable {
-//    let nickName: String
-//}
-
 final class MyPageRepository: @unchecked Sendable {
     @Dependency(\.networkManager) var networkManager
     

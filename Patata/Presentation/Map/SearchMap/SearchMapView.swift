@@ -224,8 +224,10 @@ extension SearchMapView {
                     .textStyle(.captionS)
                 
                 Spacer()
-                
-                SpotArchiveButton(height: 24, width: 24, isSaved: $store.archive.sending(\.bindingArchive))
+                // $store.archive.sending(\.bindingArchive)
+                SpotArchiveButton(height: 24, width: 24, isSaved: false) {
+                    print("tap")
+                }
             }
             
             HStack(spacing: 4) {

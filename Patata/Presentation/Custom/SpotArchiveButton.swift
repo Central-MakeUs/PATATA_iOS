@@ -11,13 +11,14 @@ struct SpotArchiveButton: View {
     let height: CGFloat
     let width: CGFloat
     let viewState: ViewState
+    let onToggleScrap: () -> Void
     
     enum ViewState {
         case home
         case other
     }
     
-    @Binding var isSaved: Bool
+    var isSaved: Bool
     
     var otherGesture: (() -> Void)?
     
@@ -27,12 +28,13 @@ struct SpotArchiveButton: View {
     }
     @State private var animate = false
     
-    init(height: CGFloat, width: CGFloat, viewState: ViewState = .other, isSaved: Binding<Bool>, otherGesture: (() -> Void)? = nil) {
+    init(height: CGFloat, width: CGFloat, viewState: ViewState = .other, isSaved: Bool, otherGesture: (() -> Void)? = nil, onToggleScrap: @escaping () -> Void) {
         self.height = height
         self.width = width
         self.viewState = viewState
-        self._isSaved = isSaved
+        self.isSaved = isSaved
         self.otherGesture = otherGesture
+        self.onToggleScrap = onToggleScrap
     }
     
     var body: some View {
@@ -45,8 +47,9 @@ struct SpotArchiveButton: View {
                 if let otherGesture {
                     otherGesture()
                 }
+                
                 self.animate = true
-                self.isSaved.toggle()
+                onToggleScrap()
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
                     self.animate = false

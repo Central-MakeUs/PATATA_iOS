@@ -261,17 +261,16 @@ extension PatataMainView {
                                 return 1.0
                             }()
                             
-                            TodayRecommendView(item: store.todaySpotItems[adjustedIndex])
-                                .frame(width: cardWidth, height: contentHeight)
-                                .shadow(color: .shadowColor, radius: 8)
-                                .scaleEffect(scale)
-                                .animation(.smooth, value: dragOffset)
-                                .onTapGesture {
-                                    store.send(.viewEvent(.tappedSpot))
-                                }
-                                .onAppear {
-                                    print("index", adjustedIndex)
-                                }
+                            TodayRecommendView(item: store.todaySpotItems[adjustedIndex]) {
+                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex)))
+                            }
+                            .frame(width: cardWidth, height: contentHeight)
+                            .shadow(color: .shadowColor, radius: 8)
+                            .scaleEffect(scale)
+                            .animation(.smooth, value: dragOffset)
+                            .onTapGesture {
+                                store.send(.viewEvent(.tappedSpot))
+                            }
                         }
                     }
                 }

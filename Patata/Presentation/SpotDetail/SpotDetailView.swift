@@ -18,6 +18,7 @@ struct SpotDetailView: View {
     @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
     @Environment(\.isScrollEnabled) var scrollEnable
+    var isSaved: Bool = false
     
     var body: some View {
         WithPerceptionTracking {
@@ -174,8 +175,10 @@ extension SpotDetailView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: $store.saveIsTapped.sending(\.bindingSaveIsTapped)) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: isSaved) {
                     hideKeyboard()
+                } onToggleScrap: {
+                    print("tap")
                 }
             }
             .padding(.top, 33)

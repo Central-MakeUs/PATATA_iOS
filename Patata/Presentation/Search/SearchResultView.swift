@@ -19,7 +19,7 @@ struct SearchResultView: View {
     @Perception.Bindable var store: StoreOf<SearchFeature>
 //    @Binding var spotItems: SpotItems
     @State var isPresent: Bool = false
-    @State var isSaved: Bool = false
+    var isSaved: Bool = false
     @State var filter: String = "거리순"
     
     private let columns = [
@@ -150,7 +150,9 @@ extension SearchResultView {
                 .aspectRatio(1.0, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(alignment: .topTrailing) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: $isSaved)
+                    SpotArchiveButton(height: 24, width: 24, isSaved: isSaved) {
+                        print("tap")
+                    }
                         .padding(.trailing, 10)
                         .padding(.top, 10)
                 }
