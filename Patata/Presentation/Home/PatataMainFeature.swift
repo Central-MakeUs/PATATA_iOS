@@ -12,6 +12,7 @@ struct PatataMainFeature {
     
     @ObservableState
     struct State: Equatable {
+        var todaySpotItems: [TodaySpotEntity] = []
         var spotItems: [SpotEntity] = []
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
@@ -46,11 +47,13 @@ struct PatataMainFeature {
     }
     
     enum NetworkType {
-        case fetchCategorySpot
+        case fetchCategorySpot(Int)
+        case fetchTodaySpot
     }
     
     enum DataTransType {
         case categorySpot([SpotEntity])
+        case todaySpot([TodaySpotEntity])
     }
     
     @Dependency(\.spotRepository) var spotRepository
@@ -67,11 +70,16 @@ extension PatataMainFeature {
             switch action {
             case .viewCycle(.onAppear):
                 return .run { send in
-                    await send(.networkType(.fetchCategorySpot))
+                    await send(.networkType(.fetchCategorySpot(0)))
+                    await send(.networkType(.fetchTodaySpot))
                 }
                 
             case let .viewEvent(.selectCategory(index)):
                 state.selectedIndex = index
+                
+                return .run { send in
+                    await send(.networkType(.fetchCategorySpot(index)))
+                }
                 
             case .viewEvent(.tappedSearch):
                 return .send(.delegate(.tappedSearch))
@@ -85,16 +93,30 @@ extension PatataMainFeature {
             case .viewEvent(.tappedMoreButton):
                 return .send(.delegate(.tappedMoreButton))
                 
-            case .networkType(.fetchCategorySpot):
+            case let .networkType(.fetchCategorySpot(index)):
                 return .run { send in
                     do {
-                        let data = try await spotRepository.fetchSpotCategory(category: .snapSpot)
+                        let data = try await spotRepository.fetchSpotCategory(category: CategoryCase(rawValue: index) ?? .all)
                         
                         await send(.dataTransType(.categorySpot(data)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }
                 }
+                
+            case .networkType(.fetchTodaySpot):
+                return .run { send in
+                    do {
+                        let data = try await spotRepository.fetchTodaySpot()
+                        
+                        await send(.dataTransType(.todaySpot(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
+            case let .dataTransType(.todaySpot(data)):
+                state.todaySpotItems = data
                 
             case let .dataTransType(.categorySpot(data)):
                 state.spotItems = data

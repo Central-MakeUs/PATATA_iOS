@@ -158,7 +158,7 @@ extension NetworkManager {
                 switch response.result {
                 case let .success(data):
                     return data
-                case .failure(_):
+                case let .failure(error):
                     await downRetryCount()
                     
                     return try await retryNetwork(dto: dto, router: router, ifRefresh: ifRefresh)

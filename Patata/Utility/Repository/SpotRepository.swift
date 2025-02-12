@@ -26,16 +26,16 @@ extension SpotRepository {
         
         let dto = try await networkManager.requestNetworkWithRefresh(
             dto: SpotCategoryDTO.self,
-            router: SpotRouter.fetchCategorySpot(
-                categoryId: category.rawValue,
-                page: page,
-                latitude: latitude,
-                longitude: longitude,
-                sortBy: sortBy
-            )
+            router: SpotRouter.fetchCategorySpot(all: category.rawValue == 0, categoryId: category.rawValue, page: page, latitude: latitude, longitude: longitude, sortBy: sortBy)
         ).result
         
         return await mapper.dtoToEntity(dto.spots)
+    }
+    
+    func fetchTodaySpot() async throws(PAError) -> [TodaySpotEntity] {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: TodaySpotDTO.self, router: SpotRouter.fetchTodayMain).result
+        
+        return await mapper.dtoToEntity(dto)
     }
 }
 

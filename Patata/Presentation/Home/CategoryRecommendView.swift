@@ -20,7 +20,8 @@ extension CategoryRecommendView {
     private var contentView: some View {
         HStack(alignment: .top) {
             DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .min, fallBackImg: "ImageDefault")
-                .aspectRatio(contentMode: .fit)
+//                .aspectRatio(contentMode: .fit)
+                .aspectRatio(1, contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(alignment: .bottomLeading) {

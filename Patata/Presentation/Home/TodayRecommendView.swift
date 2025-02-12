@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TodayRecommendView: View {
     @State var isValid: Bool = false // 여기는 걍 스팟 데이터만 받자
-    let item: SpotEntity
+    let item: TodaySpotEntity
     
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -28,9 +28,9 @@ struct TodayRecommendView: View {
 extension TodayRecommendView {
     private var contentView: some View {
            VStack(spacing: 10) {
-               DownImageView(url: URL(string: item.imageUrl ?? ""), option: .max, fallBackImg: "ImageDefault")
-                   .aspectRatio(contentMode: .fit)
-                   .frame(maxHeight: .infinity)
+               DownImageView(url: URL(string: item.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
+                   .aspectRatio(5/6, contentMode: .fit)
+                   .clipped()
                    .clipShape(RoundedRectangle(cornerRadius: 8))
                    .padding(.top, 15)
                    
@@ -43,7 +43,7 @@ extension TodayRecommendView {
                    
                    Spacer()
                    
-                   SpotArchiveButton(height: 24, width: 24, isSaved: $isValid)
+                   SpotArchiveButton(height: 24, width: 24, viewState: .home, isSaved: $isValid)
                }
                .padding(.bottom, 10)
            }

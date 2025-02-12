@@ -9,27 +9,30 @@ import Foundation
 import Alamofire
 
 enum SpotRouter: Router {
-    case fetchCategorySpot(categoryId: Int, page: Int, latitude: Double, longitude: Double, sortBy: String)
+    case fetchCategorySpot(all: Bool, categoryId: Int, page: Int, latitude: Double, longitude: Double, sortBy: String)
+    case fetchTodayMain
 }
 
 extension SpotRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchCategorySpot:
+        case .fetchCategorySpot, .fetchTodayMain:
             return .get
         }
     }
     
     var path: String {
         switch self {
-        case let .fetchCategorySpot(categoryId, _, _, _, _):
-            return "/spot/category/\(categoryId)"
+        case .fetchCategorySpot:
+            return "/spot/category"
+        case .fetchTodayMain:
+            return "/spot/today"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot:
+        case .fetchCategorySpot, .fetchTodayMain:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -38,26 +41,39 @@ extension SpotRouter {
     
     var parameters: Parameters? {
         switch self {
-        case let .fetchCategorySpot(_, page, latitude, longitude, sortBy):
+        case let .fetchCategorySpot(all, categoryId, page, latitude, longitude, sortBy):
+            if all {
+                return [
+                    "page": page,
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "sortBy": sortBy
+                    ]
+            }
+            
             return [
                 "page": page,
                 "latitude": latitude,
                 "longitude": longitude,
-                "sortBy": sortBy
+                "sortBy": sortBy,
+                "categoryId": categoryId
             ]
+            
+        case .fetchTodayMain:
+            return nil
         }
     }
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot:
+        case .fetchCategorySpot, .fetchTodayMain:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchCategorySpot:
+        case .fetchCategorySpot, .fetchTodayMain:
             return .url
         }
     }

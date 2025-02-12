@@ -82,13 +82,14 @@ extension PatataMainView {
                         categoryRecommendView
                             .padding(.horizontal, 15)
                             .padding(.top, 35)
+                            .padding(.bottom, 15)
                         
                         ForEach(store.spotItems, id: \.self) { item in
                             CategoryRecommendView(spotItem: item)
                                 .background(.white)
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .padding(.horizontal, 15)
-                                .padding(.top, 15)
+                                .padding(.bottom, 4)
                                 .onTapGesture {
                                     store.send(.viewEvent(.tappedSpot))
                                 }
@@ -209,7 +210,7 @@ extension PatataMainView {
 extension PatataMainView {
     private func scrollToCurrentPage() {
         let baseOffset = -(cardWidth + spacing)
-        let totalCount = store.spotItems.count
+        let totalCount = store.todaySpotItems.count
         
         withAnimation(.linear(duration: 0.3)) {
             contentOffsetX = baseOffset * CGFloat(currentIndex + 1)
@@ -237,14 +238,14 @@ extension PatataMainView {
         VStack(spacing: 0) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: spacing) {
-                    if !store.spotItems.isEmpty {
-                        ForEach(-1..<store.spotItems.count + 1, id: \.self) { i in
-                            let adjustedIndex = i < 0 ? store.spotItems.count - 1 : (i >= store.spotItems.count ? 0 : i)
+                    if !store.todaySpotItems.isEmpty {
+                        ForEach(-1..<store.todaySpotItems.count + 1, id: \.self) { i in
+                            let adjustedIndex = i < 0 ? store.todaySpotItems.count - 1 : (i >= store.todaySpotItems.count ? 0 : i)
                             
                             let progress = -dragOffset / (cardWidth + spacing)
                             
                             let scale: CGFloat = {
-                                let totalCount = store.spotItems.count
+                                let totalCount = store.todaySpotItems.count
                                 let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
                                 let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
                                 
@@ -260,14 +261,17 @@ extension PatataMainView {
                                 return 1.0
                             }()
                             
-                                TodayRecommendView(item: store.spotItems[adjustedIndex])
-                                    .frame(width: cardWidth, height: contentHeight)
-                                    .shadow(color: .shadowColor, radius: 8)
-                                    .scaleEffect(scale)
-                                    .animation(.smooth, value: dragOffset)
-                                    .onTapGesture {
-                                        store.send(.viewEvent(.tappedSpot))
-                                    }
+                            TodayRecommendView(item: store.todaySpotItems[adjustedIndex])
+                                .frame(width: cardWidth, height: contentHeight)
+                                .shadow(color: .shadowColor, radius: 8)
+                                .scaleEffect(scale)
+                                .animation(.smooth, value: dragOffset)
+                                .onTapGesture {
+                                    store.send(.viewEvent(.tappedSpot))
+                                }
+                                .onAppear {
+                                    print("index", adjustedIndex)
+                                }
                         }
                     }
                 }
