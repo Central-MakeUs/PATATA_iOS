@@ -30,11 +30,6 @@ struct HomeCoordinator {
     enum Action {
         case router(IdentifiedRouterActionOf<HomeScreen>)
         case navigationAction(NavigationAction)
-        case delegate(Delegate)
-        
-        enum Delegate {
-            case tappedSearch
-        }
     }
     
     enum NavigationAction {
@@ -51,10 +46,7 @@ extension HomeCoordinator {
         Reduce { state, action in
             switch action {
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSearch)))):
-                return .concatenate(
-                    .send(.delegate(.tappedSearch)),
-                    .send(.navigationAction(.pushSearch))
-                )
+                return .send(.navigationAction(.pushSearch))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedAddButton)))):
                 state.routes.push(.category(SpotCategoryFeature.State()))

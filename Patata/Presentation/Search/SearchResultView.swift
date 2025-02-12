@@ -94,7 +94,7 @@ extension SearchResultView {
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textDefault)
                 
-                Text("6")
+                Text("\(store.itemTotalCount)")
                     .textStyle(.captionM)
                     .foregroundStyle(.textInfo)
             }
@@ -123,55 +123,44 @@ extension SearchResultView {
     
     private var spotGridView: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-//            ForEach(items) { item in
-//                CourseItemView(item: item)
-//            }
-            
-            ForEach(0..<10) { _ in
-                spotView
+            ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.spotId) { index, item in
+                spotView(item: item, index: index)
             }
         }
         .padding(16)
     }
-    
-    private var spotView: some View {
+}
+
+extension SearchResultView {
+    private func spotView(item: SearchSpotEntity, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-//            Image(item.image)
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fill)
-//                    .frame(maxWidth: .infinity)
-//                    .aspectRatio(1.0, contentMode: .fit) // Double 값으로 변경
-//                    .clipped()
-//                    .cornerRadius(8)
-            
-            Rectangle()
-                .foregroundColor(.gray)
+            DownImageView(url: item.imageUrl, option: .min, fallBackImg: "ImageDefault")
+                .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: .infinity)
-                .aspectRatio(1.0, contentMode: .fit)
+                .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(alignment: .topTrailing) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: isSaved) {
-                        print("tap")
+                .overlay(alignment: .bottomLeading) {
+                    SpotArchiveButton(height: 24, width: 24, isSaved: item.isScraped) {
+                        store.send(.viewEvent(.tappedArchiveButton(index)))
                     }
-                        .padding(.trailing, 10)
-                        .padding(.top, 10)
+                    .padding(.trailing, 10)
+                    .padding(.top, 10)
                 }
                 .onTapGesture {
                     store.send(.viewEvent(.tappedSpotDetail))
                 }
             
-            // 아래부터는 아이템 들어오면 데이터자리들
-            Text("이촌 한강공원 철교")
+            Text(item.spotName)
                 .textStyle(.subtitleS)
                 .foregroundStyle(.textDefault)
                 .padding(.top, 12)
             
             HStack(spacing: 8) {
-                Text("12.2" + "Km")
+                Text("\(item.distance)" + "Km")
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 
-                SaveCommentCountView(archiveCount: 117, commentCount: 117, imageSize: 12)
+                SaveCommentCountView(archiveCount: item.spotScraps, commentCount: item.reviews, imageSize: 12)
             }
             .padding(.top, 4)
         }

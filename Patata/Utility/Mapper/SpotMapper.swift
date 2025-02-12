@@ -16,6 +16,16 @@ struct SpotMapper: Sendable {
     func dtoToEntity(_ dtos: [TodaySpotItemDTO]) async -> [TodaySpotEntity] {
         return await dtos.asyncMap { dtoToEntity($0)}
     }
+    
+    func dtoToEntity(_ dto: SearchSpotCountDTO) async -> SearchSpotCountEntity {
+        return await SearchSpotCountEntity(
+            currentPage: dto.currentPage,
+            totalPages: dto.totalPages,
+            totalCount: dto.totalCount,
+            spots: dto.spots
+                .asyncMap { dtoToEntity($0) }
+        )
+    }
 }
 
 extension SpotMapper {
@@ -42,6 +52,18 @@ extension SpotMapper {
             imageUrl: dto.imageUrl,
             isScraped: dto.isScraped,
             tags: dto.tags
+        )
+    }
+    
+    private func dtoToEntity(_ dto: SearchSpotItemDTO) -> SearchSpotEntity {
+        return SearchSpotEntity(
+            spotId: String(dto.spotId),
+            spotName: dto.spotName,
+            imageUrl: URL(string: dto.imageUrl ?? ""),
+            spotScraps: dto.spotScraps,
+            isScraped: dto.isScraped,
+            reviews: dto.reviews,
+            distance: dto.distance
         )
     }
 }

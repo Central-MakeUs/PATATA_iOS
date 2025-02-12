@@ -11,12 +11,13 @@ import Alamofire
 enum SpotRouter: Router {
     case fetchCategorySpot(all: Bool, categoryId: Int, page: Int, latitude: Double, longitude: Double, sortBy: String)
     case fetchTodayMain
+    case fetchSearchResult(searchText: String, page: Int, latitude: Double, longitude: Double, sortBy: String)
 }
 
 extension SpotRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
             return .get
         }
     }
@@ -27,12 +28,14 @@ extension SpotRouter {
             return "/spot/category"
         case .fetchTodayMain:
             return "/spot/today"
+        case .fetchSearchResult:
+            return "/spot/search"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -61,19 +64,28 @@ extension SpotRouter {
             
         case .fetchTodayMain:
             return nil
+            
+        case let .fetchSearchResult(searchText, page, latitude, longitude, sortBy):
+            return [
+                "spotName": searchText,
+                "page": page,
+                "latitude": latitude,
+                "longitude": longitude,
+                "sortBy": sortBy
+            ]
         }
     }
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
             return .url
         }
     }
