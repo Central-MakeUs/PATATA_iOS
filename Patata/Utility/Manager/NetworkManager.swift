@@ -108,6 +108,8 @@ extension NetworkManager {
             print("AFError details:", patataError.localizedDescription)
             print("AFError underlying error:", patataError.underlyingError ?? "nil")
             print("Response status code:", response.response?.statusCode ?? "nil")
+//            let check = checkResponseData(response.data, patataError)
+//            networkError.send(check)
             throw checkResponseData(response.data, patataError)
         }
     }

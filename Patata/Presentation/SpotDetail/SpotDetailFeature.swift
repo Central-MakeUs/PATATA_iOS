@@ -15,6 +15,7 @@ struct SpotDetailFeature {
         var isHomeCoordinator: Bool
         var spotId: String
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
+        var reviewData: [SpotDetailReviewEntity] = []
         
         // bindingState
         var currentIndex: Int = 0
@@ -56,21 +57,28 @@ struct SpotDetailFeature {
         case tappedDismissIcon
         case tappedArchiveButton
         case tappedDeleteButton
+        case tappedOnSubmit
+        case tappedDeleteReview(reviewId: Int, index: Int)
     }
     
     enum NetworkType {
         case fetchSpotDetail(String)
         case patchArchiveState
         case deleteSpot
+        case createReview(String)
+        case deleteReview(reviewId: Int, index: Int)
     }
     
     enum DataTransType {
         case spotDetail(SpotDetailEntity)
         case archiveState(ArchiveEntity)
+        case reviewData(ReviewEntity)
+        case deleteReviewData(index: Int)
     }
     
     @Dependency(\.spotRepository) var spotRepository
     @Dependency(\.archiveRepostiory) var archiveRepository
+    @Dependency(\.reviewRepository) var reviewRepository
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -117,8 +125,21 @@ extension SpotDetailFeature {
                 }
                 
             case .viewEvent(.tappedDeleteButton):
-                // 네트워크하고 끝나면 딜리게이트로 보내자
-                return .send(.delegate(.delete))
+                return .run { send in
+                    await send(.networkType(.deleteSpot))
+                }
+                
+            case .viewEvent(.tappedOnSubmit):
+                let comment = state.commentText
+                
+                return .run { send in
+                    await send(.networkType(.createReview(comment)))
+                }
+                
+            case let .viewEvent(.tappedDeleteReview(reviewId, index)):
+                return .run { send in
+                    await send(.networkType(.deleteReview(reviewId: reviewId, index: index)))
+                }
                 
             case let .networkType(.fetchSpotDetail(spotId)):
                 return .run { send in
@@ -153,8 +174,31 @@ extension SpotDetailFeature {
                     }
                 }
                 
+            case let .networkType(.createReview(comment)):
+                return .run { [state = state] send in
+                    do {
+                        let data = try await reviewRepository.createReview(spotId: state.spotDetailData.spotId, text: comment)
+                        
+                        await send(.dataTransType(.reviewData(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
+            case let .networkType(.deleteReview(reviewId, index)):
+                return .run { send in
+                    do {
+                        try await reviewRepository.deleteReview(reviewId: reviewId)
+                        
+                        await send(.dataTransType(.deleteReviewData(index: index)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.spotDetail(data)):
                 state.spotDetailData = data
+                state.reviewData = data.reviews
                 
             case let .dataTransType(.archiveState(data)):
                 state.spotDetailData = SpotDetailEntity(
@@ -172,6 +216,14 @@ extension SpotDetailFeature {
                     tags: state.spotDetailData.tags,
                     reviews: state.spotDetailData.reviews
                 )
+                
+            case let .dataTransType(.reviewData(review)):
+                state.commentText = ""
+                let reviewData = SpotDetailReviewEntity(reviewId: review.reviewId, memberName: UserDefaultsManager.nickname, reviewText: review.reviewText)
+                state.reviewData.append(reviewData)
+                
+            case let .dataTransType(.deleteReviewData(index: index)):
+                state.reviewData.remove(at: index)
                 
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index

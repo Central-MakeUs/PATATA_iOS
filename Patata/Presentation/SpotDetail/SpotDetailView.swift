@@ -72,7 +72,7 @@ extension SpotDetailView {
                                 .frame(height: 0.35)
                                 .background(.blue100)
                             
-                            reviewView(items: store.spotDetailData.reviews)
+                            reviewView(items: store.reviewData)
                             
                         }
                         .background(.white)
@@ -255,7 +255,7 @@ extension SpotDetailView {
                 .frame(width: 24, height: 24)
             
             // 댓글 수
-            Text(String(store.spotDetailData.reviewCount))
+            Text(String(store.reviewData.count))
                 .textStyle(.subtitleS)
                 .foregroundStyle(.textInfo)
             
@@ -273,6 +273,7 @@ extension SpotDetailView {
             )
             .onSubmit {
                 hideKeyboard()
+                store.send(.viewEvent(.tappedOnSubmit))
             }
             .textStyle(.bodyS)
             
@@ -282,6 +283,7 @@ extension SpotDetailView {
                 .foregroundStyle(.gray70)
                 .asButton {
                     hideKeyboard()
+                    store.send(.viewEvent(.tappedOnSubmit))
                 }
         }
         .frame(maxWidth: .infinity)
@@ -293,7 +295,7 @@ extension SpotDetailView {
 }
 
 extension SpotDetailView {
-    private func commentView(nick: String, text: String, date: Date, user: Bool) -> some View {
+    private func commentView(nick: String, text: String, date: Date, user: Bool, reviewId: Int, index: Int) -> some View {
         VStack {
             HStack {
                 Text(nick)
@@ -302,9 +304,14 @@ extension SpotDetailView {
                 
                 Spacer()
                 
-                Text("삭제하기")
-                    .textStyle(.captionS)
-                    .foregroundStyle(.textInfo)
+                if user {
+                    Text("삭제하기")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.textInfo)
+                        .asButton {
+                            store.send(.viewEvent(.tappedDeleteReview(reviewId: reviewId, index: index)))
+                        }
+                }
             }
             .padding(.horizontal, 15)
             
@@ -335,7 +342,7 @@ extension SpotDetailView {
 extension SpotDetailView {
     private func reviewView(items: [SpotDetailReviewEntity]) -> some View {
         ForEach(Array(items.enumerated()), id: \.element.reviewId) { index, item in
-            commentView(nick: item.memberName, text: item.reviewText, date: Date(), user: UserDefaultsManager.nickname == item.memberName)
+            commentView(nick: item.memberName, text: item.reviewText, date: Date(), user: UserDefaultsManager.nickname == item.memberName, reviewId: item.reviewId, index: index)
                 .background(.white)
                 .padding(.vertical, 12)
             
