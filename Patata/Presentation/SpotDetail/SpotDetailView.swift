@@ -95,7 +95,6 @@ extension SpotDetailView {
                 }
                 .padding(.leading, 15)
                 
-                
                 Spacer()
             }
             
@@ -170,7 +169,7 @@ extension SpotDetailView {
                 SpotArchiveButton(height: 24, width: 24, isSaved: store.spotDetailData.isScraped) {
                     hideKeyboard()
                 } onToggleScrap: {
-                    print("tap")
+                    store.send(.viewEvent(.tappedArchiveButton))
                 }
             }
             .padding(.top, 33)
@@ -189,7 +188,7 @@ extension SpotDetailView {
             
             // 주소와 주소 복사
             HStack {
-                Text(store.spotDetailData.spotAddress + store.spotDetailData.spotDescription)
+                Text(store.spotDetailData.spotAddress)
                     .textStyle(.captionS)
                     .foregroundStyle(.textDisabled)
                 

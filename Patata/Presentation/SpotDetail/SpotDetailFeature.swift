@@ -51,17 +51,21 @@ struct SpotDetailFeature {
         case bottomSheetClose
         case tappedNavBackButton
         case tappedDismissIcon
+        case tappedArchiveButton
     }
     
     enum NetworkType {
         case fetchSpotDetail(String)
+        case patchArchiveState
     }
     
     enum DataTransType {
         case spotDetail(SpotDetailEntity)
+        case archiveState(ArchiveEntity)
     }
     
     @Dependency(\.spotRepository) var spotRepository
+    @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -71,7 +75,9 @@ struct SpotDetailFeature {
 
 extension SpotDetailFeature {
     private func core() -> some ReducerOf<Self> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .viewCycle(.onAppear):
                 return .run { [state = state] send in
@@ -90,6 +96,11 @@ extension SpotDetailFeature {
             case .viewEvent(.tappedDismissIcon):
                 return .send(.delegate(.tappedDismissIcon))
                 
+            case .viewEvent(.tappedArchiveButton):
+                return .run { send in
+                    await send(.networkType(.patchArchiveState))
+                }
+                
             case let .networkType(.fetchSpotDetail(spotId)):
                 return .run { send in
                     do {
@@ -101,8 +112,36 @@ extension SpotDetailFeature {
                     }
                 }
                 
+            case .networkType(.patchArchiveState):
+                return .run { [state = state] send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: String(state.spotDetailData.spotId))
+                        
+                        await send(.dataTransType(.archiveState(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.spotDetail(data)):
                 state.spotDetailData = data
+                
+            case let .dataTransType(.archiveState(data)):
+                state.spotDetailData = SpotDetailEntity(
+                    spotId: state.spotDetailData.spotId,
+                    isAuthor: state.spotDetailData.isAuthor,
+                    spotAddress: state.spotDetailData.spotAddress,
+                    spotAddressDetail: state.spotDetailData.spotAddressDetail,
+                    spotName: state.spotDetailData.spotName,
+                    spotDescription: state.spotDetailData.spotDescription,
+                    categoryId: state.spotDetailData.categoryId,
+                    memberName: state.spotDetailData.memberName,
+                    images: state.spotDetailData.images,
+                    reviewCount: state.spotDetailData.reviewCount,
+                    isScraped: data.isArchive,
+                    tags: state.spotDetailData.tags,
+                    reviews: state.spotDetailData.reviews
+                )
                 
             case let .bindingCurrentIndex(index):
                 print("index", index)
