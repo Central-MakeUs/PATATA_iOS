@@ -17,7 +17,6 @@ struct SpotDetailView: View {
     
     @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
-    @Environment(\.isScrollEnabled) var scrollEnable
     var isSaved: Bool = false
     
     var body: some View {
@@ -25,9 +24,18 @@ struct SpotDetailView: View {
             contentView
                 .navigationBarHidden(true)
                 .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
-                    BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
-                        store.send(.viewEvent(.bottomSheetClose))
+                    if store.spotDetailData.memberName != UserDefaultsManager.nickname {
+                        BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
+                            store.send(.viewEvent(.bottomSheetClose))
+                        }
+                    } else {
+                        BottomSheetItem(items: ["게시글 수정하기", "게시글 삭제하기"]) { _ in
+                            store.send(.viewEvent(.bottomSheetClose))
+                        }
                     }
+                }
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
                 }
         }
     }
@@ -36,13 +44,8 @@ struct SpotDetailView: View {
 extension SpotDetailView {
     private var contentView: some View {
         VStack {
-            if !store.isHomeCoordinator && scrollEnable {
-                fakeNavBar
-                    .background(.white)
-            } else if store.isHomeCoordinator {
-                fakeNavBar
-                    .background(.white)
-            }
+            fakeNavBar
+                .background(.white)
             
             ScrollView(.vertical) {
                 spotDetailImage
@@ -61,17 +64,7 @@ extension SpotDetailView {
                         .frame(height: 0.35)
                         .background(.blue100)
                     
-                    ForEach(0..<5) { index in
-                        commentView(nick: "ddd", text: "dsfadffdsfadasfa\ndsfasdfasfadsfas", date: Date(), user: true)
-                            .background(.white)
-                            .padding(.vertical, 12)
-                        
-                        if index != 4 {
-                            Divider()
-                                .frame(height: 0.3)
-                                .background(.blue100)
-                        }
-                    }
+                    reviewView(items: store.spotDetailData.reviews)
                     
                 }
                 .background(.white)
@@ -79,7 +72,6 @@ extension SpotDetailView {
                 .offset(y: -28)
             }
             .background(.gray20)
-            .scrollDisabled(store.isHomeCoordinator ? false : (scrollEnable ? false : true))
             
             VStack {
                 commentTextField
@@ -97,68 +89,68 @@ extension SpotDetailView {
     private var fakeNavBar: some View {
         ZStack {
             HStack {
-//                NavBackButton {
-//                    hideKeyboard()
-//                    store.send(.viewEvent(.tappedNavBackButton))
-//                }
-//                .padding(.leading, 15)
-                
-                if scrollEnable {
-                    Image("XActive")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 24, height: 24)
-                        .padding(.leading, 15)
-                        .asButton {
-                            store.send(.viewEvent(.tappedDismissIcon))
-                        }
-                } else {
-                    NavBackButton {
-                        hideKeyboard()
-                        store.send(.viewEvent(.tappedNavBackButton))
-                    }
-                    .padding(.leading, 15)
+                NavBackButton {
+                    hideKeyboard()
+                    store.send(.viewEvent(.tappedNavBackButton))
                 }
+                .padding(.leading, 15)
+                
                 
                 Spacer()
             }
             
-            Text("작가 추천")
-                .textStyle(.subtitleL)
-                .foregroundStyle(.textDefault)
+            HStack {
+                Image(store.spotDetailData.categoryId.getCategoryCase().image ?? "ImageDefault")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 18, height: 18)
+                
+                Text(store.spotDetailData.categoryId.getCategoryCase().title)
+                    .textStyle(.subtitleL)
+                    .foregroundStyle(.textDefault)
+            }
             
             HStack {
                 Spacer()
                 
-                Image("ComplaintActive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .padding(.trailing, 15)
-                    .asButton {
-                        hideKeyboard()
-                        store.send(.viewEvent(.bottomSheetOpen))
-                    }
+                if store.spotDetailData.memberName != UserDefaultsManager.nickname {
+                    Image("ComplaintActive")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .padding(.trailing, 15)
+                        .asButton {
+                            hideKeyboard()
+                            store.send(.viewEvent(.bottomSheetOpen))
+                        }
+                } else {
+                    Image("MoreIcon")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 24, height: 24)
+                        .padding(.trailing, 15)
+                        .asButton {
+                            hideKeyboard()
+                            store.send(.viewEvent(.bottomSheetOpen))
+                        }
+                }
             }
         }
     }
     
     private var spotDetailImage: some View {
         TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
-            ForEach(0..<2) { index in
-                Rectangle()
-                    .frame(maxWidth: .infinity)
-                    .aspectRatio(1, contentMode: .fit)
-                    .foregroundStyle(index == 0 ? .red : .blue)
+            ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
+                DownImageView(url: image, option: .max, fallBackImg: "ImageDefault")
+                    .aspectRatio(contentMode: .fill)
             }
         }
         .frame(maxWidth: .infinity)
-        .scrollDisabled(false)
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .aspectRatio(1, contentMode: .fit)
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
         .overlay(alignment: .bottom) {
             CustomPageIndicator(
-                numberOfPages: 2,
+                numberOfPages: store.spotDetailData.images.count,
                 currentIndex: store.currentIndex
             )
             .padding(.bottom, 40)
@@ -169,13 +161,13 @@ extension SpotDetailView {
         VStack(spacing: 0) {
             HStack {
                 // spotTitleView
-                Text("전쟁기념관 벚꽃 길")
+                Text(store.spotDetailData.spotName)
                     .textStyle(.headlineS)
                     .foregroundStyle(.textDefault)
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: isSaved) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: store.spotDetailData.isScraped) {
                     hideKeyboard()
                 } onToggleScrap: {
                     print("tap")
@@ -186,7 +178,7 @@ extension SpotDetailView {
             
             // 유저
             HStack {
-                Text("정해원투쓰리")
+                Text(store.spotDetailData.memberName)
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textDefault)
                 
@@ -197,7 +189,7 @@ extension SpotDetailView {
             
             // 주소와 주소 복사
             HStack {
-                Text("서울특별시 용산구 가나다길 441-49 두번째 계단")
+                Text(store.spotDetailData.spotAddress + store.spotDetailData.spotDescription)
                     .textStyle(.captionS)
                     .foregroundStyle(.textDisabled)
                 
@@ -215,7 +207,7 @@ extension SpotDetailView {
             .padding(.horizontal, 30)
             
             HStack {
-                Text("여기는 Text 공간입니다.")
+                Text(store.spotDetailData.spotDescription)
                     .textStyle(.captionM)
                     .foregroundStyle(.textSub)
                 
@@ -226,11 +218,10 @@ extension SpotDetailView {
             
             // hashTag
             HStack {
-                Text("#가을사진")
-                    .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS)
-                
-                Text("#자연스팟")
-                    .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS)
+                ForEach(store.spotDetailData.tags, id: \.self) { tag in
+                    Text("#" + tag)
+                        .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS)
+                }
                 
                 Spacer()
             }
@@ -249,7 +240,7 @@ extension SpotDetailView {
                 .frame(width: 24, height: 24)
             
             // 댓글 수
-            Text("2")
+            Text(String(store.spotDetailData.reviewCount))
                 .textStyle(.subtitleS)
                 .foregroundStyle(.textInfo)
             
@@ -324,6 +315,22 @@ extension SpotDetailView {
             }
             .foregroundStyle(.textInfo)
             .padding(.horizontal, 15)
+        }
+    }
+}
+
+extension SpotDetailView {
+    private func reviewView(items: [SpotDetailReviewEntity]) -> some View {
+        ForEach(Array(items.enumerated()), id: \.element.reviewId) { index, item in
+            commentView(nick: item.memberName, text: item.reviewText, date: Date(), user: UserDefaultsManager.nickname == item.memberName)
+                .background(.white)
+                .padding(.vertical, 12)
+            
+            if index != items.count - 1 {
+                Divider()
+                    .frame(height: 0.3)
+                    .background(.blue100)
+            }
         }
     }
 }

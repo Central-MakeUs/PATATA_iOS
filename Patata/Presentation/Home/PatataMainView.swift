@@ -90,8 +90,8 @@ extension PatataMainView {
                                 .clipShape(RoundedRectangle(cornerRadius: 10))
                                 .padding(.horizontal, 15)
                                 .padding(.bottom, 4)
-                                .onTapGesture {
-                                    store.send(.viewEvent(.tappedSpot))
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(String(item.spotId))))
                                 }
                         }
                         
@@ -269,7 +269,7 @@ extension PatataMainView {
                             .scaleEffect(scale)
                             .animation(.smooth, value: dragOffset)
                             .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot))
+                                store.send(.viewEvent(.tappedSpot(String(store.todaySpotItems[adjustedIndex].spotId))))
                             }
                         }
                     }

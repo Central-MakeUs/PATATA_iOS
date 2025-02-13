@@ -49,9 +49,8 @@ struct SearchFeature {
         
         enum Delegate {
             case tappedBackButton
-            // 이때 전달시 결과값들이 있으면 같이 전달
             case successSearch
-            case tappedSpotDetail
+            case tappedSpotDetail(String)
         }
     }
     
@@ -63,7 +62,7 @@ struct SearchFeature {
         case tappedBackButton
         case searchOnSubmit
         case searchStart
-        case tappedSpotDetail // 나중에 탭하면서 서버에서 준 데이터도 같이 보내자
+        case tappedSpotDetail(String)
         case tappedArchiveButton(Int)
         case nextPage
     }
@@ -120,16 +119,20 @@ extension SearchFeature {
                     state.viewState = .loading
                 }
                 
-                return .run { send in
-                    await send(.networkType(.searchSpot(page: 0, filter: .recommend, scroll: false)))
+                if state.beforeViewState == .home {
+                    return .run { send in
+                        await send(.networkType(.searchSpot(page: 0, filter: .recommend, scroll: false)))
+                    }
+                } else {
+                    return .send(.delegate(.successSearch))
                 }
                 
             case .viewEvent(.searchStart):
                 state.searchText = ""
                 state.viewState = .search
                 
-            case .viewEvent(.tappedSpotDetail):
-                return .send(.delegate(.tappedSpotDetail))
+            case let .viewEvent(.tappedSpotDetail(spotId)):
+                return .send(.delegate(.tappedSpotDetail(spotId)))
                 
             case let .viewEvent(.tappedArchiveButton(index)):
                 return .run { send in

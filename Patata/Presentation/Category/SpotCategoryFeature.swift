@@ -17,7 +17,7 @@ struct SpotCategoryFeature {
         var selectedIndex: Int = 0
         var isPresent: Bool = false
         var filterText: String = "거리순"
-        var spotDetailState = SpotDetailFeature.State(isHomeCoordinator: false)
+        var spotDetailState = SpotDetailFeature.State(isHomeCoordinator: false, spotId: "")
         var spotItems: SpotEntity = SpotEntity()
     }
     

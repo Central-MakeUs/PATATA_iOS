@@ -125,6 +125,9 @@ extension SearchResultView {
         LazyVGrid(columns: columns, spacing: 12) {
             ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.spotId) { index, item in
                 spotView(item: item, index: index)
+                    .asButton {
+                        store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[index].spotId)))
+                    }
                     .onAppear {
                         if store.pageTotalCount != 1 && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
                             store.send(.viewEvent(.nextPage))
@@ -150,9 +153,6 @@ extension SearchResultView {
                     }
                     .padding(.trailing, 10)
                     .padding(.top, 10)
-                }
-                .onTapGesture {
-                    store.send(.viewEvent(.tappedSpotDetail))
                 }
             
             Text(item.spotName)

@@ -12,12 +12,13 @@ enum SpotRouter: Router {
     case fetchCategorySpot(all: Bool, categoryId: Int, page: Int, latitude: Double, longitude: Double, sortBy: String)
     case fetchTodayMain
     case fetchSearchResult(searchText: String, page: Int, latitude: Double, longitude: Double, sortBy: String)
+    case fetchSpot(String)
 }
 
 extension SpotRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
             return .get
         }
     }
@@ -30,12 +31,14 @@ extension SpotRouter {
             return "/spot/today"
         case .fetchSearchResult:
             return "/spot/search"
+        case let .fetchSpot(spotId):
+            return "/spot/\(spotId)"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -62,7 +65,7 @@ extension SpotRouter {
                 "categoryId": categoryId
             ]
             
-        case .fetchTodayMain:
+        case .fetchTodayMain, .fetchSpot:
             return nil
             
         case let .fetchSearchResult(searchText, page, latitude, longitude, sortBy):
@@ -78,14 +81,14 @@ extension SpotRouter {
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
             return .url
         }
     }

@@ -21,7 +21,7 @@ extension CustomPageIndicator {
         HStack(spacing: 8) {
             ForEach(0..<numberOfPages, id: \.self) { index in
                 Circle()
-                    .fill(currentIndex == index ? Color.blue100 : Color.gray.opacity(0.2))
+                    .fill(currentIndex == index ? Color.blue100 : Color.gray50)
                     .frame(width: 8, height: 8)
             }
         }

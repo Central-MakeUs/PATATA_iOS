@@ -65,6 +65,12 @@ extension SpotRepository {
         
         return await mapper.dtoToEntity(dto)
     }
+    
+    func fetchSpot(spotId: String) async throws(PAError) -> SpotDetailEntity {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: SpotDetailDTO.self, router: SpotRouter.fetchSpot(spotId)).result
+        
+        return await mapper.dtoToEntity(dto)
+    }
 }
 
 extension SpotRepository: DependencyKey {

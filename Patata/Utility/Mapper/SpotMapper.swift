@@ -26,6 +26,24 @@ struct SpotMapper: Sendable {
                 .asyncMap { dtoToEntity($0) }
         )
     }
+    
+    func dtoToEntity(_ dto: SpotDetailItemDTO) async -> SpotDetailEntity {
+        return await SpotDetailEntity(
+            spotId: dto.spotId,
+            isAuthor: dto.isAuthor,
+            spotAddress: dto.spotAddress,
+            spotAddressDetail: dto.spotAddressDetail,
+            spotName: dto.spotName,
+            spotDescription: dto.spotDescription,
+            categoryId: CategoryCase(rawValue: dto.categoryId) ?? .houseSpot,
+            memberName: dto.memberName,
+            images: dto.images.asyncMap { URL(string: $0) },
+            reviewCount: dto.reviewCount,
+            isScraped: dto.isScraped,
+            tags: dto.tags,
+            reviews: await dto.reviews.asyncMap { dtoToEntity($0) }
+        )
+    }
 }
 
 extension SpotMapper {
@@ -65,6 +83,10 @@ extension SpotMapper {
             reviews: dto.reviews,
             distance: dto.distance
         )
+    }
+    
+    private func dtoToEntity(_ dto: SpotDetailReviewDTO) -> SpotDetailReviewEntity {
+        return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText)
     }
 }
 

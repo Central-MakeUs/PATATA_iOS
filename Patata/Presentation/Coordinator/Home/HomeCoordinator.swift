@@ -51,8 +51,8 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedAddButton)))):
                 state.routes.push(.category(SpotCategoryFeature.State()))
                 
-            case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot)))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true)))
+            case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedMoreButton)))):
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .home)))
@@ -60,8 +60,8 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
-            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail)))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true)))
+            case let .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
