@@ -25,11 +25,20 @@ struct HomeCoordinator {
     struct State: Equatable, Sendable {
         static let initialState = State(routes: [.root(.home(PatataMainFeature.State()), embedInNavigationView: true)])
         var routes: IdentifiedArrayOf<Route<HomeScreen.State>>
+        
+        var popupIsPresent: Bool = false
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<HomeScreen>)
         case navigationAction(NavigationAction)
+        
+        case viewEvent(ViewEventType)
+        case bindingPopupIsPresent(Bool)
+    }
+    
+    enum ViewEventType {
+        case dismissPopup
     }
     
     enum NavigationAction {
@@ -66,6 +75,10 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
                 
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
+                state.routes.pop()
+                state.popupIsPresent = true
+                
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
                 
@@ -74,6 +87,12 @@ extension HomeCoordinator {
                 
             case .navigationAction(.pushSearch):
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))
+                
+            case .viewEvent(.dismissPopup):
+                state.popupIsPresent = false
+                
+            case let .bindingPopupIsPresent(isPresent):
+                state.popupIsPresent = isPresent
                 
             default:
                 break

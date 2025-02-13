@@ -21,6 +21,7 @@ struct SpotDetailFeature {
         var saveIsTapped: Bool = false
         var commentText: String = ""
         var bottomSheetIsPresent: Bool = false
+        var alertIsPresent: Bool = false
     }
     
     enum Action {
@@ -35,10 +36,12 @@ struct SpotDetailFeature {
         case bindingSaveIsTapped(Bool)
         case bindingCommentText(String)
         case bindingBottomSheetIsPresent(Bool)
+        case bindingAlertIsPresent(Bool)
         
         enum Delegate {
             case tappedNavBackButton
             case tappedDismissIcon
+            case delete
         }
     }
     
@@ -48,15 +51,17 @@ struct SpotDetailFeature {
     
     enum ViewEvent {
         case bottomSheetOpen
-        case bottomSheetClose
+        case bottomSheetClose(String)
         case tappedNavBackButton
         case tappedDismissIcon
         case tappedArchiveButton
+        case tappedDeleteButton
     }
     
     enum NetworkType {
         case fetchSpotDetail(String)
         case patchArchiveState
+        case deleteSpot
     }
     
     enum DataTransType {
@@ -90,8 +95,18 @@ extension SpotDetailFeature {
             case .viewEvent(.bottomSheetOpen):
                 state.bottomSheetIsPresent = true
                 
-            case .viewEvent(.bottomSheetClose):
+            case let .viewEvent(.bottomSheetClose(text)):
                 state.bottomSheetIsPresent = false
+                
+                if text == "게시글 신고하기" {
+                    
+                } else if text == "사용자 신고하기" {
+                    
+                } else if text == "게시글 수정하기" {
+                    
+                } else {
+                    state.alertIsPresent = true
+                }
                 
             case .viewEvent(.tappedDismissIcon):
                 return .send(.delegate(.tappedDismissIcon))
@@ -100,6 +115,10 @@ extension SpotDetailFeature {
                 return .run { send in
                     await send(.networkType(.patchArchiveState))
                 }
+                
+            case .viewEvent(.tappedDeleteButton):
+                // 네트워크하고 끝나면 딜리게이트로 보내자
+                return .send(.delegate(.delete))
                 
             case let .networkType(.fetchSpotDetail(spotId)):
                 return .run { send in
@@ -118,6 +137,17 @@ extension SpotDetailFeature {
                         let data = try await archiveRepository.toggleArchive(spotId: String(state.spotDetailData.spotId))
                         
                         await send(.dataTransType(.archiveState(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
+            case .networkType(.deleteSpot):
+                return .run { [state = state] send in
+                    do {
+                        try await spotRepository.deleteSpot(spotId: state.spotDetailData.spotId)
+                        
+                        await send(.delegate(.delete))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }
@@ -144,7 +174,6 @@ extension SpotDetailFeature {
                 )
                 
             case let .bindingCurrentIndex(index):
-                print("index", index)
                 state.currentIndex = index
                 
             case let .bindingSaveIsTapped(isTapped):
@@ -155,6 +184,9 @@ extension SpotDetailFeature {
                 
             case let .bindingBottomSheetIsPresent(isPresent):
                 state.bottomSheetIsPresent = isPresent
+                
+            case let .bindingAlertIsPresent(isPresent):
+                state.alertIsPresent = isPresent
                 
             default:
                 break

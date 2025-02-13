@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 
 // 어떤 카테고리와 그 해당하는 이미지를 받아야됨
 
@@ -17,20 +18,23 @@ struct SpotDetailView: View {
     
     @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
-    var isSaved: Bool = false
+    @State private var sizeState: CGSize = .zero
     
     var body: some View {
         WithPerceptionTracking {
             contentView
                 .navigationBarHidden(true)
+                .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
+                    store.send(.viewEvent(.tappedDeleteButton))
+                }
                 .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
-                    if store.spotDetailData.memberName != UserDefaultsManager.nickname {
-                        BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { _ in
-                            store.send(.viewEvent(.bottomSheetClose))
+                    if !store.spotDetailData.isAuthor {
+                        BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
+                            store.send(.viewEvent(.bottomSheetClose(text)))
                         }
                     } else {
-                        BottomSheetItem(items: ["게시글 수정하기", "게시글 삭제하기"]) { _ in
-                            store.send(.viewEvent(.bottomSheetClose))
+                        BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
+                            store.send(.viewEvent(.bottomSheetClose(text)))
                         }
                     }
                 }
@@ -48,32 +52,43 @@ extension SpotDetailView {
                 .background(.white)
             
             ScrollView(.vertical) {
-                spotDetailImage
-                
-                detailView
-                    .background(.white)
-                    .cornerRadius(20, corners: [.topLeft, .topRight])
-                    .offset(y: -30)
-                
-                VStack {
-                    commentBar
-                        .padding(.top, 10)
-                        .padding(.horizontal, 15)
+                ZStack(alignment: .top) {
+                    spotDetailImage
                     
-                    Divider()
-                        .frame(height: 0.35)
-                        .background(.blue100)
-                    
-                    reviewView(items: store.spotDetailData.reviews)
-                    
+                    VStack {
+                        Color.clear
+                            .frame(height: max(0, sizeState.height - 30))
+                        
+                        detailView
+                            .background(.white)
+                            .cornerRadius(20, corners: [.topLeft, .topRight])
+                        
+                        VStack {
+                            commentBar
+                                .padding(.top, 10)
+                                .padding(.horizontal, 15)
+                            
+                            Divider()
+                                .frame(height: 0.35)
+                                .background(.blue100)
+                            
+                            reviewView(items: store.spotDetailData.reviews)
+                            
+                        }
+                        .background(.white)
+                        .padding(.top, 0)
+                    }
                 }
-                .background(.white)
-                .padding(.top, 0)
-                .offset(y: -28)
             }
             .background(.gray20)
             
-            VStack {
+            VStack(spacing: 0) {
+                Color.black
+                    .opacity(0.3)
+                    .frame(height: 0.8)
+                    .blur(radius: 3)
+                    .offset(y: -6)
+                
                 commentTextField
                     .padding(.top, 5)
                     .padding(.horizontal, 15)
@@ -112,7 +127,7 @@ extension SpotDetailView {
             HStack {
                 Spacer()
                 
-                if store.spotDetailData.memberName != UserDefaultsManager.nickname {
+                if !store.spotDetailData.isAuthor {
                     Image("ComplaintActive")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
@@ -147,6 +162,7 @@ extension SpotDetailView {
         .frame(maxWidth: .infinity)
         .aspectRatio(1, contentMode: .fit)
         .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .sizeState(size: $sizeState)
         .overlay(alignment: .bottom) {
             CustomPageIndicator(
                 numberOfPages: store.spotDetailData.images.count,
@@ -273,9 +289,7 @@ extension SpotDetailView {
         .padding(.vertical, 9)
         .background(.gray20)
         .clipShape(RoundedRectangle(cornerRadius: 25))
-        
     }
-    
 }
 
 extension SpotDetailView {

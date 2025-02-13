@@ -13,6 +13,7 @@ enum SpotRouter: Router {
     case fetchTodayMain
     case fetchSearchResult(searchText: String, page: Int, latitude: Double, longitude: Double, sortBy: String)
     case fetchSpot(String)
+    case deleteSpot(Int)
 }
 
 extension SpotRouter {
@@ -20,6 +21,8 @@ extension SpotRouter {
         switch self {
         case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
             return .get
+        case .deleteSpot:
+            return .delete
         }
     }
     
@@ -33,12 +36,14 @@ extension SpotRouter {
             return "/spot/search"
         case let .fetchSpot(spotId):
             return "/spot/\(spotId)"
+        case let .deleteSpot(spotId):
+            return "/spot/\(spotId)"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -65,7 +70,7 @@ extension SpotRouter {
                 "categoryId": categoryId
             ]
             
-        case .fetchTodayMain, .fetchSpot:
+        case .fetchTodayMain, .fetchSpot, .deleteSpot:
             return nil
             
         case let .fetchSearchResult(searchText, page, latitude, longitude, sortBy):
@@ -81,14 +86,14 @@ extension SpotRouter {
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
             return .url
         }
     }

@@ -71,6 +71,12 @@ extension SpotRepository {
         
         return await mapper.dtoToEntity(dto)
     }
+    
+    func deleteSpot(spotId: Int) async throws(PAError) {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: DeleteSpotDTO.self, router: SpotRouter.deleteSpot(spotId))
+        
+        print("success", dto)
+    }
 }
 
 extension SpotRepository: DependencyKey {

@@ -9,11 +9,13 @@ import SwiftUI
 
 struct BottomSheetItem: View {
     let title: String?
+    let delete: Bool
     let items: [String]
     let tappedItem: (String) -> Void
     
-    init(title: String? = nil, items: [String], tappedItem: @escaping (String) -> Void) {
+    init(title: String? = nil, delete: Bool = false, items: [String], tappedItem: @escaping (String) -> Void) {
         self.title = title
+        self.delete = delete
         self.items = items
         self.tappedItem = tappedItem
     }
@@ -51,6 +53,7 @@ extension BottomSheetItem {
                     Spacer()
                 }
                 .frame(height: 35)
+                .foregroundStyle(delete && item == "게시글 삭제하기" ? .red100 : .black)
                 .asButton {
                     tappedItem(item)
                 }
