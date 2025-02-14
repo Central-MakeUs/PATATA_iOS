@@ -40,6 +40,7 @@ struct SpotCategoryFeature {
         
         enum Delegate {
             case tappedNavBackButton
+            case tappedSpot(Int)
         }
     }
     
@@ -54,20 +55,25 @@ struct SpotCategoryFeature {
         case tappedBottomSheetItem(String)
         case tappedNavBackButton
         case nextPage
+        case tappedSpot(Int)
+        case tappedArchiveButton(Int)
     }
     
     enum NetworkType {
         case fetchCategoryItem(page: Int, filter: FilterCase, scroll: Bool, categoryId: Int, userLocation: Coordinate)
+        case patchArchiveState(Int)
     }
     
     enum DataTransType {
         case fetchRealm
         case fetchCategoryItem(CategorySpotPageEntity, scroll: Bool)
         case userLocation(Coordinate)
+        case archiveState(ArchiveEntity, Int)
     }
     
     @Dependency(\.spotRepository) var spotRepository
     @Dependency(\.locationManager) var locationManager
+    @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -166,6 +172,14 @@ extension SpotCategoryFeature {
             case .viewEvent(.tappedNavBackButton):
                 return .send(.delegate(.tappedNavBackButton))
                 
+            case let .viewEvent(.tappedSpot(index)):
+                return .send(.delegate(.tappedSpot(state.spotItems[index].spotId)))
+                
+            case let .viewEvent(.tappedArchiveButton(index)):
+                return .run { send in
+                    await send(.networkType(.patchArchiveState(index)))
+                }
+                
             case let .networkType(.fetchCategoryItem(page, filter, scroll, categoryId, userLocation)):
                 return .run { send in
                     do {
@@ -178,6 +192,17 @@ extension SpotCategoryFeature {
                         )
                         
                         await send(.dataTransType(.fetchCategoryItem(data, scroll: scroll)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
+            case let .networkType(.patchArchiveState(index)):
+                return .run { [state = state] send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: String(state.spotItems[index].spotId))
+                        
+                        await send(.dataTransType(.archiveState(data, index)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }
@@ -221,6 +246,19 @@ extension SpotCategoryFeature {
                         )
                     )
                 }
+                
+            case let .dataTransType(.archiveState(data, index)):
+                state.spotItems[index] = SpotEntity(
+                    spotId: state.spotItems[index].spotId,
+                    spotAddress: state.spotItems[index].spotAddress,
+                    spotName: state.spotItems[index].spotName,
+                    category: state.spotItems[index].category,
+                    imageUrl: state.spotItems[index].imageUrl,
+                    reviews: state.spotItems[index].reviews,
+                    spotScraps: state.spotItems[index].spotScraps,
+                    isScraped: data.isArchive,
+                    tags: state.spotItems[index].tags
+                )
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent

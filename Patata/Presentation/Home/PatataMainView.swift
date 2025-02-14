@@ -84,9 +84,9 @@ extension PatataMainView {
                             .padding(.top, 35)
                             .padding(.bottom, 15)
                         
-                        ForEach(store.spotItems, id: \.self) { item in
+                        ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
                             CategoryRecommendView(spotItem: item) {
-                                print("tap")
+                                store.send(.viewEvent(.tappedArchiveButton(index, card: false)))
                             }
                             .background(.white)
                             .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -265,7 +265,7 @@ extension PatataMainView {
                             }()
                             
                             TodayRecommendView(item: store.todaySpotItems[adjustedIndex]) {
-                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex)))
+                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
                             }
                             .frame(width: cardWidth, height: contentHeight)
                             .shadow(color: .shadowColor, radius: 8)

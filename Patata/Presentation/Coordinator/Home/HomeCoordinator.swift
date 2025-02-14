@@ -78,6 +78,9 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.routes.pop()
                 
+            case let .router(.routeAction(id: .category, action: .category(.delegate(.tappedSpot(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: String(spotId))))
+                
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 state.routes.pop()
                 state.popupIsPresent = true

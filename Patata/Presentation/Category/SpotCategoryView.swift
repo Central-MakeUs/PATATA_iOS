@@ -58,7 +58,7 @@ extension SpotCategoryView {
 //                LazyVGrid(columns: [GridItem(.flexible())]) {
                     ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
                         CategoryRecommendView(spotItem: item) {
-                            print("tap")
+                            store.send(.viewEvent(.tappedArchiveButton(index)))
                         }
                         .background(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -67,6 +67,9 @@ extension SpotCategoryView {
                             if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
                                 store.send(.viewEvent(.nextPage))
                             }
+                        }
+                        .asButton {
+                            store.send(.viewEvent(.tappedSpot(index)))
                         }
                     }
 //                }
