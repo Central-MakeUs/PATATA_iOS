@@ -18,8 +18,10 @@ struct TodayRecommendView: View {
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
             
-            RecommendSpotIconMark()
-                .offset(x: -20, y: -5)
+            if item.category == .recommendSpot {
+                RecommendSpotIconMark()
+                    .offset(x: -20, y: -5)
+            }
         }
     }
 }

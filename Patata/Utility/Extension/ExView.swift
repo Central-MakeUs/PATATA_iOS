@@ -124,6 +124,16 @@ extension View {
     }
 }
 
+extension View {
+    func limitText(_ text: String, to maxLength: Int) -> some View {
+        let limitedString = text.count <= maxLength
+            ? text
+            : String(text.prefix(maxLength)) + "..."
+            
+        return Text(limitedString)
+    }
+}
+
 struct RoundedCorner: Shape {
     var radius: CGFloat = .infinity
     var corners: UIRectCorner = .allCorners

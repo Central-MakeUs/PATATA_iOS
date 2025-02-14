@@ -34,15 +34,17 @@ extension CategoryRecommendView {
                 .padding(.vertical, 10)
             
             ZStack(alignment: .topTrailing) {
-                    spotDesView
-                        .padding(.top, 20)
-                        .padding(.leading, 8)
-                    
+                spotDesView
+                    .padding(.top, 20)
+                    .padding(.leading, 8)
+                
+                if spotItem.category == .recommendSpot {
                     Text("작가 추천 스팟")
-                        .hashTagStyle(backgroundColor: .navy100, textColor: .blue50, font: .captionS)
+                        .hashTagStyle(backgroundColor: .navy100, textColor: .blue50, font: .captionS, verticalPadding: 5, horizontalPadding: 10, cornerRadius: 30)
                         .padding(.top, 10)
                         .padding(.trailing, 10)
                 }
+            }
         }
         
     }
@@ -50,12 +52,13 @@ extension CategoryRecommendView {
     private var spotDesView: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(spotItem.spotAddress)
+                limitText(spotItem.spotAddress, to: 10)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
                 
                 Spacer()
             }
+            
             
             Text(spotItem.spotName)
                 .foregroundStyle(.textDefault)

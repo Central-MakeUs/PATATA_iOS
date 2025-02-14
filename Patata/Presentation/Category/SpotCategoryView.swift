@@ -55,21 +55,21 @@ extension SpotCategoryView {
                     .padding(.top, 12)
                     .padding(.horizontal, 15)
                 
-                ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                    CategoryRecommendView(spotItem: item) {
-                        print("tap")
-                    }
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal, 15)
-                    .onAppear {
-                        if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
-                            print("scroll")
-                            store.send(.viewEvent(.nextPage))
+//                LazyVGrid(columns: [GridItem(.flexible())]) {
+                    ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                        CategoryRecommendView(spotItem: item) {
+                            print("tap")
+                        }
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .padding(.horizontal, 15)
+                        .onAppear {
+                            if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
+                                store.send(.viewEvent(.nextPage))
+                            }
                         }
                     }
-                }
-
+//                }
             }
             .background(.gray10)
 
