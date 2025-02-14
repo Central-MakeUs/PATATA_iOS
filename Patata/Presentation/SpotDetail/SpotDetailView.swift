@@ -72,6 +72,20 @@ extension SpotDetailView {
                                 .frame(height: 0.35)
                                 .background(.blue100)
                             
+                            if store.reviewData.isEmpty {
+                                HStack {
+                                    Spacer()
+                                    
+                                    Text("첫 후기를 남겨보세요!")
+                                        .textStyle(.subtitleL)
+                                        .foregroundStyle(.textDisabled)
+                                    
+                                    Spacer()
+                                }
+                                .frame(height: 150)
+                                .background(.white)
+                                .padding(.top, 0)
+                            }
                             reviewView(items: store.reviewData)
                             
                         }
