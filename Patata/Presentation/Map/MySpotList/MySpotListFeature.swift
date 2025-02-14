@@ -15,6 +15,7 @@ struct MySpotListFeature {
     @ObservableState
     struct State: Equatable {
         let viewState: ViewState
+        var spotListEntity: [TodaySpotListEntity] = []
         let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운"]
         var userCoord: Coordinate =  Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var selectedIndex: Int = 0
@@ -30,6 +31,7 @@ struct MySpotListFeature {
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case networkType(NetworkType)
         case dataTransType(DataTransType)
         case delegate(Delegate)
         
@@ -45,9 +47,14 @@ struct MySpotListFeature {
         case onAppear
     }
     
+    enum NetworkType {
+        case fetchSpotList(Coordinate)
+    }
+    
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
+        case todaySpotList([TodaySpotListEntity])
     }
     
     enum ViewEvent {
@@ -55,7 +62,9 @@ struct MySpotListFeature {
         case tappedBackButton
     }
     
+    @Dependency(\.spotRepository) var spotRepository
     @Dependency(\.locationManager) var locationManager
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -81,6 +90,17 @@ extension MySpotListFeature {
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
                 
+            case let .networkType(.fetchSpotList(userCoord)):
+                return .run { send in
+                    do {
+                        let data = try await spotRepository.fetchTodaySpotList(userLocation: userCoord)
+                        
+                        await send(.dataTransType(.todaySpotList(data)))
+                    } catch {
+                        print("error", errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -89,6 +109,15 @@ extension MySpotListFeature {
                 
             case let .dataTransType(.userLocation(coord)):
                 state.userCoord = coord
+                
+                if state.viewState == .home {
+                    return .run { send in
+                        await send(.networkType(.fetchSpotList(coord)))
+                    }
+                }
+                
+            case let .dataTransType(.todaySpotList(spotList)):
+                state.spotListEntity = spotList
                 
             case let .bindingArchive(archive):
                 state.archive = archive

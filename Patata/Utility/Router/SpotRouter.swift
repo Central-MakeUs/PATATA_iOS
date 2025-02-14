@@ -15,12 +15,13 @@ enum SpotRouter: Router {
     case fetchSpot(String)
     case deleteSpot(Int)
     case createSpot(CreateSpotRequestDTO)
+    case fetchTodaySpotList(Coordinate)
 }
 
 extension SpotRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .fetchTodaySpotList:
             return .get
         case .deleteSpot:
             return .delete
@@ -43,12 +44,14 @@ extension SpotRouter {
             return "/spot/\(spotId)"
         case .createSpot:
             return "/spot/create"
+        case .fetchTodaySpotList:
+            return "/spot/today/list"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .fetchTodaySpotList:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -90,19 +93,25 @@ extension SpotRouter {
                 "longitude": longitude,
                 "sortBy": sortBy
             ]
+            
+        case let .fetchTodaySpotList(userCoord):
+            return [
+                "userLatitude": userCoord.latitude,
+                "userLongitude": userCoord.longitude
+            ]
         }
     }
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .createSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .createSpot, .fetchTodaySpotList:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .fetchTodaySpotList:
             return .url
             
         case let .createSpot(request):

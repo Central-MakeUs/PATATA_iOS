@@ -80,13 +80,17 @@ extension SpotRepository {
     
     func createSpot(spotName: String, spotAddress: String, spotAddressDetail: String, coord: Coordinate, spotDescription: String, categoryId: Int, tags: [String], images: [Data]) async throws(PAError) {
         
-        let reqestData = await mapper.dataToRequestDTO(spotName: spotName, spotAddress: spotAddress, spotAddressDetail: spotAddressDetail, coord: coord, spotDescription: spotDescription, categoryId: categoryId, tags: tags, images: images)
+        let requestData = await mapper.dataToRequestDTO(spotName: spotName, spotAddress: spotAddress, spotAddressDetail: spotAddressDetail, coord: coord, spotDescription: spotDescription, categoryId: categoryId, tags: tags, images: images)
         
-        print("mapperData", reqestData)
-        
-        let dto = try await networkManager.requestNetworkWithRefresh(dto: CreateSpotDTO.self, router: SpotRouter.createSpot(reqestData))
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: CreateSpotDTO.self, router: SpotRouter.createSpot(requestData))
         
         print("success", dto)
+    }
+    
+    func fetchTodaySpotList(userLocation: Coordinate) async throws(PAError) -> [TodaySpotListEntity] {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: TodaySpotListDTO.self, router: SpotRouter.fetchTodaySpotList(userLocation)).result
+        
+        return await mapper.dtoToEntity(dtos: dto)
     }
 }
 
