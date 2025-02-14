@@ -15,9 +15,14 @@ struct SpotEditorFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
+        var initViewState: ViewState = .add
+        var spotLocation: Coordinate
+        var spotAddress: String
         var spotEditorIsValid: Bool = false
         var categoryText: String = "카테고리를 선택해주세요"
         var hashTags: [String] = []
+        var imageDatas: [Data] = []
+        var errorMsg: String = ""
         
         // bindingState
         var title: String = ""
@@ -26,20 +31,27 @@ struct SpotEditorFeature {
         var hashTag: String = ""
         var isPresent: Bool = false
         var showPermissionAlert: Bool = false
+        var isPresentPopup: Bool = false
     }
     
     enum ViewState {
         case add
         case edit
+        case loading
     }
     
     enum Action {
         case textValidation(TextValidation)
+        case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
+        case networkType(NetworkType)
+        case errorHandle(ErrorHandleType)
         case delegate(Delegate)
         
         enum Delegate {
             case tappedBackButton
+            case successSpotAdd
+            case tappedXButton
         }
         
         // bindingAction
@@ -49,6 +61,11 @@ struct SpotEditorFeature {
         case bindingHashTag(String)
         case bindingPresent(Bool)
         case bindingPermission(Bool)
+        case bindingIsPresentPopup(Bool)
+    }
+    
+    enum ViewCycle {
+        case onAppear
     }
     
     enum TextValidation {
@@ -66,7 +83,22 @@ struct SpotEditorFeature {
         case closeBottomSheet(Bool)
         case hashTagOnSubmit
         case deleteHashTag(Int)
+        case tappedSpotAddButton([Data])
+        case dismissPopup
+        case tappedXButton
     }
+    
+    enum NetworkType {
+        case createSpot
+    }
+    
+    enum ErrorHandleType {
+        case imageResize(Error)
+        case networkFail(Error)
+    }
+    
+    @Dependency(\.spotRepository) var spotRepository
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -77,6 +109,9 @@ extension SpotEditorFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                state.initViewState = state.viewState
+                
             case let .viewEvent(.tappedBottomSheet(category)):
                 state.categoryText = category
                 
@@ -103,6 +138,43 @@ extension SpotEditorFeature {
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
+                
+            case .viewEvent(.dismissPopup):
+                state.isPresentPopup = false
+                
+            case let .viewEvent(.tappedSpotAddButton(imageDatas)):
+                state.imageDatas = imageDatas
+                
+                return .run { send in
+                    await send(.networkType(.createSpot))
+                }
+                
+            case .viewEvent(.tappedXButton):
+                return .send(.delegate(.tappedXButton))
+                
+            case .networkType(.createSpot):
+                let categoryId = CategoryCase.getCategoryId(text: state.categoryText)
+                state.viewState = .loading
+                
+                return .run { [state = state] send in
+                    do {
+                        try await spotRepository.createSpot(spotName: state.title, spotAddress: state.location, spotAddressDetail: state.detail, coord: state.spotLocation, spotDescription: state.detail, categoryId: categoryId, tags: state.hashTags, images: state.imageDatas)
+                        
+                        await send(.delegate(.successSpotAdd))
+                    } catch {
+                        print("fail", errorManager.handleError(error) ?? "")
+                        await send(.errorHandle(.networkFail(error)))
+                    }
+                }
+                
+            case let .errorHandle(.imageResize(error)):
+                state.errorMsg = errorManager.handleError(error) ?? ""
+                state.isPresentPopup = true
+                
+            case let .errorHandle(.networkFail(error)):
+                state.viewState = state.initViewState
+                state.errorMsg = errorManager.handleError(error) ?? ""
+                state.isPresentPopup = true
                 
             case let .textValidation(.titleValidation(titleText)):
                 let limitedText = String(titleText.prefix(15))
@@ -229,6 +301,9 @@ extension SpotEditorFeature {
                 
             case let .bindingPermission(permission):
                 state.showPermissionAlert = permission
+                
+            case let .bindingIsPresentPopup(isPresent):
+                state.isPresentPopup = isPresent
                 
             default:
                 break

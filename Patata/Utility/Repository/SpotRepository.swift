@@ -77,6 +77,17 @@ extension SpotRepository {
         
         print("success", dto)
     }
+    
+    func createSpot(spotName: String, spotAddress: String, spotAddressDetail: String, coord: Coordinate, spotDescription: String, categoryId: Int, tags: [String], images: [Data]) async throws(PAError) {
+        
+        let reqestData = await mapper.dataToRequestDTO(spotName: spotName, spotAddress: spotAddress, spotAddressDetail: spotAddressDetail, coord: coord, spotDescription: spotDescription, categoryId: categoryId, tags: tags, images: images)
+        
+        print("mapperData", reqestData)
+        
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: CreateSpotDTO.self, router: SpotRouter.createSpot(reqestData))
+        
+        print("success", dto)
+    }
 }
 
 extension SpotRepository: DependencyKey {

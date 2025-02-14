@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import Photos
+import PopupView
 
 struct SpotEditorView: View {
     
@@ -16,6 +17,8 @@ struct SpotEditorView: View {
     @State private var selectedImages: [UIImage] = []
     @State private var sizeState: CGSize = .zero
     @FocusState private var focusedField: Field?
+    
+    let imageResizeManager = ImageResizeManager()
     
     enum Field: Hashable {
         case title
@@ -26,33 +29,73 @@ struct SpotEditorView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            contentView
-                .hideTabBar(true)
-                .navigationBarBackButtonHidden()
-                .background(
-                    Color.clear
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            hideKeyboard()
+            if store.viewState == .add || store.viewState == .edit {
+                contentView
+                    .hideTabBar(true)
+                    .navigationBarBackButtonHidden()
+                    .background(
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                hideKeyboard()
+                            }
+                    )
+                    .popup(isPresented: $store.isPresentPopup.sending(\.bindingIsPresentPopup), view: {
+                        HStack {
+                            Spacer()
+                            
+                            Text(store.errorMsg)
+                                .textStyle(.subtitleXS)
+                                .foregroundStyle(.blue20)
+                                .padding(.vertical, 10)
+                            
+                            Spacer()
                         }
-                )
-                .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
-                    BottomSheetItem(title: "카테고리 선택", items: ["스냅 스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
-                        store.send(.viewEvent(.tappedBottomSheet(category)))
-                        store.send(.viewEvent(.closeBottomSheet(false)))
+                        .background(.gray100)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .padding(.horizontal, 15)
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                                store.send(.viewEvent(.dismissPopup))
+                            }
+                        }
+                    }, customize: {
+                        $0
+                            .type(.floater())
+                            .position(.center)
+                            .animation(.spring())
+                            .closeOnTap(true)
+                            .closeOnTapOutside(true)
+                            .backgroundColor(.black.opacity(0.5))
+                            .dismissCallback {
+                                store.send(.viewEvent(.dismissPopup))
+                            }
+                        
+                    })
+                    .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
+                        BottomSheetItem(title: "카테고리 선택", items: ["스냅스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
+                            store.send(.viewEvent(.tappedBottomSheet(category)))
+                            store.send(.viewEvent(.closeBottomSheet(false)))
+                        }
                     }
-                }
-                .customAlert(
-                    isPresented: $store.showPermissionAlert.sending(\.bindingPermission),
-                    title: AlertMessage.imagePermission.title,
-                    message: AlertMessage.imagePermission.message,
-                    cancelText: AlertMessage.imagePermission.cancelTitle,
-                    confirmText: AlertMessage.imagePermission.actionTitle
-                ) {
-                    if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                        UIApplication.shared.open(settingsUrl)
+                    .customAlert(
+                        isPresented: $store.showPermissionAlert.sending(\.bindingPermission),
+                        title: AlertMessage.imagePermission.title,
+                        message: AlertMessage.imagePermission.message,
+                        cancelText: AlertMessage.imagePermission.cancelTitle,
+                        confirmText: AlertMessage.imagePermission.actionTitle
+                    ) {
+                        if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+                            UIApplication.shared.open(settingsUrl)
+                        }
                     }
-                }
+                    .onAppear {
+                        store.send(.viewCycle(.onAppear))
+                    }
+            } else {
+                ProgressView("파타타가 스팟을 등록하고 있습니다...")
+                    .navigationBarBackButtonHidden()
+            }
         }
     }
 }
@@ -154,7 +197,7 @@ extension SpotEditorView {
             titleView("상세한 위치를 입력하세요")
             
             HStack {
-                Text("아차산로 451 길")
+                Text(store.spotAddress)
                     .textStyle(.bodyS)
                     .foregroundStyle(.textDisabled)
                     .padding(.leading, 16)
@@ -250,7 +293,8 @@ extension SpotEditorView {
             .padding(.vertical, 12)
             .background(.white)
             .clipShape(RoundedRectangle(cornerRadius: 8))
-            .onTapGesture {
+            .asButton {
+                hideKeyboard()
                 store.send(.viewEvent(.openBottomSheet(true)))
             }
         }
@@ -393,7 +437,15 @@ extension SpotEditorView {
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .asButton {
             if store.spotEditorIsValid {
-                print("tap")
+                Task {
+                    do {
+                        let data = try await imageResizeManager.resizeImages(selectedImages)
+                        
+                        store.send(.viewEvent(.tappedSpotAddButton(data)))
+                    } catch {
+                        store.send(.errorHandle(.imageResize(error)))
+                    }
+                }
             }
         }
     }

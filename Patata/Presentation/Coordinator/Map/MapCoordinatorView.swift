@@ -41,6 +41,9 @@ struct MapCoordinatorView: View {
                     AddSpotMapView(store: addSpotMapStore)
                         .hideTabBar(store.isHideTabBar)
                     
+                case let .successView(successStore):
+                    SuccessView(store: successStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
         }
@@ -62,6 +65,8 @@ extension MapScreen.State: Identifiable {
             return ID.searchMap
         case .addSpotMap:
             return ID.addSpotMap
+        case .successView:
+            return ID.successView
         }
     }
     
@@ -72,6 +77,7 @@ extension MapScreen.State: Identifiable {
         case search
         case searchMap
         case addSpotMap
+        case successView
         
         var id: ID {
             return self

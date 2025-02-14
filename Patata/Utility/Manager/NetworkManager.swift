@@ -76,17 +76,34 @@ extension NetworkManager {
     private func getRequest<T: DTO, R: Router>(dto: T.Type, router: R, request: URLRequest, ifRefreshMode: Bool = false) async -> DataResponse<T, AFError> {
             
             if ifRefreshMode {
-                let requestResponse = await AF.request(request, interceptor: PARequestInterceptor())
-                    .validate(statusCode: 200..<300)
-                    .cURLDescription { curl in  // 여기 추가
-                        print("🚀 cURL:", curl)
-                    }
-                    .serializingDecodable(T.self)
-                    .response
-//                Logger.debug(requestResponse.debugDescription)
-                return requestResponse
-            }
-            else {
+                
+                if case let .multiPart(multipartformData) = router.encodingType {
+                    let requestResponse = await AF.upload(multipartFormData: multipartformData, with: request, interceptor: PARequestInterceptor())
+                        .validate(statusCode: 200..<300)
+                        .cURLDescription { curl in
+                            print("🚀 Upload cURL:", curl)
+                        }
+                        .serializingDecodable(T.self)
+                        .response
+                    
+                    print("🔍 Upload Response Data:", String(data: requestResponse.data ?? Data(), encoding: .utf8) ?? "No data")
+                    print("📝 Upload Status Code:", requestResponse.response?.statusCode ?? -1)
+                    
+                    return requestResponse
+                } else {
+                    let requestResponse = await AF.request(request, interceptor: PARequestInterceptor())
+                        .validate(statusCode: 200..<300)
+                        .cURLDescription { curl in  // 여기 추가
+                            print("🚀 cURL:", curl)
+                        }
+                        .serializingDecodable(T.self)
+                        .response
+                    //                Logger.debug(requestResponse.debugDescription)
+                    return requestResponse
+                }
+                
+            } else {
+                
                 let requestResponse = await AF.request(request)
                     .validate(statusCode: 200..<300)
                     .cURLDescription { curl in  // 여기 추가
@@ -94,8 +111,10 @@ extension NetworkManager {
                     }
                     .serializingDecodable(T.self)
                     .response
-//                Logger.debug(requestResponse.debugDescription)
+                //                Logger.debug(requestResponse.debugDescription)
+                
                 return requestResponse
+                
             }
         }
     

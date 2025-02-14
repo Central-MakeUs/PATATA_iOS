@@ -44,6 +44,36 @@ struct SpotMapper: Sendable {
             reviews: await dto.reviews.asyncMap { dtoToEntity($0) }
         )
     }
+    
+    func dataToRequestDTO(
+        spotName: String,
+        spotAddress: String,
+        spotAddressDetail: String,
+        coord: Coordinate,
+        spotDescription: String,
+        categoryId: Int,
+        tags: [String],
+        images: [Data]
+    ) async -> CreateSpotRequestDTO {
+        return await CreateSpotRequestDTO(
+            spotName: spotName,
+            spotAddress: spotAddress,
+            spotAddressDetail: spotAddressDetail,
+            latitude: coord.latitude,
+            longitude: coord.longitude,
+            spotDescription: spotDescription,
+            categoryId: categoryId,
+            tags: tags,
+            images: images
+                .enumerated()
+                .asyncMap {
+                    dataToRequestDTO(
+                        images: $1,
+                        index: $0
+                    )
+                }
+        )
+    }
 }
 
 extension SpotMapper {
@@ -87,6 +117,10 @@ extension SpotMapper {
     
     private func dtoToEntity(_ dto: SpotDetailReviewDTO) -> SpotDetailReviewEntity {
         return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText)
+    }
+    
+    private func dataToRequestDTO(images: Data, index: Int) -> RequestSpotImageDTO {
+        return RequestSpotImageDTO(file: images, isRepresentative: true, sequence: index)
     }
 }
 

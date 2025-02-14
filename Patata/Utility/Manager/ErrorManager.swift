@@ -57,6 +57,9 @@ extension ErrorManager {
             print("loactionError", locationError)
             return "잠시후 다시 이용해주세요"
             
+        case .imageResizeError(let imageResizeError):
+            return handleImageResizeError(imageResizeError)
+            
         case .unknown(let errorStr):
             print("해결 시급합니다!! \(errorStr)")
             return "알 수 없는 오류가 발생했습니다."
@@ -101,7 +104,7 @@ extension ErrorManager {
             }
             
         case .unknown(let apiResponseErrorDTO):
-            print("해당 에러 추가해줘야돼 모르는 에러등장")
+            print("해당 에러 추가해줘야돼 모르는 에러등장", apiResponseErrorDTO)
             return nil
         }
     }
@@ -136,6 +139,15 @@ extension ErrorManager {
         case .networkError, .unknown:
             print("router에서 모르는 에러 발생 확인해봐!!!")
             return "네트워크 오류가 발생했습니다. 문의해주세요"
+        }
+    }
+    
+    private func handleImageResizeError(_ imageResizeError: ImageResizeError) -> String {
+        switch imageResizeError {
+        case .totalSizeExceeded:
+            return "전체 이미지 크기가 10MB를 초과합니다."
+        case .invalidImage:
+            return "이미지 처리 중 오류가 발생했습니다."
         }
     }
 }

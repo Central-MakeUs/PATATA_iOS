@@ -14,6 +14,7 @@ enum SpotRouter: Router {
     case fetchSearchResult(searchText: String, page: Int, latitude: Double, longitude: Double, sortBy: String)
     case fetchSpot(String)
     case deleteSpot(Int)
+    case createSpot(CreateSpotRequestDTO)
 }
 
 extension SpotRouter {
@@ -23,6 +24,8 @@ extension SpotRouter {
             return .get
         case .deleteSpot:
             return .delete
+        case .createSpot:
+            return .post
         }
     }
     
@@ -38,6 +41,8 @@ extension SpotRouter {
             return "/spot/\(spotId)"
         case let .deleteSpot(spotId):
             return "/spot/\(spotId)"
+        case .createSpot:
+            return "/spot/create"
         }
     }
     
@@ -47,11 +52,18 @@ extension SpotRouter {
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
+        case .createSpot:
+            return HTTPHeaders([
+                HTTPHeader(name: "Content-Type", value: "multipart/form-data")
+            ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
+        case .fetchTodayMain, .fetchSpot, .deleteSpot, .createSpot:
+            return nil
+            
         case let .fetchCategorySpot(all, categoryId, page, latitude, longitude, sortBy):
             if all {
                 return [
@@ -70,9 +82,6 @@ extension SpotRouter {
                 "categoryId": categoryId
             ]
             
-        case .fetchTodayMain, .fetchSpot, .deleteSpot:
-            return nil
-            
         case let .fetchSearchResult(searchText, page, latitude, longitude, sortBy):
             return [
                 "spotName": searchText,
@@ -86,7 +95,7 @@ extension SpotRouter {
     
     var body: Data? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .createSpot:
             return nil
         }
     }
@@ -95,8 +104,65 @@ extension SpotRouter {
         switch self {
         case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot:
             return .url
+            
+        case let .createSpot(request):
+            let formData = MultipartFormData()
+            
+            formData.append(
+                request.spotName.data(using: .utf8)!,
+                withName: "spotName"
+            )
+            formData.append(
+                request.spotAddress.data(using: .utf8)!,
+                withName: "spotAddress"
+            )
+            formData.append(
+                request.spotAddressDetail.data(using: .utf8)!,
+                withName: "spotAddressDetail"
+            )
+            
+            formData.append(
+                String(request.latitude).data(using: .utf8)!,
+                withName: "latitude"
+            )
+            formData.append(
+                String(request.longitude).data(using: .utf8)!,
+                withName: "longitude"
+            )
+            formData.append(
+                String(request.categoryId).data(using: .utf8)!,
+                withName: "categoryId"
+            )
+            
+            formData.append(
+                request.spotDescription.data(using: .utf8)!,
+                withName: "spotDescription"
+            )
+            
+            let tagsString = request.tags.joined(separator: ",")
+            formData.append(
+                tagsString.data(using: .utf8)!,
+                withName: "tags"
+            )
+            
+            for (index, spotImage) in request.images.enumerated() {
+                formData.append(
+                    spotImage.file,
+                    withName: "images[\(index)].file",
+                    fileName: "image_\(index).jpeg",
+                    mimeType: "image/jpeg"
+                )
+                formData.append(
+                    String(spotImage.isRepresentative).data(using: .utf8)!,
+                    withName: "images[\(index)].isRepresentative"
+                )
+                formData.append(
+                    String(spotImage.sequence).data(using: .utf8)!,
+                    withName: "images[\(index)].sequence"
+                )
+            }
+                
+            return .multiPart(formData)
         }
     }
 }
-
-

@@ -23,6 +23,7 @@ enum MapScreen {
     case search(SearchFeature)
     case searchMap(SearchMapFeature)
     case addSpotMap(AddSpotMapFeature)
+    case successView(SuccessFeature)
 }
 
 @Reducer
@@ -81,6 +82,14 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.pop()
                 
+            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.tappedXButton)))):
+                state.isHideTabBar = false
+                state.routes.popToRoot()
+                
+            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.successSpotAdd)))):
+                state.isHideTabBar = true
+                state.routes.push(.successView(SuccessFeature.State()))
+                
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
@@ -111,8 +120,12 @@ extension MapCoordinator {
                 }
                 state.routes.pop()
                 
-            case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton)))):
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add)))
+            case let .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress))))):
+                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotLocation: spotCoord, spotAddress: spotAddress)))
+                
+            case .router(.routeAction(id: _, action: .successView(.delegate(.tappedConfirmButton)))):
+                state.isHideTabBar = false
+                state.routes.popToRoot()
                 
             default:
                 break

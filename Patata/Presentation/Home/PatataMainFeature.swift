@@ -16,7 +16,6 @@ struct PatataMainFeature {
         var spotItems: [SpotEntity] = []
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
-        var currentIndex: Int = 0
     }
     
     enum Action {
@@ -73,8 +72,10 @@ extension PatataMainFeature {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
+                let categoryIndex = state.selectedIndex
+                
                 return .run { send in
-                    await send(.networkType(.fetchCategorySpot(0)))
+                    await send(.networkType(.fetchCategorySpot(categoryIndex)))
                     await send(.networkType(.fetchTodaySpot))
                 }
                 

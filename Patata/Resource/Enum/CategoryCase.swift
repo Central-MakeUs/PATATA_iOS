@@ -35,6 +35,15 @@ enum CategoryCase: Int, CaseIterable, Identifiable {
             return .all
         }
     }
+    
+    static func getCategoryId(text: String) -> Int {
+        for category in CategoryCase.allCases {
+            if category.getCategoryCase().title == text {
+                return category.rawValue
+            }
+        }
+        return 1
+    }
 }
 
 extension CategoryCase {

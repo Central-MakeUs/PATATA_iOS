@@ -11,6 +11,7 @@ import Alamofire
 enum EncodingType {
     case url
     case json
+    case multiPart(MultipartFormData)
 }
 
 protocol Router {
@@ -63,6 +64,19 @@ extension Router {
             } catch {
                 throw .routerError(.decodingFail)
             }
+            
+        case .multiPart:
+//            do {
+//                let boundary = "Boundary-\(UUID().uuidString)"
+//                urlRequest.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+//                
+//                urlRequest.httpBody = try formData.encode()
+//                
+//                return urlRequest
+//            } catch {
+//                throw .routerError(.encodingFail)
+//            }
+            return urlRequest
         }
     }
     

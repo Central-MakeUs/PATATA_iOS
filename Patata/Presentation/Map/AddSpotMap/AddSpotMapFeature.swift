@@ -17,6 +17,7 @@ struct AddSpotMapFeature {
     struct State: Equatable {
         var mapState: MapStateEntity
         var address: String = ""
+        var spotCoord: Coordinate = Coordinate(latitude: 0, longitude: 0)
     }
     
     enum Action {
@@ -26,7 +27,7 @@ struct AddSpotMapFeature {
         
         enum Delegate {
             case tappedBackButton
-            case tappedAddConfirmButton
+            case tappedAddConfirmButton(Coordinate, String)
         }
     }
     
@@ -37,7 +38,7 @@ struct AddSpotMapFeature {
     }
     
     enum DataTransType {
-        case locationText(String)
+        case locationText(String, lat: Double, long: Double)
     }
     
     let addressManager = AddressManager()
@@ -63,7 +64,7 @@ extension AddSpotMapFeature {
                         let result = try await addressManager.getAddress(
                             for: CLLocationCoordinate2D(latitude: lat, longitude: long)
                         )
-                        await send(.dataTransType(.locationText(result)))
+                        await send(.dataTransType(.locationText(result, lat: lat, long: long)))
                     } catch {
                         print(error)
                     }
@@ -71,10 +72,11 @@ extension AddSpotMapFeature {
                 .cancellable(id: "location-lookup")
                 
             case .viewEvent(.tappedAddConfirmButton):
-                return .send(.delegate(.tappedAddConfirmButton))
+                return .send(.delegate(.tappedAddConfirmButton(state.spotCoord, state.address)))
                 
-            case let .dataTransType(.locationText(location)):
+            case let .dataTransType(.locationText(location, lat, long)):
                 state.address = location
+                state.spotCoord = Coordinate(latitude: lat, longitude: long)
                 
             default:
                 break

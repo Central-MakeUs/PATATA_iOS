@@ -12,8 +12,6 @@ final actor ImageResizeManager {
     private let maxTotalSize: Int64 = 10 * 1024 * 1024  // 10MB
     private let maxImageSize: Int64 = 5 * 1024 * 1024   // 5MB
     
-    private init() {}
-    
     func resizeImages(_ images: [UIImage]) async throws(PAError) -> [Data] {
         guard !images.isEmpty else { throw PAError.imageResizeError(.invalidImage) }
         
