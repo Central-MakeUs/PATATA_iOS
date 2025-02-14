@@ -85,14 +85,16 @@ extension PatataMainView {
                             .padding(.bottom, 15)
                         
                         ForEach(store.spotItems, id: \.self) { item in
-                            CategoryRecommendView(spotItem: item)
-                                .background(.white)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .padding(.horizontal, 15)
-                                .padding(.bottom, 4)
-                                .asButton {
-                                    store.send(.viewEvent(.tappedSpot(String(item.spotId))))
-                                }
+                            CategoryRecommendView(spotItem: item) {
+                                print("tap")
+                            }
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding(.horizontal, 15)
+                            .padding(.bottom, 4)
+                            .asButton {
+                                store.send(.viewEvent(.tappedSpot(String(item.spotId))))
+                            }
                         }
                         
                         moreButton
@@ -155,10 +157,11 @@ extension PatataMainView {
                         .frame(maxWidth: .infinity)
                         .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
-                        .clipShape(
-                            RoundedRectangle(cornerRadius: 12)
-                        )
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                         .shadow(color: .shadowColor, radius: 8)
+                        .asButton {
+                            store.send(.viewEvent(.tappedCategoryButton(item)))
+                        }
                 }
             }
         }

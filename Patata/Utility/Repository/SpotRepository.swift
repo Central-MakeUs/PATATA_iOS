@@ -22,7 +22,7 @@ extension SpotRepository {
         latitude: Double = 0,
         longitude: Double = 0,
         sortBy: String = "RECOMMEND"
-    ) async throws(PAError) -> [SpotEntity] {
+    ) async throws(PAError) -> CategorySpotPageEntity {
         
         let dto = try await networkManager.requestNetworkWithRefresh(
             dto: SpotCategoryDTO.self,
@@ -36,7 +36,7 @@ extension SpotRepository {
             )
         ).result
         
-        return await mapper.dtoToEntity(dto.spots)
+        return await mapper.dtoToEntity(dto)
     }
     
     func fetchTodaySpot() async throws(PAError) -> [TodaySpotEntity] {

@@ -7,6 +7,20 @@
 
 import Foundation
 
+struct CategorySpotPageEntity: Entity {
+    let currentPage: Int
+    let totalPages: Int
+    let totalCount: Int
+    let spots: [SpotEntity]
+    
+    init(currentPage: Int = 0, totalPages: Int = 0, totalCount: Int = 0, spots: [SpotEntity] = []) {
+        self.currentPage = currentPage
+        self.totalPages = totalPages
+        self.totalCount = totalCount
+        self.spots = spots
+    }
+}
+
 struct SpotEntity: Entity {
     let spotId: Int
     let spotAddress: String

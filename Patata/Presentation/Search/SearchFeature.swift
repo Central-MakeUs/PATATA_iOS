@@ -17,6 +17,8 @@ struct SearchFeature {
         var searchSpotItems: [SearchSpotEntity] = []
         var itemTotalCount: Int = 0
         var pageTotalCount: Int = 0
+        var currentPage: Int = 0
+        var filter: FilterCase = .recommend
         var beforeViewState: BeforeViewState
         var searchText: String = ""
         var searchResult: Bool = true
@@ -120,8 +122,8 @@ extension SearchFeature {
                 }
                 
                 if state.beforeViewState == .home {
-                    return .run { send in
-                        await send(.networkType(.searchSpot(page: 0, filter: .recommend, scroll: false)))
+                    return .run { [state = state] send in
+                        await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false)))
                     }
                 } else {
                     return .send(.delegate(.successSearch))
@@ -143,7 +145,7 @@ extension SearchFeature {
                 state.listLoadTrigger = false
                 
                 return .run { [state = state] send in
-                    await send(.networkType(.searchSpot(page: state.pageTotalCount + 1, filter: .recommend, scroll: true)))
+                    await send(.networkType(.searchSpot(page: state.currentPage + 1, filter: .recommend, scroll: true)))
                 }
                 
             case let .networkType(.searchSpot(page, filer, scroll)):
@@ -184,6 +186,7 @@ extension SearchFeature {
                         state.searchResult = true
                         state.itemTotalCount = data.totalCount
                         state.pageTotalCount = data.totalPages
+                        state.currentPage = data.currentPage
                         state.searchSpotItems.append(contentsOf: data.spots)
                         state.listLoadTrigger = true
                         
@@ -191,6 +194,7 @@ extension SearchFeature {
                         state.searchResult = true
                         state.itemTotalCount = data.totalCount
                         state.pageTotalCount = data.totalPages
+                        state.currentPage = data.currentPage
                         state.searchSpotItems = data.spots
                         state.listLoadTrigger = true
                     }

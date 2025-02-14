@@ -30,6 +30,7 @@ struct PatataMainFeature {
             case tappedAddButton
             case tappedSpot(String)
             case tappedMoreButton
+            case tappedCategoryButton(CategoryCase)
         }
     }
     
@@ -44,6 +45,7 @@ struct PatataMainFeature {
         case tappedSpot(String)
         case tappedMoreButton
         case tappedArchiveButton(Int)
+        case tappedCategoryButton(CategoryCase)
     }
     
     enum NetworkType {
@@ -103,12 +105,15 @@ extension PatataMainFeature {
                     await send(.networkType(.patchArchiveState(index)))
                 }
                 
+            case let .viewEvent(.tappedCategoryButton(category)):
+                return .send(.delegate(.tappedCategoryButton(category)))
+                
             case let .networkType(.fetchCategorySpot(index)):
                 return .run { send in
                     do {
                         let data = try await spotRepository.fetchSpotCategory(category: CategoryCase(rawValue: index) ?? .all)
                         
-                        await send(.dataTransType(.categorySpot(data)))
+                        await send(.dataTransType(.categorySpot(data.spots)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }

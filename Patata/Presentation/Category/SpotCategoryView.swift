@@ -32,6 +32,9 @@ struct SpotCategoryView: View {
                         // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
         }
     }
 }
@@ -52,10 +55,21 @@ extension SpotCategoryView {
                     .padding(.top, 12)
                     .padding(.horizontal, 15)
                 
-                CategoryRecommendView(spotItem: store.spotItems)
+                ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                    CategoryRecommendView(spotItem: item) {
+                        print("tap")
+                    }
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 10))
                     .padding(.horizontal, 15)
+                    .onAppear {
+                        if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
+                            print("scroll")
+                            store.send(.viewEvent(.nextPage))
+                        }
+                    }
+                }
+
             }
             .background(.gray10)
 
@@ -83,26 +97,21 @@ extension SpotCategoryView {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
                 HStack(spacing: 0) {
-                    ForEach(Array(store.titles.enumerated()), id: \.element) { index, title in
-                        let menuItem = MenuItem(title: title, isSelected: store.selectedIndex == index)
+                    ForEach(store.category, id: \.id) { category in
+                        let menuItem = MenuItem(title: category.getCategoryCase().title, isSelected: store.selectedIndex == category.rawValue)
                         categoryMenuView(item: menuItem)
                             .fixedSize(horizontal: true, vertical: true)
-                            .id(index)
+                            .id(category.rawValue)
                             .asButton {
-                                store.send(.viewEvent(.selectedMenu(index)))
+                                store.send(.viewEvent(.selectedMenu(category.rawValue)))
                                 withAnimation {
-                                    proxy.scrollTo(index, anchor: .center)
+                                    proxy.scrollTo(category.rawValue, anchor: .center)
                                 }
                             }
                     }
                 }
             }
             .scrollIndicators(.hidden)
-            //                .onChange(of: selectedIndex) { newIndex in
-            //                    withAnimation {
-            //                        proxy.scrollTo(newIndex, anchor: .center)
-            //                    }
-            //                }
         }
     }
     
@@ -113,7 +122,7 @@ extension SpotCategoryView {
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textDefault)
                 
-                Text("6")
+                Text("\(store.totalCount)")
                     .textStyle(.captionM)
                     .foregroundStyle(.textInfo)
                     .padding(.leading, 0)
@@ -125,9 +134,6 @@ extension SpotCategoryView {
                 Text(store.filterText)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
-                    .asButton {
-                        store.send(.viewEvent(.openBottomSheet))
-                    }
                 
                 Image("UnderIcon")
                     .resizable()
@@ -135,7 +141,6 @@ extension SpotCategoryView {
                     .frame(width: 18, height: 18)
             }
             .asButton {
-                print("tap")
                 store.send(.viewEvent(.openBottomSheet))
             }
         }

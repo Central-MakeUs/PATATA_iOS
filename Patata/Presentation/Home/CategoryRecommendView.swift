@@ -8,8 +8,8 @@
 import SwiftUI
 
 struct CategoryRecommendView: View {
-    var isValid: Bool = false
     let spotItem: SpotEntity
+    let tappedButton: () -> Void
     
     var body: some View {
         contentView
@@ -20,21 +20,20 @@ extension CategoryRecommendView {
     private var contentView: some View {
         HStack(alignment: .top) {
             DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .min, fallBackImg: "ImageDefault")
-//                .aspectRatio(contentMode: .fit)
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .overlay(alignment: .bottomLeading) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: isValid) {
-                        print("a")
+                    SpotArchiveButton(height: 24, width: 24, isSaved: spotItem.isScraped) {
+                        tappedButton()
                     }
-                        .padding(.leading, 10)
-                        .padding(.bottom, 10)
+                    .padding(.leading, 10)
+                    .padding(.bottom, 10)
                 }
                 .padding(.leading, 10)
                 .padding(.vertical, 10)
             
-            ZStack(alignment: .topTrailing) {  // ZStack으로 변경
+            ZStack(alignment: .topTrailing) {
                     spotDesView
                         .padding(.top, 20)
                         .padding(.leading, 8)
@@ -68,7 +67,7 @@ extension CategoryRecommendView {
                 .padding(.bottom, 25)
             
             HStack {
-                ForEach(spotItem.tags, id: \.self) { tag in
+                ForEach(Array(spotItem.tags.enumerated()), id: \.offset) { _, tag in
                     Text(tag)
                         .hashTagStyle()
                 }

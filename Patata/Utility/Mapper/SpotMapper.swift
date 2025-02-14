@@ -9,8 +9,8 @@ import Foundation
 import ComposableArchitecture
 
 struct SpotMapper: Sendable {
-    func dtoToEntity(_ dtos: [SpotDTO]) async -> [SpotEntity] {
-        return await dtos.asyncMap { dtoToEntity($0) }
+    func dtoToEntity(_ dtos: SpotCategoryItemDTO) async -> CategorySpotPageEntity {
+        return await CategorySpotPageEntity(currentPage: dtos.currentPage, totalPages: dtos.totalPages, totalCount: dtos.totalCount, spots: dtos.spots.asyncMap { dtoToEntity($0) })
     }
     
     func dtoToEntity(_ dtos: [TodaySpotItemDTO]) async -> [TodaySpotEntity] {
