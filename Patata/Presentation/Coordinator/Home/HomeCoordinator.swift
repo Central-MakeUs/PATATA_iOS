@@ -85,6 +85,9 @@ extension HomeCoordinator {
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
+            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: String(spotId))))
+                
             case .navigationAction(.pushSearch):
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))
                 

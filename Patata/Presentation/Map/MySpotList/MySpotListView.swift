@@ -39,10 +39,12 @@ extension MySpotListView {
             
             ScrollView(.vertical) {
                 VStack {
-                    ForEach(store.spotListEntity, id: \.spotId) { item in
-                        spotListView(spot: item)
+                    ForEach(Array(store.spotListEntity.enumerated()), id: \.element.spotId) { index, item in
+                        spotListView(spot: item, index: index)
                             .background(.white)
-                        //                        .padding(.vertical, 15)
+                            .asButton {
+                                store.send(.viewEvent(.tappedSpot(item.spotId)))
+                            }
                     }
                 }
                 .padding(.top, 8)
@@ -151,9 +153,9 @@ extension MySpotListView {
         
     }
     
-    private func spotListView(spot: TodaySpotListEntity) -> some View {
+    private func spotListView(spot: TodaySpotListEntity, index: Int) -> some View {
         VStack {
-            spotItemListView(spot: spot)
+            spotItemListView(spot: spot, index: index)
                 .padding(.horizontal, 15)
             
             spotImageView(spotImage: spot.images)
@@ -161,7 +163,7 @@ extension MySpotListView {
         }
     }
     
-    private func spotItemListView(spot: TodaySpotListEntity) -> some View {
+    private func spotItemListView(spot: TodaySpotListEntity, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 if spot.categoryId == .recommendSpot {
@@ -189,8 +191,8 @@ extension MySpotListView {
                 
                 Spacer()
 
-                SpotArchiveButton(height: 24, width: 24, isSaved: false) {
-                    print("tap")
+                SpotArchiveButton(height: 24, width: 24, isSaved: spot.isScraped) {
+                    store.send(.viewEvent(.tappedArchiveButton(index)))
                 }
             }
             .padding(.top, 16)
@@ -222,14 +224,14 @@ extension MySpotListView {
         
         return Group {
             if spotImage.count == 1{
-                DownImageView(url: spotImage[0], option: .mid, fallBackImg: "ImageDefault")
+                DownImageView(url: spotImage[0], option: .mid, fallBackImg: imageDefault)
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity)
                     .frame(height: imageWidth * 0.5)
                     .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .padding(.horizontal, 15)
-            } else if store.imageCount == 2 {
+            } else if spotImage.count == 2 {
                 HStack(spacing: 8) {
                     ForEach(spotImage, id: \.self) { image in
                         DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
