@@ -153,23 +153,31 @@ extension SpotDetailView {
     }
     
     private var spotDetailImage: some View {
-        TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
-            ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
-                DownImageView(url: image, option: .max, fallBackImg: "ImageDefault")
-                    .aspectRatio(contentMode: .fill)
+        ZStack(alignment: .topTrailing) {
+            TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
+                ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
+                    DownImageView(url: image, option: .max, fallBackImg: "ImageDefault")
+                        .aspectRatio(contentMode: .fill)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fit)
+            .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+            .sizeState(size: $sizeState)
+            .overlay(alignment: .bottom) {
+                CustomPageIndicator(
+                    numberOfPages: store.spotDetailData.images.count,
+                    currentIndex: store.currentIndex
+                )
+                .padding(.bottom, 40)
+            }
+            
+            if store.spotDetailData.categoryId == .recommendSpot {
+                RecommendSpotIconMark()
+                    .offset(x: -20, y: -5)
             }
         }
-        .frame(maxWidth: .infinity)
-        .aspectRatio(1, contentMode: .fit)
-        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
-        .sizeState(size: $sizeState)
-        .overlay(alignment: .bottom) {
-            CustomPageIndicator(
-                numberOfPages: store.spotDetailData.images.count,
-                currentIndex: store.currentIndex
-            )
-            .padding(.bottom, 40)
-        }
+        
     }
     
     private var detailView: some View {
