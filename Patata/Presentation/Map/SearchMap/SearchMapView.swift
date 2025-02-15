@@ -44,13 +44,13 @@ extension SearchMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(mapState: store.mapState) { lat, long in
+                UIMapView(mapState: store.mapState) { index in
                     store.send(.viewEvent(.tappedMarker))
                 } onLocationChange: {
                     if store.spotReloadButton == false {
                         store.send(.viewEvent(.changeMapLocation))
                     }
-                } onCameraIdle: { coord in
+                } onCameraIdle: { coord, mbr in
                     store.send(.viewEvent(.onCameraIdle(coord)))
                 }
                 .ignoresSafeArea(edges: [.bottom])

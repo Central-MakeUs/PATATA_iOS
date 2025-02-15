@@ -62,7 +62,7 @@ struct SpotEditorView: View {
                     }, customize: {
                         $0
                             .type(.floater())
-                            .position(.center)
+                            .position(.bottom)
                             .animation(.spring())
                             .closeOnTap(true)
                             .closeOnTapOutside(true)

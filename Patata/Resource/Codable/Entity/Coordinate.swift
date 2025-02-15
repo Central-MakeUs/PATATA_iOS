@@ -7,7 +7,12 @@
 
 import Foundation
 
-struct Coordinate: Equatable {
+struct Coordinate: Equatable, Hashable {
     var latitude: Double
     var longitude: Double
+}
+
+struct MBRCoordinates: Equatable {
+    let northEast: Coordinate
+    let southWest: Coordinate
 }

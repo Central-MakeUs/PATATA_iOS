@@ -123,11 +123,6 @@ extension MySpotListView {
                 }
             }
             .scrollIndicators(.hidden)
-            //                .onChange(of: selectedIndex) { newIndex in
-            //                    withAnimation {
-            //                        proxy.scrollTo(newIndex, anchor: .center)
-            //                    }
-            //                }
         }
     }
 }
@@ -224,7 +219,7 @@ extension MySpotListView {
         
         return Group {
             if spotImage.count == 1{
-                DownImageView(url: spotImage[0], option: .mid, fallBackImg: imageDefault)
+                DownImageView(url: spotImage[0], option: .max, fallBackImg: imageDefault)
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity)
                     .frame(height: imageWidth * 0.5)

@@ -19,17 +19,17 @@ import NMapsMap
 
 struct UIMapView: UIViewRepresentable {
     @ObservedObject var mapState: MapStateEntity
-    let onMarkerTap: ((Double, Double) -> Void)?
+    let onMarkerTap: ((Int) -> Void)?
     let onLocationChange: (() -> Void)?
     let locationToAddress: ((Double, Double) -> Void)?
-    let onCameraIdle: ((Coordinate) -> Void)?
+    let onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)?
     
     init(
         mapState: MapStateEntity,
-        onMarkerTap: ((Double, Double) -> Void)? = nil,
+        onMarkerTap: ((Int) -> Void)? = nil,
         onLocationChange: (() -> Void)? = nil,
         locationToAddress: ((Double, Double) -> Void)? = nil,
-        onCameraIdle: ((Coordinate) -> Void)? = nil
+        onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)? = nil
     ) {
         self.mapState = mapState
         self.onMarkerTap = onMarkerTap
@@ -47,9 +47,9 @@ struct UIMapView: UIViewRepresentable {
             if let locationToAddress {
                 locationToAddress(lat, long)
             }
-        } onCameraIdle: { coord in
+        } onCameraIdle: { coord, mbrLocation in
             if let onCameraIdle {
-                onCameraIdle(coord)
+                onCameraIdle(coord, mbrLocation)
             }
         }
     }
@@ -71,12 +71,13 @@ struct UIMapView: UIViewRepresentable {
         moveToCamera(coord: mapState.coord, uiView: uiView)
         
         Task {
-            let newMarkers = mapState.markers.map { marker in
+            let newMarkers = mapState.markers.enumerated().map { index, marker in
                 addMarker(
                     lat: marker.coordinate.latitude,
                     long: marker.coordinate.longitude,
                     mapView: uiView.mapView,
-                    category: marker.category
+                    category: marker.category,
+                    index: index
                 )
             }
             
@@ -92,9 +93,9 @@ struct UIMapView: UIViewRepresentable {
     class Coordinator: NSObject, NMFMapViewCameraDelegate {
         let onLocationChange: (() -> Void)?
         let locationToAddress: ((Double, Double) -> Void)?
-        let onCameraIdle: ((Coordinate) -> Void)?
+        let onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)?
         
-        init(onLocationChange: (() -> Void)?, locationToAddress: ((Double, Double) -> Void)?, onCameraIdle: ((Coordinate) -> Void)?) {
+        init(onLocationChange: (() -> Void)?, locationToAddress: ((Double, Double) -> Void)?, onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)?) {
             self.onLocationChange = onLocationChange
             self.locationToAddress = locationToAddress
             self.onCameraIdle = onCameraIdle
@@ -112,19 +113,29 @@ struct UIMapView: UIViewRepresentable {
                 latitude: mapView.latitude,
                 longitude: mapView.longitude
             )
-                    
-            onCameraIdle?(currentCoord)
+            
+            let mbrCoord = MBRCoordinates(
+                northEast: Coordinate(latitude: mapView.contentBounds.northEastLat, longitude: mapView.contentBounds.northEastLng),
+                southWest: Coordinate(latitude: mapView.contentBounds.southWestLat, longitude: mapView.contentBounds.southWestLng)
+            )
+            
+            onCameraIdle?(currentCoord, mbrCoord)
             locationToAddress?(mapView.latitude, mapView.longitude)
         }
     }
 }
 
 extension UIMapView {
-    private func addMarker(lat: Double, long: Double, mapView: NMFMapView, category: String) -> NMFMarker {
+    private func addMarker(lat: Double, long: Double, mapView: NMFMapView, category: String, index: Int) -> NMFMarker {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: lat, lng: long)
+        marker.userInfo = ["index": index]
         marker.touchHandler = { (overlay) -> Bool in
-            onMarkerTap?(lat, long)
+            guard let marker = overlay as? NMFMarker,
+                  let spotInfo = marker.userInfo as? [String: Any],
+                  let index = spotInfo["index"] as? Int else { return true }
+            
+            onMarkerTap?(index)
             return true
         }
         

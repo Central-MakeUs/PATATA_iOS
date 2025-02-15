@@ -88,6 +88,9 @@ extension SpotCategoryFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
+                state.currentPage = 0
+                state.totalPages = 0
+                
                 state.listLoadTrigger = false
                 
                 return .run { send in
