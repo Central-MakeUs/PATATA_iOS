@@ -44,16 +44,16 @@ extension SearchMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(mapState: store.mapState) { index in
-                    store.send(.viewEvent(.tappedMarker))
-                } onLocationChange: {
-                    if store.spotReloadButton == false {
-                        store.send(.viewEvent(.changeMapLocation))
-                    }
-                } onCameraIdle: { coord, mbr in
-                    store.send(.viewEvent(.onCameraIdle(coord)))
-                }
-                .ignoresSafeArea(edges: [.bottom])
+//                UIMapView(mapState: store.mapState) { index in
+//                    store.send(.viewEvent(.tappedMarker))
+//                } onLocationChange: {
+//                    if store.spotReloadButton == false {
+//                        store.send(.viewEvent(.changeMapLocation))
+//                    }
+//                } onCameraIdle: { coord, mbr in
+//                    store.send(.viewEvent(.onCameraIdle(coord)))
+//                }
+//                .ignoresSafeArea(edges: [.bottom])
                 
                 Color.black
                     .opacity(0.1)

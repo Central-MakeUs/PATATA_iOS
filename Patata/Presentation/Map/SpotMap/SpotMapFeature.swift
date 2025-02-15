@@ -14,12 +14,11 @@ struct SpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 37.5666791, longitude: 126.9784147), markers: [(Coordinate(latitude: 37.5666791, longitude: 126.9784147), SpotMarkerImage.housePin)])
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))
         var mapSpotEntity: [MapSpotEntity] = []
-        var selectMarker: MapSpotEntity = MapSpotEntity()
+        var selectIndex: Int = 0
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         var isFirst: Bool = false
@@ -34,6 +33,7 @@ struct SpotMapFeature {
         case viewEvent(ViewEvent)
         case locationAction(LocationAction)
         case networkType(NetworkType)
+        case mapAction(MapAction)
         case delegate(Delegate)
         case dataTransType(DataTransType)
         
@@ -56,14 +56,13 @@ struct SpotMapFeature {
     
     enum ViewEvent {
         case tappedMenu(Int)
-        case tappedMarker(Int)
         case tappedSpotAddButton
         case tappedSideButton
         case tappedSearch
         case tappedMoveToUserLocationButton
         case bottomSheetDismiss
-        case changeMapLocation
-        case onCameraIdle(user: Coordinate, mbr: MBRCoordinates)
+        case tappedReloadButton
+        case tappedArchiveButton
     }
     
     enum LocationAction {
@@ -74,16 +73,28 @@ struct SpotMapFeature {
     
     enum NetworkType {
         case fetchMapMarker(userLocation: Coordinate, mbr: MBRCoordinates, categoryId: CategoryCase)
+        case patchArchiveState
     }
     
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
         case fetchMarkers([MapSpotEntity])
+        case archiveState(ArchiveEntity)
+    }
+    
+    enum MapAction {
+        case getUserAndMBRLocation(Coordinate, MBRCoordinates)
+        case getMBRLocation(MBRCoordinates)
+        case getCameraLocation(Coordinate)
+        case getMarkerIndex(Int)
+        case moveCamera
     }
     
     @Dependency(\.mapRepository) var mapRepository
+    @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.locationManager) var locationManager
+    @Dependency(\.naverMapManager) var naverMapManager
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -93,27 +104,34 @@ struct SpotMapFeature {
 
 extension SpotMapFeature {
     private func core() -> some ReducerOf<Self> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .viewCycle(.onAppear):
                 state.spotReloadButton = false
                 state.isFirst = true
                 
-                return .run { send in
+                return .merge(
+                    .run { send in
                         await send(.dataTransType(.fetchRealm))
                         
                         for await location in locationManager.getLocationUpdates() {
                             await send(.dataTransType(.userLocation(location)))
                         }
-                    }
+                    },
+                    .merge(registerPublisher())
+                )
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
                 
-            case let .viewEvent(.tappedMarker(index)):
-                state.selectMarker = state.mapSpotEntity[index]
-                state.isPresented = true
-                return .send(.delegate(.tappedMarker))
+                let userLocation = state.userLocation
+                let mbrLocation = state.mbrLocation
+                
+                return .run { send in
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbrLocation, categoryId: CategoryCase(rawValue: index) ?? .all)))
+                }
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
@@ -128,16 +146,37 @@ extension SpotMapFeature {
             case .viewEvent(.tappedSearch):
                 return .send(.delegate(.tappedSearch))
                 
-            case .viewEvent(.changeMapLocation):
+            case .viewEvent(.tappedMoveToUserLocationButton):
+                naverMapManager.moveCamera(coord: state.userLocation)
+                
+            case .viewEvent(.tappedReloadButton):
+                state.selectedMenuIndex = 0
+                
+                let userLocation = state.userLocation
+                let mbr = state.mbrLocation
+                
+                return .run { send in
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: .all)))
+                }
+                
+            case .viewEvent(.tappedArchiveButton):
+                return .run { send in
+                    await send(.networkType(.patchArchiveState))
+                }
+                
+            case let .mapAction(.getMBRLocation(mbrLocation)):
+                state.mbrLocation = mbrLocation
+                
+            case .mapAction(.moveCamera):
                 state.spotReloadButton = true
                 
-            case .viewEvent(.tappedMoveToUserLocationButton):
-                state.mapState.first = false
-                state.mapState.coord = state.userLocation
+            case let .mapAction(.getCameraLocation(cameraLocation)):
+                state.cameraLocation = cameraLocation
                 
-            case let .viewEvent(.onCameraIdle(coord, mbr)):
-                state.cameraLocation = coord
-                state.mbrLocation = mbr
+            case let .mapAction(.getMarkerIndex(index)):
+                state.selectIndex = index
+                state.isPresented = true
+                return .send(.delegate(.tappedMarker))
                 
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
                 return .run { send in
@@ -150,12 +189,23 @@ extension SpotMapFeature {
                     }
                 }
                 
+            case .networkType(.patchArchiveState):
+                let spot = state.mapSpotEntity[state.selectIndex]
+                
+                return .run { send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: String(spot.spotId))
+                        
+                        await send(.dataTransType(.archiveState(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.fetchMarkers(markers)):
                 state.mapSpotEntity = markers
-                state.mapState = MapStateEntity(
-                    coord: state.userLocation,
-                    markers: markers.map { ($0.coordinate, SpotMarkerImage.getMarkerImage(category: $0.category)) }
-                )
+                
+                naverMapManager.updateMarkers(markers: markers)
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
@@ -165,7 +215,8 @@ extension SpotMapFeature {
                 
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
-                state.mapState.coord = coord
+                
+                naverMapManager.moveCamera(coord: coord)
                 
                 if state.isFirst {
                     state.isFirst = false
@@ -178,6 +229,20 @@ extension SpotMapFeature {
                         )))
                     }
                 }
+                
+            case let .dataTransType(.archiveState(data)):
+                state.mapSpotEntity[state.selectIndex] = MapSpotEntity(
+                    spotId: state.mapSpotEntity[state.selectIndex].spotId,
+                    spotName: state.mapSpotEntity[state.selectIndex].spotName,
+                    spotAddress: state.mapSpotEntity[state.selectIndex].spotAddress,
+                    spotAddressDetail: state.mapSpotEntity[state.selectIndex].spotAddressDetail,
+                    coordinate: state.mapSpotEntity[state.selectIndex].coordinate,
+                    category: state.mapSpotEntity[state.selectIndex].category,
+                    tags: state.mapSpotEntity[state.selectIndex].tags,
+                    representativeImageUrl: state.mapSpotEntity[state.selectIndex].representativeImageUrl,
+                    isScraped: data.isArchive,
+                    distance: state.mapSpotEntity[state.selectIndex].distance
+                )
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented
@@ -213,5 +278,49 @@ extension SpotMapFeature {
         )
         
         return MBRCoordinates(northEast: northEast, southWest: southWest)
+    }
+}
+
+extension SpotMapFeature {
+    private func registerPublisher() -> [Effect<SpotMapFeature.Action>] {
+        var effects : [Effect<SpotMapFeature.Action>] = .init()
+        
+        effects.append(Effect<SpotMapFeature.Action>
+            .publisher {
+                naverMapManager.cameraIdlePass
+                    .map { cameraLocation in
+                        Action.mapAction(.getCameraLocation(cameraLocation))
+                    }
+            }
+        )
+        
+        effects.append(Effect<SpotMapFeature.Action>
+            .publisher {
+                naverMapManager.mbrLocationPass
+                    .map { mbrLocation in
+                        Action.mapAction(.getMBRLocation(mbrLocation))
+                    }
+            }
+        )
+        
+        effects.append(Effect<SpotMapFeature.Action>
+            .publisher {
+                naverMapManager.moveCameraPass
+                    .map { _ in 
+                        Action.mapAction(.moveCamera)
+                    }
+            }
+        )
+        
+        effects.append(Effect<SpotMapFeature.Action>
+            .publisher {
+                naverMapManager.markerIndexPass
+                    .map { index in
+                        Action.mapAction(.getMarkerIndex(index))
+                    }
+            }
+        )
+        
+        return effects
     }
 }

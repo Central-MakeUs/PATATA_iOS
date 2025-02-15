@@ -23,7 +23,9 @@ struct SpotMapView: View {
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
-                    AnyView(spotDetailSheet(spot: store.selectMarker))
+                    
+                        AnyView(spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[store.selectIndex]))
+                    
                 }, onDismiss: {
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })
@@ -48,15 +50,7 @@ extension SpotMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView(mapState: store.mapState) { index in
-                    store.send(.viewEvent(.tappedMarker(index)))
-                } onLocationChange: {
-                    if store.spotReloadButton == false {
-                        store.send(.viewEvent(.changeMapLocation))
-                    }
-                } onCameraIdle: { coord, mbr in
-                    store.send(.viewEvent(.onCameraIdle(user: coord, mbr: mbr)))
-                }
+                UIMapView()
                 
                 Color.black
                     .opacity(0.1)
@@ -109,17 +103,26 @@ extension SpotMapView {
     }
     
     private var mapMenuView: some View {
-        ScrollView(.horizontal) {
-            HStack {
-                ForEach(CategoryCase.allCases, id: \.id) { item in
-                    categoryMenuView(categoryItem: item)
-                        .onTapGesture {
-                            store.send(.viewEvent(.tappedMenu(item.rawValue)))
-                        }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(CategoryCase.allCases, id: \.id) { item in
+                        categoryMenuView(categoryItem: item)
+                            .id(item.rawValue)
+                            .asButton {
+                                store.send(.viewEvent(.tappedMenu(item.rawValue)))
+                            }
+                            .onChange(of: store.selectedMenuIndex) { newValue in
+                                withAnimation {
+                                    proxy.scrollTo(store.selectedMenuIndex, anchor: .center)
+                                }
+                            }
+                    }
                 }
+                .padding(.horizontal, 15)
             }
-            .padding(.horizontal, 15)
         }
+        
     }
     
     private var mapBottomView: some View {
@@ -144,7 +147,7 @@ extension SpotMapView {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .shadow(color: .shadowColor, radius: 5)
                     .asButton {
-                        print("tap")
+                        store.send(.viewEvent(.tappedReloadButton))
                     }
                 }
                 .padding(.bottom, 12)
@@ -247,8 +250,8 @@ extension SpotMapView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: false) {
-                    print("tap")
+                SpotArchiveButton(height: 24, width: 24, isSaved: store.mapSpotEntity.isEmpty ? false : store.mapSpotEntity[store.selectIndex].isScraped) {
+                    store.send(.viewEvent(.tappedArchiveButton))
                 }
             }
             

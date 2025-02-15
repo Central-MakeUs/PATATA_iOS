@@ -31,16 +31,16 @@ extension AddSpotMapView {
             
             ZStack(alignment: .bottom) {
                 ZStack(alignment: .top) {
-                    UIMapView(mapState: store.mapState, locationToAddress:  { lat, long in
-                        store.send(.viewEvent(.locationToAddress(lat: lat, long: long)))
-                    })
-                    .overlay(alignment: .center) {
-                        Image("ActivePin")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 48, height: 48)
-                            .offset(y: -40)
-                    }
+//                    UIMapView(mapState: store.mapState, locationToAddress:  { lat, long in
+//                        store.send(.viewEvent(.locationToAddress(lat: lat, long: long)))
+//                    })
+//                    .overlay(alignment: .center) {
+//                        Image("ActivePin")
+//                            .resizable()
+//                            .aspectRatio(contentMode: .fit)
+//                            .frame(width: 48, height: 48)
+//                            .offset(y: -40)
+//                    }
                     
                     Color.black
                         .opacity(0.1)
