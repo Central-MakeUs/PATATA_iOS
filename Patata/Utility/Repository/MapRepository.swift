@@ -31,6 +31,23 @@ final class MapRepository: @unchecked Sendable {
         
         return await mapper.dtoToEntity(dtos)
     }
+    
+    func checkValidSpot(coord: Coordinate) async throws(PAError) -> [MapSpotEntity] {
+        do {
+            let isSuccess = try await networkManager.requestNetworkWithRefresh(dto: AddSpotDTO.self, router: MapRouter.checkSpotCount(coord)).isSuccess
+            
+            print("success", isSuccess)
+            
+            return []
+        } catch {
+            switch error {
+            case let .checkAddSpot(addFailDTO):
+                return await mapper.dtoToEntity(addFailDTO.result)
+            default:
+                throw error
+            }
+        }
+    }
 }
 
 extension MapRepository: DependencyKey {

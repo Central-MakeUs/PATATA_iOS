@@ -15,12 +15,14 @@ enum MapRouter: Router {
         categoryId: Int,
         isSearch: Bool
     )
+    
+    case checkSpotCount(Coordinate)
 }
 
 extension MapRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchMap:
+        case .fetchMap, .checkSpotCount:
             return .get
         }
     }
@@ -29,12 +31,14 @@ extension MapRouter {
         switch self {
         case .fetchMap:
             return "/map/in-bound"
+        case .checkSpotCount:
+            return "/map/density"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchMap:
+        case .fetchMap, .checkSpotCount:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -66,19 +70,25 @@ extension MapRouter {
                     "withSearch": isSearch
                 ]
             }
+            
+        case let .checkSpotCount(coord):
+            return [
+                "latitude": coord.latitude,
+                "longitude": coord.longitude
+            ]
         }
     }
     
     var body: Data? {
         switch self {
-        case .fetchMap:
+        case .fetchMap, .checkSpotCount:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchMap:
+        case .fetchMap, .checkSpotCount:
             return .url
         }
     }

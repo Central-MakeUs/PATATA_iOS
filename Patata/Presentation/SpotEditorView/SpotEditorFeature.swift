@@ -156,9 +156,17 @@ extension SpotEditorFeature {
                 let categoryId = CategoryCase.getCategoryId(text: state.categoryText)
                 state.viewState = .loading
                 
-                return .run { [state = state] send in
+                let spotName = state.title
+                let spotAddress = state.spotAddress
+                let spotAddressDetail = state.location
+                let coord = state.spotLocation
+                let spotDes = state.detail
+                let tag = state.hashTags
+                let image = state.imageDatas
+                
+                return .run { send in
                     do {
-                        try await spotRepository.createSpot(spotName: state.title, spotAddress: state.location, spotAddressDetail: state.detail, coord: state.spotLocation, spotDescription: state.detail, categoryId: categoryId, tags: state.hashTags, images: state.imageDatas)
+                        try await spotRepository.createSpot(spotName: spotName, spotAddress: spotAddress, spotAddressDetail: spotAddressDetail, coord: coord, spotDescription: spotDes, categoryId: categoryId, tags: tag, images: image)
                         
                         await send(.delegate(.successSpotAdd))
                     } catch {

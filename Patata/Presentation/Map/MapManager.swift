@@ -11,8 +11,6 @@ import NMapsMap
 import ComposableArchitecture
 
 final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate, CLLocationManagerDelegate {
-    // MARK: - Properties
-    static let shared = NaverMapManager()
     
     let view = NMFNaverMapView(frame: .zero)
     let specificMarker: NMFMarker = NMFMarker()
@@ -75,6 +73,11 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
         view.mapView.moveCamera(cameraUpdate)
     }
     
+    func clearCurrentMarkers() {
+        currentMarkers.forEach { $0.mapView = nil }
+        currentMarkers.removeAll()
+    }
+    
     private func createMarker(lat: Double, lng: Double, category: String, index: Int) -> NMFMarker {
         let marker = NMFMarker()
         marker.position = NMGLatLng(lat: lat, lng: lng)
@@ -100,11 +103,6 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
         }
         
         return marker
-    }
-    
-    private func clearCurrentMarkers() {
-        currentMarkers.forEach { $0.mapView = nil }
-        currentMarkers.removeAll()
     }
     
 }
@@ -133,19 +131,14 @@ extension NaverMapManager: NMFMapViewCameraDelegate {
                 longitude: mapView.contentBounds.southWestLng
             )
         )
-        
+        print(currentCoord)
         mbrLocationPass.send(mbrCoord)
         cameraIdlePass.send(currentCoord)
     }
 }
 
-private enum NaverMapManagerKey: DependencyKey {
-    static var liveValue: NaverMapManager = NaverMapManager.shared
-}
-
-extension DependencyValues {
-    var naverMapManager: NaverMapManager {
-        get { self[NaverMapManagerKey.self] }
-        set { self[NaverMapManagerKey.self] = newValue }
-    }
+extension NaverMapManager {
+    static let spotMapShared = NaverMapManager()
+    static let addSpotShared = NaverMapManager()
+    static let searchMapShared = NaverMapManager()
 }

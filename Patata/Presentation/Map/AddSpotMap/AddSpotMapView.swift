@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 
 // 스팟 추가하기 일때 유저의 마커를 보여줘야되는지
 
@@ -18,6 +19,46 @@ struct AddSpotMapView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden()
+                .popup(isPresented: $store.isPresent.sending(\.bindingIsPresent), view: {
+                    HStack {
+                        Spacer()
+                        
+                        Text("반경 100m 내에 등록된 장소가 많아 장소를 등록할 수 없어요")
+                            .textStyle(.subtitleXS)
+                            .foregroundStyle(.blue20)
+                            .padding(.vertical, 10)
+                        
+                        Image("NoAddIcon")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                        
+                        Spacer()
+                    }
+                    .background(.gray100)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal, 15)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    }
+                }, customize: {
+                    $0
+                        .type(.floater())
+                        .position(.bottom)
+                        .animation(.spring())
+                        .closeOnTap(true)
+                        .closeOnTapOutside(true)
+                        .backgroundColor(.black.opacity(0.5))
+                        .dismissCallback {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    
+                })
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
         }
     }
 }
@@ -31,16 +72,14 @@ extension AddSpotMapView {
             
             ZStack(alignment: .bottom) {
                 ZStack(alignment: .top) {
-//                    UIMapView(mapState: store.mapState, locationToAddress:  { lat, long in
-//                        store.send(.viewEvent(.locationToAddress(lat: lat, long: long)))
-//                    })
-//                    .overlay(alignment: .center) {
-//                        Image("ActivePin")
-//                            .resizable()
-//                            .aspectRatio(contentMode: .fit)
-//                            .frame(width: 48, height: 48)
-//                            .offset(y: -40)
-//                    }
+                    UIMapView(mapManager: store.mapManager)
+                        .overlay(alignment: .center) {
+                            Image("ActivePin")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 48, height: 48)
+                                .offset(y: -40)
+                        }
                     
                     Color.black
                         .opacity(0.1)
@@ -103,7 +142,7 @@ extension AddSpotMapView {
                 
                 Spacer()
             }
-            .background(.gray50)
+            .background(store.addValid ? .navy100 : .gray50)
             .clipShape(RoundedRectangle(cornerRadius: 38))
             .asButton {
                 store.send(.viewEvent(.tappedAddConfirmButton))

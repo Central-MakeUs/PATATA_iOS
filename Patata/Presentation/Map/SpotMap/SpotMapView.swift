@@ -50,7 +50,7 @@ extension SpotMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-                UIMapView()
+                UIMapView(mapManager: store.mapManager)
                 
                 Color.black
                     .opacity(0.1)

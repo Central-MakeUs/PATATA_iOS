@@ -18,40 +18,13 @@ import NMapsMap
 // 초기값으로는 좌표값과 카테고리가 있어야지
 
 struct UIMapView: UIViewRepresentable {
-//    @ObservedObject var mapState: MapStateEntity
-//    let onMarkerTap: ((Int) -> Void)?
-//    let onLocationChange: (() -> Void)?
-//    let locationToAddress: ((Double, Double) -> Void)?
-//    let onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)?
-//    
-//    init(
-//        mapState: MapStateEntity,
-//        onMarkerTap: ((Int) -> Void)? = nil,
-//        onLocationChange: (() -> Void)? = nil,
-//        locationToAddress: ((Double, Double) -> Void)? = nil,
-//        onCameraIdle: ((Coordinate, MBRCoordinates) -> Void)? = nil
-//    ) {
-//        self.mapState = mapState
-//        self.onMarkerTap = onMarkerTap
-//        self.onLocationChange = onLocationChange
-//        self.locationToAddress = locationToAddress
-//        self.onCameraIdle = onCameraIdle
-//    }
+    let mapManager: NaverMapManager
     
     func makeCoordinator() -> NaverMapManager {
-        NaverMapManager.shared
+        mapManager
     }
     
     func makeUIView(context: Context) -> NMFNaverMapView {
-//        let view = NMFNaverMapView()
-//        
-//        view.showZoomControls = false
-//        view.mapView.positionMode = .direction
-//        view.mapView.zoomLevel = 17
-//        view.mapView.addCameraDelegate(delegate: context.coordinator)
-//        view.mapView.positionMode = .normal
-//        
-//        return view
         return context.coordinator.getNaverMapView()
     }
     

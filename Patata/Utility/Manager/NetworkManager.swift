@@ -151,6 +151,14 @@ extension NetworkManager {
                     print("❌ Error Status Code:", response.response?.statusCode ?? -1)
                     print("❌ Error Details:", patataError)
                 
+                if dto == AddSpotDTO.self {
+                    if let data = response.data {
+                        if let addFail = try? CodableManager.shared.jsonDecoding(model: AddFailDTO.self, from: data) {
+                            throw .checkAddSpot(addFail)
+                        }
+                    }
+                }
+                
                 do {
                     let retryResult = try await retryNetwork(dto: dto, router: router, ifRefresh: ifRefreshMode)
                     

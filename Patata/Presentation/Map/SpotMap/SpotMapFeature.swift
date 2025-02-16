@@ -14,6 +14,7 @@ struct SpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
+        var mapManager: NaverMapManager = NaverMapManager.spotMapShared
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))
@@ -94,7 +95,6 @@ struct SpotMapFeature {
     @Dependency(\.mapRepository) var mapRepository
     @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.locationManager) var locationManager
-    @Dependency(\.naverMapManager) var naverMapManager
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -120,7 +120,7 @@ extension SpotMapFeature {
                             await send(.dataTransType(.userLocation(location)))
                         }
                     },
-                    .merge(registerPublisher())
+                    .merge(registerPublisher(state: &state))
                 )
                 
             case let .viewEvent(.tappedMenu(index)):
@@ -147,7 +147,7 @@ extension SpotMapFeature {
                 return .send(.delegate(.tappedSearch))
                 
             case .viewEvent(.tappedMoveToUserLocationButton):
-                naverMapManager.moveCamera(coord: state.userLocation)
+                state.mapManager.moveCamera(coord: state.userLocation)
                 
             case .viewEvent(.tappedReloadButton):
                 state.selectedMenuIndex = 0
@@ -205,7 +205,7 @@ extension SpotMapFeature {
             case let .dataTransType(.fetchMarkers(markers)):
                 state.mapSpotEntity = markers
                 
-                naverMapManager.updateMarkers(markers: markers)
+                state.mapManager.updateMarkers(markers: markers)
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
@@ -216,7 +216,7 @@ extension SpotMapFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
-                naverMapManager.moveCamera(coord: coord)
+                state.mapManager.moveCamera(coord: coord)
                 
                 if state.isFirst {
                     state.isFirst = false
@@ -282,12 +282,12 @@ extension SpotMapFeature {
 }
 
 extension SpotMapFeature {
-    private func registerPublisher() -> [Effect<SpotMapFeature.Action>] {
+    private func registerPublisher(state: inout State) -> [Effect<SpotMapFeature.Action>] {
         var effects : [Effect<SpotMapFeature.Action>] = .init()
         
         effects.append(Effect<SpotMapFeature.Action>
             .publisher {
-                naverMapManager.cameraIdlePass
+                state.mapManager.cameraIdlePass
                     .map { cameraLocation in
                         Action.mapAction(.getCameraLocation(cameraLocation))
                     }
@@ -296,7 +296,7 @@ extension SpotMapFeature {
         
         effects.append(Effect<SpotMapFeature.Action>
             .publisher {
-                naverMapManager.mbrLocationPass
+                state.mapManager.mbrLocationPass
                     .map { mbrLocation in
                         Action.mapAction(.getMBRLocation(mbrLocation))
                     }
@@ -305,8 +305,8 @@ extension SpotMapFeature {
         
         effects.append(Effect<SpotMapFeature.Action>
             .publisher {
-                naverMapManager.moveCameraPass
-                    .map { _ in 
+                state.mapManager.moveCameraPass
+                    .map { _ in
                         Action.mapAction(.moveCamera)
                     }
             }
@@ -314,7 +314,7 @@ extension SpotMapFeature {
         
         effects.append(Effect<SpotMapFeature.Action>
             .publisher {
-                naverMapManager.markerIndexPass
+                state.mapManager.markerIndexPass
                     .map { index in
                         Action.mapAction(.getMarkerIndex(index))
                     }

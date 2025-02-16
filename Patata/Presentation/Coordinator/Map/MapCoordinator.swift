@@ -54,7 +54,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(mapState: MapStateEntity(coord: coord, markers: []))))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
                 
             case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -107,7 +107,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(mapState: MapStateEntity(coord: coord, markers: []))))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
                 
             case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true

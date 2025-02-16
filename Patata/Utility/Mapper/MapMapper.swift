@@ -12,6 +12,10 @@ struct MapMapper: Sendable {
     func dtoToEntity(_ dtos: [MapSpotItemDTO]) async -> [MapSpotEntity] {
         return await dtos.asyncMap { dtoToEntity($0) }
     }
+    
+    func dtoToEntity(_ dtos: [AddSpotItemDTO]) async -> [MapSpotEntity] {
+        return await dtos.asyncMap { dtoToEntity($0) }.asyncMap { entityToEntity($0) }
+    }
 }
 
 extension MapMapper {
@@ -28,6 +32,14 @@ extension MapMapper {
             isScraped: dto.isScraped,
             distance: DistanceUnit.formatDistance(dto.distance)
         )
+    }
+    
+    private func dtoToEntity(_ dto: AddSpotItemDTO) -> AddSpotEntity {
+        return AddSpotEntity(spotId: dto.spotId, spotName: dto.spotName, coord: Coordinate(latitude: dto.latitude, longitude: dto.longitude))
+    }
+    
+    private func entityToEntity(_ dto: AddSpotEntity) -> MapSpotEntity {
+        return MapSpotEntity(spotId: dto.spotId, spotName: "", spotAddress: "", spotAddressDetail: "", coordinate: dto.coord, category: .all, tags: [], representativeImageUrl: "", isScraped: false, distance: "")
     }
 }
 

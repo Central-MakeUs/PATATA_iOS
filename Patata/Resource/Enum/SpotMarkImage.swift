@@ -21,7 +21,7 @@ enum SpotMarkerImage {
     static func getMarkerImage(category: CategoryCase) -> String {
         switch category {
         case .all:
-            return ""
+            return inActivePin
         case .recommendSpot:
             return recommendPin
         case .snapSpot:

@@ -60,6 +60,10 @@ extension ErrorManager {
         case .imageResizeError(let imageResizeError):
             return handleImageResizeError(imageResizeError)
             
+        case .checkAddSpot(let error):
+            print("checkAddSpot")
+            return nil
+            
         case .unknown(let errorStr):
             print("해결 시급합니다!! \(errorStr)")
             return "알 수 없는 오류가 발생했습니다."
