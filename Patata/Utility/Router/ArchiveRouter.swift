@@ -9,7 +9,7 @@ import Foundation
 import Alamofire
 
 enum ArchiveRouter: Router {
-    case toggleArchive(String)
+    case toggleArchive([Int])
 }
 
 extension ArchiveRouter {
@@ -23,7 +23,7 @@ extension ArchiveRouter {
     var path: String {
         switch self {
         case let .toggleArchive(spotId):
-            return "/scrap/\(spotId)"
+            return "/scrap/toggle"
         }
     }
     
@@ -45,8 +45,8 @@ extension ArchiveRouter {
     
     var body: Data? {
         switch self {
-        case .toggleArchive:
-            return nil
+        case let .toggleArchive(spotIds):
+            return requestToBody(spotIds)
         }
     }
     

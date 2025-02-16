@@ -97,7 +97,7 @@ extension SpotMapper {
     
     private func dtoToEntity(_ dto: TodaySpotItemDTO) -> TodaySpotEntity {
         TodaySpotEntity(
-            spotId: String(dto.spotId),
+            spotId: dto.spotId,
             spotAddress: dto.spotAddress,
             spotName: dto.spotName,
             category: .getCategory(id: dto.categoryId),
@@ -109,7 +109,7 @@ extension SpotMapper {
     
     private func dtoToEntity(_ dto: SearchSpotItemDTO) -> SearchSpotEntity {
         return SearchSpotEntity(
-            spotId: String(dto.spotId),
+            spotId: dto.spotId,
             spotName: dto.spotName,
             imageUrl: URL(string: dto.imageUrl ?? ""),
             spotScraps: dto.spotScraps,

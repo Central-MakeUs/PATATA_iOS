@@ -13,7 +13,7 @@ struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
         var isHomeCoordinator: Bool
-        var spotId: String
+        var spotId: Int
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
         var reviewData: [SpotDetailReviewEntity] = []
         
@@ -62,7 +62,7 @@ struct SpotDetailFeature {
     }
     
     enum NetworkType {
-        case fetchSpotDetail(String)
+        case fetchSpotDetail(Int)
         case patchArchiveState
         case deleteSpot
         case createReview(String)
@@ -153,9 +153,11 @@ extension SpotDetailFeature {
                 }
                 
             case .networkType(.patchArchiveState):
-                return .run { [state = state] send in
+                let spotId = [state.spotDetailData.spotId]
+                
+                return .run { send in
                     do {
-                        let data = try await archiveRepository.toggleArchive(spotId: String(state.spotDetailData.spotId))
+                        let data = try await archiveRepository.toggleArchive(spotId: spotId)
                         
                         await send(.dataTransType(.archiveState(data)))
                     } catch {

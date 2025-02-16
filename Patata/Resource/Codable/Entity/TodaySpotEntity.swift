@@ -8,7 +8,7 @@
 import Foundation
 
 struct TodaySpotEntity: Entity {
-    let spotId: String
+    let spotId: Int
     let spotAddress: String
     let spotName: String
     let category: CategoryCase

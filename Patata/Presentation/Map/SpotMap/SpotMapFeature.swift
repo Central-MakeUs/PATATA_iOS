@@ -194,7 +194,7 @@ extension SpotMapFeature {
                 
                 return .run { send in
                     do {
-                        let data = try await archiveRepository.toggleArchive(spotId: String(spot.spotId))
+                        let data = try await archiveRepository.toggleArchive(spotId: [spot.spotId])
                         
                         await send(.dataTransType(.archiveState(data)))
                     } catch {

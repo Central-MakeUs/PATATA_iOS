@@ -79,7 +79,7 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .category, action: .category(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: String(spotId))))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 state.routes.pop()
@@ -92,7 +92,7 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: String(spotId))))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .navigationAction(.pushSearch):
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))

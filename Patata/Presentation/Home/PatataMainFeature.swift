@@ -28,7 +28,7 @@ struct PatataMainFeature {
         enum Delegate {
             case tappedSearch
             case tappedAddButton
-            case tappedSpot(String)
+            case tappedSpot(Int)
             case tappedMoreButton
             case tappedCategoryButton(CategoryCase)
         }
@@ -42,7 +42,7 @@ struct PatataMainFeature {
         case selectCategory(Int)
         case tappedSearch
         case tappedAddButton
-        case tappedSpot(String)
+        case tappedSpot(Int)
         case tappedMoreButton
         case tappedArchiveButton(Int, card: Bool)
         case tappedCategoryButton(CategoryCase)
@@ -133,10 +133,12 @@ extension PatataMainFeature {
                 }
                 
             case let .networkType(.patchArchiveState(index, isCard)):
+                let spotId = [state.todaySpotItems[index].spotId]
+                
                 if isCard {
-                    return .run { [state = state] send in
+                    return .run { send in
                         do {
-                            let data = try await archiveRepository.toggleArchive(spotId: state.todaySpotItems[index].spotId)
+                            let data = try await archiveRepository.toggleArchive(spotId: spotId)
                             
                             await send(.dataTransType(.archiveState(data, index, card: isCard)))
                         } catch {
@@ -144,9 +146,9 @@ extension PatataMainFeature {
                         }
                     }
                 } else {
-                    return .run { [state = state] send in
+                    return .run { send in
                         do {
-                            let data = try await archiveRepository.toggleArchive(spotId: String(state.spotItems[index].spotId))
+                            let data = try await archiveRepository.toggleArchive(spotId: spotId)
                             
                             await send(.dataTransType(.archiveState(data, index, card: isCard)))
                         } catch {
@@ -173,7 +175,7 @@ extension PatataMainFeature {
                         tags: state.todaySpotItems[index].tags
                     )
                     
-                    if let index = state.spotItems.firstIndex(where: { String($0.spotId) == state.todaySpotItems[index].spotId }) {
+                    if let index = state.spotItems.firstIndex(where: { $0.spotId == state.todaySpotItems[index].spotId }) {
                         state.spotItems[index] = SpotEntity(
                             spotId: state.spotItems[index].spotId,
                             spotAddress: state.spotItems[index].spotAddress,
@@ -200,7 +202,7 @@ extension PatataMainFeature {
                         tags: state.spotItems[index].tags
                     )
                     
-                    if let index = state.todaySpotItems.firstIndex(where: { $0.spotId == String(state.spotItems[index].spotId) }) {
+                    if let index = state.todaySpotItems.firstIndex(where: { $0.spotId == state.spotItems[index].spotId }) {
                         
                         state.todaySpotItems[index] = TodaySpotEntity(
                             spotId: state.todaySpotItems[index].spotId,

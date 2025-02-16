@@ -9,10 +9,10 @@ import Foundation
 import ComposableArchitecture
 
 struct ArchiveMapper: Sendable {
-    func dtoToEntity(_ dto: ArchiveResultItemDTO) -> ArchiveEntity {
+    func dtoToEntity(_ dto: [ArchiveResultItemDTO]) -> ArchiveEntity {
         return ArchiveEntity(
-            totalScraps: dto.totalScraps,
-            isArchive: dto.message == "스크랩되었습니다" ? true : false
+            totalScraps: dto[0].totalScraps,
+            isArchive: dto[0].message == "스크랩되었습니다" ? true : false
         )
     }
 }

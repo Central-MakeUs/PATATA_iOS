@@ -76,11 +76,13 @@ struct SearchMapFeature {
         case userLocation(Coordinate)
         case searchSpotDatas(MapSpotEntity?)
         case otherSpotDatas([MapSpotEntity])
+        case archiveState(ArchiveEntity)
     }
     
     enum NetworkType {
         case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil)
         case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase?, withSearch: Bool = true)
+        case patchArchiveState
     }
     
     enum MapAction {
@@ -91,6 +93,7 @@ struct SearchMapFeature {
     }
     
     @Dependency(\.mapRepository) var mapRepository
+    @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.locationManager) var locationManager
     @Dependency(\.errorManager) var errorManager
     
@@ -141,6 +144,11 @@ extension SearchMapFeature {
             case .viewEvent(.tappedMoveToUserLocationButton):
                 state.mapManager.moveCamera(coord: state.userLocation)
                 
+            case .viewEvent(.tappedArchiveButton):
+                return .run { send in
+                    await send(.networkType(.patchArchiveState))
+                }
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -187,6 +195,19 @@ extension SearchMapFeature {
                     }
                 }
                 
+            case .networkType(.patchArchiveState):
+                let spot = state.searchSpotItems[state.selectedIndex]
+                
+                return .run { send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: [spot.spotId])
+                        
+                        await send(.dataTransType(.archiveState(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -228,6 +249,20 @@ extension SearchMapFeature {
                 state.mapManager.updateMarkers(markers: state.searchSpotItems)
                 state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
                 state.isPresented = true
+                
+            case let .dataTransType(.archiveState(data)):
+                state.searchSpotItems[state.selectedIndex] = MapSpotEntity(
+                    spotId: state.searchSpotItems[state.selectedIndex].spotId,
+                    spotName: state.searchSpotItems[state.selectedIndex].spotName,
+                    spotAddress: state.searchSpotItems[state.selectedIndex].spotAddress,
+                    spotAddressDetail: state.searchSpotItems[state.selectedIndex].spotAddressDetail,
+                    coordinate: state.searchSpotItems[state.selectedIndex].coordinate,
+                    category: state.searchSpotItems[state.selectedIndex].category,
+                    tags: state.searchSpotItems[state.selectedIndex].tags,
+                    representativeImageUrl: state.searchSpotItems[state.selectedIndex].representativeImageUrl,
+                    isScraped: data.isArchive,
+                    distance: state.searchSpotItems[state.selectedIndex].distance
+                )
                 
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented

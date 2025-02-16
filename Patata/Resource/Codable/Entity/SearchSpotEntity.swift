@@ -22,7 +22,7 @@ struct SearchSpotCountEntity: Entity {
 }
 
 struct SearchSpotEntity: Entity {
-    let spotId: String
+    let spotId: Int
     let spotName: String
     let imageUrl: URL?
     let spotScraps: Int
@@ -30,7 +30,7 @@ struct SearchSpotEntity: Entity {
     let reviews: Int
     let distance: Double
     
-    init(spotId: String = "", spotName: String = "", imageUrl: URL? = nil, spotScraps: Int = 0, isScraped: Bool = false, reviews: Int = 0, distance: Double = 0) {
+    init(spotId: Int = 0, spotName: String = "", imageUrl: URL? = nil, spotScraps: Int = 0, isScraped: Bool = false, reviews: Int = 0, distance: Double = 0) {
         self.spotId = spotId
         self.spotName = spotName
         self.imageUrl = imageUrl

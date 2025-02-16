@@ -11,10 +11,11 @@ struct ArchiveResultDTO: DTO {
     let isSuccess: Bool
     let code: String
     let message: String
-    let result: ArchiveResultItemDTO
+    let result: [ArchiveResultItemDTO]
 }
 
 struct ArchiveResultItemDTO: DTO {
-    let message: String
+    let spotId: Int
     let totalScraps: Int
+    let message: String
 }

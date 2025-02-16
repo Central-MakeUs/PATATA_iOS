@@ -52,7 +52,7 @@ struct SearchFeature {
         enum Delegate {
             case tappedBackButton
             case successSearch(String)
-            case tappedSpotDetail(String)
+            case tappedSpotDetail(Int)
         }
     }
     
@@ -64,7 +64,7 @@ struct SearchFeature {
         case tappedBackButton
         case searchOnSubmit
         case searchStart
-        case tappedSpotDetail(String)
+        case tappedSpotDetail(Int)
         case tappedArchiveButton(Int)
         case nextPage
     }
@@ -163,9 +163,11 @@ extension SearchFeature {
                 }
                 
             case let .networkType(.patchArchiveState(index)):
-                return .run { [state = state] send in
+                let spotId = [state.searchSpotItems[index].spotId]
+                
+                return .run { send in
                     do {
-                        let data = try await archiveRepository.toggleArchive(spotId: state.searchSpotItems[index].spotId)
+                        let data = try await archiveRepository.toggleArchive(spotId: spotId)
                         
                         await send(.dataTransType(.archiveState(data, index)))
                     } catch {

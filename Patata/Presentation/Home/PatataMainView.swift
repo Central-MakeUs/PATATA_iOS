@@ -93,7 +93,7 @@ extension PatataMainView {
                             .padding(.horizontal, 15)
                             .padding(.bottom, 4)
                             .asButton {
-                                store.send(.viewEvent(.tappedSpot(String(item.spotId))))
+                                store.send(.viewEvent(.tappedSpot(item.spotId)))
                             }
                         }
                         
@@ -272,7 +272,7 @@ extension PatataMainView {
                             .scaleEffect(scale)
                             .animation(.smooth, value: dragOffset)
                             .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot(String(store.todaySpotItems[adjustedIndex].spotId))))
+                                store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
                             }
                         }
                     }

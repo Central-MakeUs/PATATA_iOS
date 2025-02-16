@@ -12,7 +12,7 @@ enum SpotRouter: Router {
     case fetchCategorySpot(all: Bool, categoryId: Int, page: Int, latitude: Double, longitude: Double, sortBy: String)
     case fetchTodayMain
     case fetchSearchResult(searchText: String, page: Int, latitude: Double, longitude: Double, sortBy: String)
-    case fetchSpot(String)
+    case fetchSpot(Int)
     case deleteSpot(Int)
     case createSpot(CreateSpotRequestDTO)
     case fetchTodaySpotList(Coordinate)

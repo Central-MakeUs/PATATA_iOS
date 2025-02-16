@@ -118,9 +118,11 @@ extension MySpotListFeature {
                 }
                 
             case let .networkType(.patchArchiveState(index)):
-                return .run { [state = state] send in
+                let spotId = [state.spotListEntity[index].spotId]
+                
+                return .run { send in
                     do {
-                        let data = try await archiveRepository.toggleArchive(spotId: String(state.spotListEntity[index].spotId))
+                        let data = try await archiveRepository.toggleArchive(spotId: spotId)
                         
                         await send(.dataTransType(.archiveState(data, index)))
                     } catch {
