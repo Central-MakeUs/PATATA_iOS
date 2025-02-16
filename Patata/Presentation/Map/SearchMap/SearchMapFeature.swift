@@ -70,6 +70,7 @@ struct SearchMapFeature {
         case tappedMoveToUserLocationButton
         case tappedArchiveButton
         case tappedReloadButton
+        case dismissPopup
     }
     
     enum DataTransType {
@@ -82,7 +83,7 @@ struct SearchMapFeature {
     
     enum NetworkType {
         case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil)
-        case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase, withSearch: Bool = true)
+        case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase)
         case patchArchiveState
     }
     
@@ -112,6 +113,10 @@ extension SearchMapFeature {
                 state.isOtherFirst = true
                 state.reloadButtonIsHide = true
                 
+                state.mapManager.clearCurrentMarkers()
+                
+                print("onAppear")
+                
                 return .merge(
                     .merge(registerPublisher(state: &state)),
                     .run { send in
@@ -125,6 +130,18 @@ extension SearchMapFeature {
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
+                
+                if !state.searchSpotItems.isEmpty {
+                    let spotName = state.searchSpotItems[state.selectedIndex].spotName
+                    let userLocation = state.userLocation
+                    let mbrLocation = state.mbrLocation
+                    
+                    state.mapManager.clearCurrentMarkers()
+                    
+                    return .run { send in
+                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbrLocation)))
+                    }
+                }
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
@@ -163,6 +180,9 @@ extension SearchMapFeature {
                     await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbr)))
                 }
                 
+            case .viewEvent(.dismissPopup):
+                state.errorIsPresented = false
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -190,7 +210,7 @@ extension SearchMapFeature {
                     }
                 }
             
-            case let .networkType(.otherSpot(mbrLocation, userLocation, category, withSearch)):
+            case let .networkType(.otherSpot(mbrLocation, userLocation, category)):
                 return .run { send in
                     do {
                         let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: category.rawValue, isSearch: true)
@@ -252,10 +272,12 @@ extension SearchMapFeature {
                     let menuItem = state.selectedMenuIndex
                     
                     return .run { send in
-                        await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: CategoryCase(rawValue: menuItem) ?? .all, withSearch: true)))
+                        await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: CategoryCase(rawValue: menuItem) ?? .all)))
                     }
                 } else {
+                    print("here")
                     state.errorIsPresented = true
+                    state.mapManager.moveCamera(coord: state.userLocation)
                 }
                 
             case let .dataTransType(.otherSpotDatas(data)):

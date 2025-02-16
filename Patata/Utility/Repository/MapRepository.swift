@@ -49,10 +49,19 @@ final class MapRepository: @unchecked Sendable {
         }
     }
     
-    func fetchSearchSpot(userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil, spotName: String) async throws(PAError) -> MapSpotEntity {
-        let dtos = try await networkManager.requestNetworkWithRefresh(dto: SearchMapDTO.self, router: MapRouter.searchMap(spotName: spotName, mbrLocation: mbrLocation, userLocation: userLocation)).result
-        
-        return mapper.dtoToEntity(dtos)
+    func fetchSearchSpot(userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil, spotName: String) async throws(PAError) -> MapSpotEntity? {
+        do {
+            let dtos = try await networkManager.requestNetworkWithRefresh(dto: SearchMapDTO.self, router: MapRouter.searchMap(spotName: spotName, mbrLocation: mbrLocation, userLocation: userLocation)).result
+            
+            return mapper.dtoToEntity(dtos)
+        } catch {
+            switch error {
+            case .errorMessage(.search(.noData)):
+                return nil
+            default:
+                throw error
+            }
+        }
     }
 }
 

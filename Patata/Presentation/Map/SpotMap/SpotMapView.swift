@@ -23,9 +23,11 @@ struct SpotMapView: View {
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
-                    
-                        AnyView(spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[store.selectIndex]))
-                    
+                    AnyView(
+                        WithPerceptionTracking(content: {
+                            spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
+                        })
+                    )
                 }, onDismiss: {
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })

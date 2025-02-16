@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 
 struct SearchMapView: View {
     
@@ -19,9 +20,50 @@ struct SearchMapView: View {
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
-                    AnyView(spotDetailSheet(spot: store.searchSpotItems.isEmpty ? MapSpotEntity() : store.searchSpotItems[store.selectedIndex]))
+                    AnyView(
+                        WithPerceptionTracking {
+                            spotDetailSheet(spot: store.searchSpotItems[safe: store.selectedIndex] ?? MapSpotEntity())
+                        }
+                    )
                 }, onDismiss: {
                     store.send(.viewEvent(.bottomSheetDismiss))
+                })
+                .popup(isPresented: $store.errorIsPresented.sending(\.bindingErrorIsPresent), view: {
+                    HStack {
+                        Spacer()
+                        
+                        Text("'\(store.searchText)'에 대한 검색 결과가 없어요")
+                            .textStyle(.subtitleXS)
+                            .foregroundStyle(.blue20)
+                            .padding(.vertical, 10)
+                        
+                        Image("NoAddIcon")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                        
+                        Spacer()
+                    }
+                    .background(.gray100)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal, 15)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    }
+                }, customize: {
+                    $0
+                        .type(.floater())
+                        .position(.bottom)
+                        .animation(.spring())
+                        .closeOnTap(true)
+                        .closeOnTapOutside(true)
+                        .backgroundColor(.black.opacity(0.5))
+                        .dismissCallback {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    
                 })
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
