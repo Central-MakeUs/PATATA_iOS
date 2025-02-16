@@ -76,9 +76,9 @@ extension SearchMapView {
                 }
             
             HStack {
-                Text("장소 또는 위치명을 검색해 보세요")
-                    .textStyle(.bodyS)
-                    .foregroundColor(.textDisabled)
+                Text(store.searchText)
+                    .textStyle(.subtitleS)
+                    .foregroundColor(.textSub)
                 
                 Spacer()
                 
@@ -109,23 +109,31 @@ extension SearchMapView {
     }
     
     private var mapMenuView: some View {
-        ScrollView(.horizontal) {
-            HStack {
-                ForEach(CategoryCase.allCases, id: \.id) { item in
-                    categoryMenuView(categoryItem: item)
-                        .onTapGesture {
-                            store.send(.viewEvent(.tappedMenu(item.rawValue)))
-                        }
+        ScrollViewReader { proxy in
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(CategoryCase.allCases, id: \.id) { item in
+                        categoryMenuView(categoryItem: item)
+                            .id(item.rawValue)
+                            .asButton {
+                                store.send(.viewEvent(.tappedMenu(item.rawValue)))
+                            }
+                            .onChange(of: store.selectedMenuIndex) { newValue in
+                                withAnimation {
+                                    proxy.scrollTo(store.selectedMenuIndex, anchor: .center)
+                                }
+                            }
+                    }
                 }
+                .padding(.horizontal, 15)
             }
-            .padding(.horizontal, 15)
         }
     }
     
     private var mapBottomView: some View {
         ZStack(alignment: .bottom) {
             
-            if store.spotReloadButton {
+            if !store.reloadButtonIsHide {
                 VStack {
                     HStack(spacing: 4) {
                         Image("ReloadIcon")
@@ -144,7 +152,7 @@ extension SearchMapView {
                     .clipShape(RoundedRectangle(cornerRadius: 20))
                     .shadow(color: .shadowColor, radius: 5)
                     .asButton {
-                        print("tap")
+                        store.send(.viewEvent(.tappedReloadButton))
                     }
                 }
                 .padding(.bottom, 12)

@@ -23,8 +23,8 @@ struct SearchMapFeature {
         var searchSpotItems: [MapSpotEntity] = []
         var selectedIndex: Int = 0
         var selectedMenuIndex: Int = 0
-        var spotReloadButton: Bool = false
         var isFirst: Bool = false
+        var isOtherFirst: Bool = false
         var reloadButtonIsHide: Bool = true
         
         // bindingState
@@ -69,6 +69,7 @@ struct SearchMapFeature {
         case bottomSheetDismiss
         case tappedMoveToUserLocationButton
         case tappedArchiveButton
+        case tappedReloadButton
     }
     
     enum DataTransType {
@@ -81,7 +82,7 @@ struct SearchMapFeature {
     
     enum NetworkType {
         case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil)
-        case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase?, withSearch: Bool = true)
+        case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase, withSearch: Bool = true)
         case patchArchiveState
     }
     
@@ -108,10 +109,10 @@ extension SearchMapFeature {
             switch action {
             case .viewCycle(.onAppear):
                 state.isFirst = true
-                state.spotReloadButton = false
+                state.isOtherFirst = true
+                state.reloadButtonIsHide = true
                 
                 return .merge(
-//                    .send(.viewEvent(.tappedMarker)),
                     .merge(registerPublisher(state: &state)),
                     .run { send in
                         await send(.dataTransType(.fetchRealm))
@@ -149,6 +150,19 @@ extension SearchMapFeature {
                     await send(.networkType(.patchArchiveState))
                 }
                 
+            case .viewEvent(.tappedReloadButton):
+                state.selectedMenuIndex = 0
+                
+                let userLocation = state.userLocation
+                let mbr = state.mbrLocation
+                let spotName = state.searchText
+                
+                state.mapManager.clearCurrentMarkers()
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbr)))
+                }
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -157,6 +171,7 @@ extension SearchMapFeature {
                 
             case let .mapAction(.getMarkerIndex(index)):
                 state.selectedIndex = index
+                state.searchText = state.searchSpotItems[state.selectedIndex].spotName
                 state.isPresented = true
                 return .send(.delegate(.tappedMarker))
                 
@@ -178,7 +193,7 @@ extension SearchMapFeature {
             case let .networkType(.otherSpot(mbrLocation, userLocation, category, withSearch)):
                 return .run { send in
                     do {
-                        let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: category?.rawValue ?? 0, isSearch: true)
+                        let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: category.rawValue, isSearch: true)
                         
                         await send(.dataTransType(.otherSpotDatas(data)))
                     } catch {
@@ -230,13 +245,14 @@ extension SearchMapFeature {
             case let .dataTransType(.searchSpotDatas(data)):
                 if let data {
                     state.errorIsPresented = false
-                    state.searchSpotItems.append(data)
+                    state.searchSpotItems = [data]
                     
                     let mbrLocation = state.mbrLocation
                     let userLocation = state.userLocation
+                    let menuItem = state.selectedMenuIndex
                     
                     return .run { send in
-                        await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: nil, withSearch: true)))
+                        await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: CategoryCase(rawValue: menuItem) ?? .all, withSearch: true)))
                     }
                 } else {
                     state.errorIsPresented = true
@@ -245,10 +261,14 @@ extension SearchMapFeature {
             case let .dataTransType(.otherSpotDatas(data)):
                 state.searchSpotItems.append(contentsOf: data)
                 state.selectedIndex = 0
-                print("search", state.searchSpotItems)
                 state.mapManager.updateMarkers(markers: state.searchSpotItems)
-                state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
-                state.isPresented = true
+                
+                if state.isOtherFirst {
+                    state.isOtherFirst = false
+                    
+                    state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
+                    state.isPresented = true
+                }
                 
             case let .dataTransType(.archiveState(data)):
                 state.searchSpotItems[state.selectedIndex] = MapSpotEntity(

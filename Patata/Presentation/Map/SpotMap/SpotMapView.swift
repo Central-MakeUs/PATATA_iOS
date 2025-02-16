@@ -122,7 +122,6 @@ extension SpotMapView {
                 .padding(.horizontal, 15)
             }
         }
-        
     }
     
     private var mapBottomView: some View {
