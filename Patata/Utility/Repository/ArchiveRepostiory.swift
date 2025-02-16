@@ -17,6 +17,12 @@ final class ArchiveRepostiory: @unchecked Sendable {
         
         return mapper.dtoToEntity(dto)
     }
+    
+    func fetchArchiveList() async throws(PAError) -> [ArchiveListEntity] {
+        let dtos = try await networkManager.requestNetworkWithRefresh(dto: ArchiveListDTO.self, router: ArchiveRouter.fetchArchiveList).result
+        
+        return await mapper.dtoToEntity(dtos)
+    }
 }
 
 extension ArchiveRepostiory: DependencyKey {

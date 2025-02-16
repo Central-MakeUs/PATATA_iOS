@@ -15,6 +15,16 @@ struct ArchiveMapper: Sendable {
             isArchive: dto[0].message == "스크랩되었습니다" ? true : false
         )
     }
+    
+    func dtoToEntity(_ dtos: [ArchiveItemDTO]) async -> [ArchiveListEntity] {
+        return await dtos.asyncMap { dtoToEntity($0) }
+    }
+}
+
+extension ArchiveMapper {
+    private func dtoToEntity(_ dto: ArchiveItemDTO) -> ArchiveListEntity {
+        return ArchiveListEntity(spotId: dto.spotId, spotName: dto.spotName, representativeImageUrl: URL(string: dto.representativeImageUrl))
+    }
 }
 
 extension ArchiveMapper: DependencyKey {

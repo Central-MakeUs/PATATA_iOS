@@ -36,6 +36,16 @@ struct TabCoordinatorView: View {
                                 .tag(TabCase.map)
                                 .ignoresSafeArea(.all, edges: .bottom)
                         }
+                        
+                        Tab(
+                            "아카이브",
+                            image: store.tabState == .archive ? "ArchiveActiveTap" : "ArchiveInActiveTap",
+                            value: .archive
+                        ) {
+                            ArchiveView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
+                                .tag(TabCase.archive)
+                                .ignoresSafeArea(.all, edges: .bottom)
+                        }
                     }
                     .tint(.textDefault)
                     .onAppear {
@@ -75,6 +85,13 @@ struct TabCoordinatorView: View {
                                 Image(store.tabState == .map ?  "SpotActive" : "SpotInActive")
                             }
                             .tag(TabCase.map)
+                            .ignoresSafeArea(.all, edges: .bottom)
+                        
+                        ArchiveView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
+                            .tabItem {
+                                Image(store.tabState == .archive ?  "ArchiveActiveTap" : "ArchiveInActiveTap")
+                            }
+                            .tag(TabCase.archive)
                             .ignoresSafeArea(.all, edges: .bottom)
                     }
                     .tint(.textDefault)
