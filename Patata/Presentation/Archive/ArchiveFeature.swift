@@ -29,7 +29,7 @@ struct ArchiveFeature {
         case delegate(Delegate)
         
         enum Delegate {
-
+            case tappedSpot(Int)
         }
         
         // bindingAction
@@ -77,10 +77,14 @@ extension ArchiveFeature {
                 }
                 
             case let .viewEvent(.tappedSpot(spotId)):
-                if state.selectedSpotList.contains(spotId) {
-                    state.selectedSpotList.removeAll { $0 == spotId }
+                if state.chooseIsValid {
+                    if state.selectedSpotList.contains(spotId) {
+                        state.selectedSpotList.removeAll { $0 == spotId }
+                    } else {
+                        state.selectedSpotList.append(spotId)
+                    }
                 } else {
-                    state.selectedSpotList.append(spotId)
+                    return .send(.delegate(.tappedSpot(spotId)))
                 }
                 
             case .viewEvent(.tappedChoseButton):

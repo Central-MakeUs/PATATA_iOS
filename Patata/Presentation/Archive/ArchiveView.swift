@@ -87,11 +87,7 @@ extension ArchiveView {
                                 }
                             )
                             .asButton {
-                                if store.chooseIsValid {
-                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                } else {
-                                    
-                                }
+                                store.send(.viewEvent(.tappedSpot(item.spotId)))
                             }
                     }
                 }

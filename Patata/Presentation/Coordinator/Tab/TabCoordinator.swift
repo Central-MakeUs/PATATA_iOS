@@ -13,18 +13,18 @@ struct TabCoordinator {
     
     @ObservableState
     struct State: Equatable {
-        static let initialState = State(tabState: .home, homeTabState: .initialState, mapTabState: .initialState, archiveTabState: .init())
+        static let initialState = State(tabState: .home, homeTabState: .initialState, mapTabState: .initialState, archiveTabState: .initialState)
         var tabState: TabCase
         
         var homeTabState = HomeCoordinator.State.initialState
         var mapTabState = MapCoordinator.State.initialState
-        var archiveTabState = ArchiveFeature.State()
+        var archiveTabState = ArchiveCoordinator.State.initialState
     }
     
     enum Action {
         case homeTabAction(HomeCoordinator.Action)
         case mapTabAction(MapCoordinator.Action)
-        case archiveTabAction(ArchiveFeature.Action)
+        case archiveTabAction(ArchiveCoordinator.Action)
         
         // binding
         case bindingTab(TabCase)
@@ -40,7 +40,7 @@ struct TabCoordinator {
         }
         
         Scope(state: \.archiveTabState, action: \.archiveTabAction) {
-            ArchiveFeature()
+            ArchiveCoordinator()
         }
         
         core()

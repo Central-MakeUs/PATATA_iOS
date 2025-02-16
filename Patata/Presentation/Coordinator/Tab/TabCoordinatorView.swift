@@ -42,7 +42,7 @@ struct TabCoordinatorView: View {
                             image: store.tabState == .archive ? "ArchiveActiveTap" : "ArchiveInActiveTap",
                             value: .archive
                         ) {
-                            ArchiveView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
+                            ArchiveCoordinatorView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
                                 .tag(TabCase.archive)
                                 .ignoresSafeArea(.all, edges: .bottom)
                         }
@@ -87,7 +87,7 @@ struct TabCoordinatorView: View {
                             .tag(TabCase.map)
                             .ignoresSafeArea(.all, edges: .bottom)
                         
-                        ArchiveView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
+                        ArchiveCoordinatorView(store: store.scope(state: \.archiveTabState, action: \.archiveTabAction))
                             .tabItem {
                                 Image(store.tabState == .archive ?  "ArchiveActiveTap" : "ArchiveInActiveTap")
                             }
