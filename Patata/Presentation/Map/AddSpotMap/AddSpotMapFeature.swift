@@ -135,7 +135,7 @@ extension AddSpotMapFeature {
                 
             case let .dataTransType(.checkValidSpot(data)):
                 state.addSpotEntity = data
-                state.addValid = data.count >= 30 ? false : true
+                state.addValid = data.count >= 25 ? false : true
                 
                 let coord = state.spotCoord
                 let address = state.address

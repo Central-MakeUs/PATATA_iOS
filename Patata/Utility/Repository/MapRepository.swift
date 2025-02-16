@@ -48,6 +48,12 @@ final class MapRepository: @unchecked Sendable {
             }
         }
     }
+    
+    func fetchSearchSpot(userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil, spotName: String) async throws(PAError) -> MapSpotEntity {
+        let dtos = try await networkManager.requestNetworkWithRefresh(dto: SearchMapDTO.self, router: MapRouter.searchMap(spotName: spotName, mbrLocation: mbrLocation, userLocation: userLocation)).result
+        
+        return mapper.dtoToEntity(dtos)
+    }
 }
 
 extension MapRepository: DependencyKey {

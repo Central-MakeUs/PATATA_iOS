@@ -12,6 +12,7 @@ enum APIError: Error {
     case member(MemberError)
     case common(CommonError)
     case oauth(OAuthError)
+    case search(SearchError)
     case unknown(APIResponseErrorDTO)
     
     static func getType(code: String) -> APIError? {
@@ -35,6 +36,10 @@ enum APIError: Error {
             return .common(.success)
         case "COMMON400":
             return .common(.invalidRequest)
+            
+        case "SPOT4005":
+            return .search(.noData)
+            
         default:
             return nil
         }

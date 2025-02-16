@@ -51,7 +51,7 @@ struct SearchFeature {
         
         enum Delegate {
             case tappedBackButton
-            case successSearch
+            case successSearch(String)
             case tappedSpotDetail(String)
         }
     }
@@ -121,12 +121,14 @@ extension SearchFeature {
                     state.viewState = .loading
                 }
                 
+                let searchText = state.searchText
+                
                 if state.beforeViewState == .home {
                     return .run { [state = state] send in
                         await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false)))
                     }
                 } else {
-                    return .send(.delegate(.successSearch))
+                    return .send(.delegate(.successSearch(searchText)))
                 }
                 
             case .viewEvent(.searchStart):

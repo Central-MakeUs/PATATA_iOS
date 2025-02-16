@@ -15,26 +15,36 @@ struct SearchMapFeature {
     
     @ObservableState
     struct State: Equatable {
-        var mapState: MapStateEntity = MapStateEntity(coord: Coordinate(latitude: 37.5666885, longitude: 126.9784147), markers: [(Coordinate(latitude: 37.5666885, longitude: 126.9784147), SpotMarkerImage.housePin)])
+        var searchText: String
+        var mapManager: NaverMapManager = NaverMapManager.searchMapShared
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
+        var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))
+        var searchSpotItems: [MapSpotEntity] = []
+        var selectedIndex: Int = 0
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
+        var isFirst: Bool = false
+        var reloadButtonIsHide: Bool = true
         
         // bindingState
         var isPresented: Bool = false
+        var errorIsPresented: Bool = false
         var archive: Bool = false
     }
     
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
-        case delegate(Delegate)
+        case networkType(NetworkType)
         case dataTransType(DataTransType)
+        case mapAction(MapAction)
+        case delegate(Delegate)
         
         // bindingAction
         case bindingIsPresented(Bool)
         case bindingArchive(Bool)
+        case bindingErrorIsPresent(Bool)
         
         enum Delegate {
             case tappedSideButton
@@ -52,23 +62,37 @@ struct SearchMapFeature {
     
     enum ViewEvent {
         case tappedMenu(Int)
-        case tappedMarker
         case tappedSpotAddButton
         case tappedSideButton
         case tappedBackButton
         case tappedSearch
-        case tappedMoveToUserLocationButton
         case bottomSheetDismiss
-        case changeMapLocation
-        case onCameraIdle(Coordinate)
+        case tappedMoveToUserLocationButton
+        case tappedArchiveButton
     }
     
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
+        case searchSpotDatas(MapSpotEntity?)
+        case otherSpotDatas([MapSpotEntity])
     }
     
+    enum NetworkType {
+        case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil)
+        case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase?, withSearch: Bool = true)
+    }
+    
+    enum MapAction {
+        case getMBRLocation(MBRCoordinates)
+        case getMarkerIndex(Int)
+        case getCameraLocation(Coordinate)
+        case moveCamera
+    }
+    
+    @Dependency(\.mapRepository) var mapRepository
     @Dependency(\.locationManager) var locationManager
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -80,10 +104,12 @@ extension SearchMapFeature {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
+                state.isFirst = true
                 state.spotReloadButton = false
                 
                 return .merge(
-                    .send(.viewEvent(.tappedMarker)),
+//                    .send(.viewEvent(.tappedMarker)),
+                    .merge(registerPublisher(state: &state)),
                     .run { send in
                         await send(.dataTransType(.fetchRealm))
                         
@@ -95,10 +121,6 @@ extension SearchMapFeature {
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
-                
-            case .viewEvent(.tappedMarker):
-                state.isPresented = true
-                return .send(.delegate(.tappedMarker))
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
@@ -116,15 +138,54 @@ extension SearchMapFeature {
             case .viewEvent(.tappedSearch):
                 return .send(.delegate(.tappedSearch))
                 
-            case .viewEvent(.changeMapLocation):
-                state.spotReloadButton = true
-                
             case .viewEvent(.tappedMoveToUserLocationButton):
-                state.mapState.first = false
-                state.mapState.coord = state.userLocation
+                state.mapManager.moveCamera(coord: state.userLocation)
                 
-            case let .viewEvent(.onCameraIdle(coord)):
-                state.cameraLocation = coord
+            case let .mapAction(.getMBRLocation(mbrLocation)):
+                state.mbrLocation = mbrLocation
+                
+            case let .mapAction(.getCameraLocation(cameraLocation)):
+                state.cameraLocation = cameraLocation
+                
+            case let .mapAction(.getMarkerIndex(index)):
+                state.selectedIndex = index
+                state.isPresented = true
+                return .send(.delegate(.tappedMarker))
+                
+            case .mapAction(.moveCamera):
+                state.reloadButtonIsHide = false
+                
+            case let .networkType(.searchSpot(spotName, userLocation, mbrLocation)):
+                return .run { send in
+                    do {
+                        let data = try await mapRepository.fetchSearchSpot(userLocation: userLocation, mbrLocation: mbrLocation, spotName: spotName)
+                        
+                        await send(.dataTransType(.searchSpotDatas(data)))
+                        
+                    } catch {
+                        print("error", errorManager.handleError(error) ?? "")
+                    }
+                }
+            
+            case let .networkType(.otherSpot(mbrLocation, userLocation, category, withSearch)):
+                return .run { send in
+                    do {
+                        let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: category?.rawValue ?? 0, isSearch: true)
+                        
+                        await send(.dataTransType(.otherSpotDatas(data)))
+                    } catch {
+                        if let paError = error as? PAError {
+                            switch paError {
+                            case .errorMessage(.search(.noData)):
+                                await send(.dataTransType(.searchSpotDatas(nil)))
+                            default:
+                                print("error", errorManager.handleError(error) ?? "")
+                            }
+                        } else {
+                            print("error", errorManager.handleError(error) ?? "")
+                        }
+                    }
+                }
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
@@ -135,16 +196,96 @@ extension SearchMapFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
+                if state.isFirst {
+                    state.isFirst = false
+                    
+                    let spotName = state.searchText
+                    
+                    return .run { send in
+                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
+                    }
+                }
+                
+            case let .dataTransType(.searchSpotDatas(data)):
+                if let data {
+                    state.errorIsPresented = false
+                    state.searchSpotItems.append(data)
+                    
+                    let mbrLocation = state.mbrLocation
+                    let userLocation = state.userLocation
+                    
+                    return .run { send in
+                        await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: nil, withSearch: true)))
+                    }
+                } else {
+                    state.errorIsPresented = true
+                }
+                
+            case let .dataTransType(.otherSpotDatas(data)):
+                state.searchSpotItems.append(contentsOf: data)
+                state.selectedIndex = 0
+                print("search", state.searchSpotItems)
+                state.mapManager.updateMarkers(markers: state.searchSpotItems)
+                state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
+                state.isPresented = true
+                
             case let .bindingIsPresented(isPresented):
                 state.isPresented = isPresented
                 
             case let .bindingArchive(isArchive):
                 state.archive = isArchive
                 
+            case let .bindingErrorIsPresent(isPresent):
+                state.errorIsPresented = isPresent
+                
             default:
                 break
             }
             return .none
         }
+    }
+}
+
+extension SearchMapFeature {
+    private func registerPublisher(state: inout State) -> [Effect<SearchMapFeature.Action>] {
+        var effects : [Effect<SearchMapFeature.Action>] = .init()
+        
+        effects.append(Effect<SearchMapFeature.Action>
+            .publisher {
+                state.mapManager.mbrLocationPass
+                    .map { mbrLocation in
+                        Action.mapAction(.getMBRLocation(mbrLocation))
+                    }
+            }
+        )
+        
+        effects.append(Effect<SearchMapFeature.Action>
+            .publisher {
+                state.mapManager.markerIndexPass
+                    .map { index in
+                        Action.mapAction(.getMarkerIndex(index))
+                    }
+            }
+        )
+        
+        effects.append(Effect<SearchMapFeature.Action>
+            .publisher {
+                state.mapManager.cameraIdlePass
+                    .map { cameraLocation in
+                        Action.mapAction(.getCameraLocation(cameraLocation))
+                    }
+            }
+        )
+        
+        effects.append(Effect<SearchMapFeature.Action>
+            .publisher {
+                state.mapManager.moveCameraPass
+                    .map { _ in
+                        Action.mapAction(.moveCamera)
+                    }
+            }
+        )
+        
+        return effects
     }
 }

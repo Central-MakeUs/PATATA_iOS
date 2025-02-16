@@ -15,14 +15,14 @@ enum MapRouter: Router {
         categoryId: Int,
         isSearch: Bool
     )
-    
     case checkSpotCount(Coordinate)
+    case searchMap(spotName: String, mbrLocation: MBRCoordinates?, userLocation: Coordinate)
 }
 
 extension MapRouter {
     var method: HTTPMethod {
         switch self {
-        case .fetchMap, .checkSpotCount:
+        case .fetchMap, .checkSpotCount, .searchMap:
             return .get
         }
     }
@@ -33,12 +33,14 @@ extension MapRouter {
             return "/map/in-bound"
         case .checkSpotCount:
             return "/map/density"
+        case .searchMap:
+            return "/map/search"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchMap, .checkSpotCount:
+        case .fetchMap, .checkSpotCount, .searchMap:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -76,19 +78,38 @@ extension MapRouter {
                 "latitude": coord.latitude,
                 "longitude": coord.longitude
             ]
+            
+        case let .searchMap(spotName, mbrLocation, userLocation):
+            if let mbrLocation {
+                return [
+                    "spotName": spotName,
+                    "minLatitude": mbrLocation.southWest.latitude,
+                    "minLongitude": mbrLocation.southWest.longitude,
+                    "maxLatitude": mbrLocation.northEast.latitude,
+                    "maxLongitude": mbrLocation.northEast.longitude,
+                    "userLatitude": userLocation.latitude,
+                    "userLongitude": userLocation.longitude
+                ]
+            } else {
+                return [
+                    "spotName": spotName,
+                    "userLatitude": userLocation.latitude,
+                    "userLongitude": userLocation.longitude
+                ]
+            }
         }
     }
     
     var body: Data? {
         switch self {
-        case .fetchMap, .checkSpotCount:
+        case .fetchMap, .checkSpotCount, .searchMap:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .fetchMap, .checkSpotCount:
+        case .fetchMap, .checkSpotCount, .searchMap:
             return .url
         }
     }

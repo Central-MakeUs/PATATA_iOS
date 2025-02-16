@@ -14,6 +14,13 @@ struct MapSpotDTO: DTO {
     let result: [MapSpotItemDTO]
 }
 
+struct SearchMapDTO: DTO {
+    let isSuccess: Bool
+    let code: String
+    let message: String
+    let result: MapSpotItemDTO
+}
+
 struct MapSpotItemDTO: DTO {
     let spotId: Int
     let spotName: String

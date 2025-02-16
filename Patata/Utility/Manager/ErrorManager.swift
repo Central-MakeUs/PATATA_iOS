@@ -107,6 +107,13 @@ extension ErrorManager {
                 return "Apple 로그인에 실패했습니다."
             }
             
+        case .search(let searchError):
+            switch searchError {
+            case .noData:
+                print("검색어에 대한 정보 없음")
+                return ""
+            }
+            
         case .unknown(let apiResponseErrorDTO):
             print("해당 에러 추가해줘야돼 모르는 에러등장", apiResponseErrorDTO)
             return nil

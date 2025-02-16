@@ -70,9 +70,9 @@ extension MapCoordinator {
                 state.isHideTabBar = false
                 state.routes.pop()
                 
-            case .router(.routeAction(id: _, action: .search(.delegate(.successSearch)))):
+            case let .router(.routeAction(id: _, action: .search(.delegate(.successSearch(searchText))))):
                 state.isHideTabBar = true
-                state.routes.push(.searchMap(SearchMapFeature.State()))
+                state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 
             case .router(.routeAction(id: _, action: .search(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false

@@ -19,7 +19,7 @@ struct SearchMapView: View {
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
-                    AnyView(spotDetailSheet)
+                    AnyView(spotDetailSheet(spot: store.searchSpotItems.isEmpty ? MapSpotEntity() : store.searchSpotItems[store.selectedIndex]))
                 }, onDismiss: {
                     store.send(.viewEvent(.bottomSheetDismiss))
                 })
@@ -44,16 +44,7 @@ extension SearchMapView {
             .background(.white)
             
             ZStack(alignment: .top) {
-//                UIMapView(mapState: store.mapState) { index in
-//                    store.send(.viewEvent(.tappedMarker))
-//                } onLocationChange: {
-//                    if store.spotReloadButton == false {
-//                        store.send(.viewEvent(.changeMapLocation))
-//                    }
-//                } onCameraIdle: { coord, mbr in
-//                    store.send(.viewEvent(.onCameraIdle(coord)))
-//                }
-//                .ignoresSafeArea(edges: [.bottom])
+                UIMapView(mapManager: store.mapManager)
                 
                 Color.black
                     .opacity(0.1)
@@ -203,63 +194,6 @@ extension SearchMapView {
             }
         }
     }
-    
-    private var spotDetailSheet: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Text("작가추천")
-                    .textStyle(.captionS)
-                    .foregroundStyle(.blue50)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 4)
-                    .background(.navy100)
-                    .clipShape(RoundedRectangle(cornerRadius: 22))
-                
-                Text("시청역 어쩌고저쩌고")
-                    .textStyle(.subtitleS)
-                    .foregroundStyle(.blue100)
-                
-                Text("category")
-                    .foregroundStyle(.gray70)
-                    .textStyle(.captionS)
-                
-                Spacer()
-                // $store.archive.sending(\.bindingArchive)
-                SpotArchiveButton(height: 24, width: 24, isSaved: false) {
-                    print("tap")
-                }
-            }
-            
-            HStack(spacing: 4) {
-                Text("512 m")
-                    .textStyle(.captionS)
-                    .foregroundStyle(.textSub)
-                
-                Text("서울특별시 종로구 가나다길 441-49 두번째 계단")
-                    .textStyle(.captionS)
-                    .foregroundStyle(.textInfo)
-                
-                Spacer()
-            }
-            
-            HStack(spacing: 8) {
-                Text("#야경맛집")
-                    .hashTagStyle()
-                
-                Text("#국회의사당뷰")
-                    .hashTagStyle()
-            }
-            
-            Rectangle()
-                .foregroundStyle(.red)
-                .frame(maxWidth: .infinity)
-                .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-        }
-        .padding(.horizontal, 15)
-        .padding(.vertical, 12)
-        
-    }
 }
 
 extension SearchMapView {
@@ -284,6 +218,67 @@ extension SearchMapView {
                 .clipShape(RoundedRectangle(cornerRadius: 20))
         )
     }
+    
+    private func spotDetailSheet(spot: MapSpotEntity) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                if spot.category == .recommendSpot {
+                    Text("작가추천")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.blue50)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(.navy100)
+                        .clipShape(RoundedRectangle(cornerRadius: 22))
+                }
+                
+                Text(spot.spotName)
+                    .textStyle(.subtitleS)
+                    .foregroundStyle(.blue100)
+                
+                Image(spot.category.getCategoryCase().image ?? "SnapIcon")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 12, height: 12)
+                
+                Text(spot.category.getCategoryCase().title)
+                    .foregroundStyle(.gray70)
+                    .textStyle(.captionS)
+                
+                Spacer()
+                
+                SpotArchiveButton(height: 24, width: 24, isSaved: store.searchSpotItems.isEmpty ? false : store.searchSpotItems[store.selectedIndex].isScraped) {
+                    store.send(.viewEvent(.tappedArchiveButton))
+                }
+            }
+            
+            HStack(spacing: 4) {
+                Text(spot.distance)
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textSub)
+                
+                Text(spot.spotAddress + spot.spotAddressDetail)
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textInfo)
+                
+                Spacer()
+            }
+            
+            HStack(spacing: 8) {
+                ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
+                    Text("#\(tag)")
+                        .hashTagStyle()
+                }
+            }
+            
+            DownImageView(url: URL(string: spot.representativeImageUrl), option: .max, fallBackImg: "ImageDefault")
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth: .infinity)
+                .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
+                .clipped()
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+        }
+        .padding(.horizontal, 15)
+        .padding(.vertical, 12)
+    }
 }
-
-
