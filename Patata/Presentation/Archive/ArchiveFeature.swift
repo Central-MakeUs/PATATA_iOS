@@ -14,7 +14,11 @@ struct ArchiveFeature {
     @ObservableState
     struct State: Equatable {
         var archiveList: [ArchiveListEntity] = []
-        var tappedSpotList: [Int] = []
+        var deleteText: String = ""
+        var selectedSpotList: [Int] = []
+        var chooseIsValid: Bool = false
+        var isPresent: Bool = false
+        var popupIsPresent: Bool = false
     }
     
     enum Action {
@@ -29,7 +33,8 @@ struct ArchiveFeature {
         }
         
         // bindingAction
-
+        case bindingIsPresent(Bool)
+        case bindingPopupIsPresent(Bool)
     }
     
     enum ViewCycle {
@@ -38,14 +43,20 @@ struct ArchiveFeature {
     
     enum ViewEvent {
         case tappedSpot(Int)
+        case tappedChoseButton
+        case tappedDeleteButton
+        case dismissAlert
+        case dismissPopup
     }
     
     enum NetworkType {
         case fetchArchiveList
+        case patchArchiveState([Int])
     }
     
     enum DataTransType {
         case fetchArchiveList([ArchiveListEntity])
+        case successDelete
     }
     
     @Dependency(\.archiveRepostiory) var archiveRepository
@@ -66,11 +77,35 @@ extension ArchiveFeature {
                 }
                 
             case let .viewEvent(.tappedSpot(spotId)):
-                if state.tappedSpotList.contains(spotId) {
-                    state.tappedSpotList.removeAll { $0 == spotId }
+                if state.selectedSpotList.contains(spotId) {
+                    state.selectedSpotList.removeAll { $0 == spotId }
                 } else {
-                    state.tappedSpotList.append(spotId)
+                    state.selectedSpotList.append(spotId)
                 }
+                
+            case .viewEvent(.tappedChoseButton):
+                if state.chooseIsValid && !state.selectedSpotList.isEmpty {
+                    state.isPresent = true
+                } else if state.chooseIsValid {
+                    state.chooseIsValid = false
+                } else {
+                    state.chooseIsValid = true
+                }
+                
+            case .viewEvent(.tappedDeleteButton):
+                let deleteList = state.selectedSpotList
+                
+                return .run { send in
+                    await send(.networkType(.patchArchiveState(deleteList)))
+                }
+                
+            case .viewEvent(.dismissAlert):
+                state.selectedSpotList = []
+                state.chooseIsValid = false
+                state.isPresent = false
+                
+            case .viewEvent(.dismissPopup):
+                state.popupIsPresent = false
                 
             case .networkType(.fetchArchiveList):
                 return .run { send in
@@ -83,8 +118,35 @@ extension ArchiveFeature {
                     }
                 }
                 
+            case let .networkType(.patchArchiveState(spots)):
+                return .run { send in
+                    do {
+                        let data = try await archiveRepository.toggleArchive(spotId: spots)
+                        
+                        await send(.dataTransType(.successDelete))
+                    } catch {
+                        print("fail", errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.fetchArchiveList(data)):
                 state.archiveList = data
+                
+            case .dataTransType(.successDelete):
+                var archiveList = state.archiveList
+                
+                archiveList.removeAll { item in
+                    state.selectedSpotList.contains(item.spotId)
+                }
+                state.chooseIsValid = false
+                state.deleteText = "\(state.selectedSpotList.count)개의 항목이 삭제되었습니다!"
+                state.archiveList = archiveList
+                
+            case let .bindingIsPresent(isPresent):
+                state.isPresent = isPresent
+                
+            case let .bindingPopupIsPresent(popupIsPresent):
+                state.popupIsPresent = popupIsPresent
                 
             default :
                 break

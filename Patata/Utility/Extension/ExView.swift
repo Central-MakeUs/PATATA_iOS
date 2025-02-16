@@ -111,6 +111,7 @@ extension View {
         message: String,
         cancelText: String = "취소",
         confirmText: String = "확인",
+        onCancle: (() -> Void)? = nil,
         onConfirm: @escaping () -> Void
     ) -> some View {
         modifier(CustomAlertModifier(
@@ -119,6 +120,7 @@ extension View {
             message: message,
             cancelText: cancelText,
             confirmText: confirmText,
+            onCancle: onCancle,
             onConfirm: onConfirm
         ))
     }

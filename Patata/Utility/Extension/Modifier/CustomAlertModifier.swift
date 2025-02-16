@@ -16,6 +16,7 @@ struct CustomAlertModifier: ViewModifier {
     let message: String
     let cancelText: String
     let confirmText: String
+    let onCancle: (() -> Void)?
     let onConfirm: () -> Void
     
     func body(content: Content) -> some View {
@@ -34,6 +35,7 @@ struct CustomAlertModifier: ViewModifier {
                     message: message,
                     cancelText: cancelText,
                     confirmText: confirmText,
+                    onCancle: onCancle,
                     onConfirm: onConfirm
                 )
                 .transition(.scale)

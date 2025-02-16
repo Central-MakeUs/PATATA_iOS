@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 // 체크가 될때 체크된 스팟들을 담아서 서버에 보내야됨
 
 struct ArchiveView: View {
@@ -17,12 +18,49 @@ struct ArchiveView: View {
         GridItem(.flexible())
     ]
     
-    @State private var chooseIsValid: Bool = false
     @State private var checkSpots: Bool = false
     
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
+                    HStack {
+                        Spacer()
+                        
+                        Text(store.deleteText)
+                            .textStyle(.subtitleXS)
+                            .foregroundStyle(.blue20)
+                            .padding(.vertical, 10)
+                        
+                        Spacer()
+                    }
+                    .background(.gray100)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal, 15)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    }
+                }, customize: {
+                    $0
+                        .type(.floater())
+                        .position(.bottom)
+                        .animation(.spring())
+                        .closeOnTap(true)
+                        .closeOnTapOutside(true)
+                        .backgroundColor(.black.opacity(0.5))
+                        .dismissCallback {
+                            store.send(.viewEvent(.dismissPopup))
+                        }
+                    
+                })
+                .customAlert(isPresented: $store.isPresent.sending(\.bindingIsPresent), message: "\(store.selectedSpotList.count)개의 항목을 목록에서\n삭제하시겠습니까?", cancelText: "취소", confirmText: "삭제", onCancle: {
+                    print("dismiss")
+                    store.send(.viewEvent(.dismissAlert))
+                }, onConfirm: {
+                    store.send(.viewEvent(.tappedDeleteButton))
+                })
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }
@@ -35,27 +73,24 @@ extension ArchiveView {
         VStack {
             fakeNavBar
             
-            // 선택될때마다 배열에 추가를 한다.
-            // 근데 또 한 번 선택을 당하면 배열에서 뺀다
-            // 추가될때마다 spotId를 추가를 하는데 만약 배열에 같은 spotId가 있다면 배열에서 제거 없다면 배열에 추가
-            // 그리고 배열에 추가된 뷰는 테두리가 파란색이다.
             ScrollView(.vertical) {
                 LazyVGrid(columns: columns, spacing: 4) {
                     ForEach(Array(store.archiveList.enumerated()), id: \.element.spotId) { index, item in
                         archiveItem(item)
                             .overlay(
                                 Group {
-                                    if chooseIsValid {
+                                    if store.chooseIsValid {
                                         Rectangle()
-                                            .stroke(store.tappedSpotList.contains(item.spotId) ? Color.blue100 : Color.clear)
+                                            .stroke(store.selectedSpotList.contains(item.spotId) ? Color.blue100 : Color.clear)
                                             .foregroundStyle(.clear)
                                     }
                                 }
                             )
                             .asButton {
-                                store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                if chooseIsValid {
-                                    checkSpots.toggle()
+                                if store.chooseIsValid {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                } else {
+                                    
                                 }
                             }
                     }
@@ -77,12 +112,12 @@ extension ArchiveView {
             HStack {
                 Spacer()
                 
-                Text(chooseIsValid ? "삭제" : "선택")
+                Text(store.chooseIsValid ? "삭제" : "선택")
                     .padding(.trailing, 15)
                     .textStyle(.subtitleM)
-                    .foregroundStyle(chooseIsValid ? .blue100 : .textDefault)
+                    .foregroundStyle(store.chooseIsValid ? .blue100 : .textDefault)
                     .asButton {
-                        chooseIsValid.toggle()
+                        store.send(.viewEvent(.tappedChoseButton))
                     }
             }
         }
@@ -94,8 +129,8 @@ extension ArchiveView {
         DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
             .aspectRatio(1, contentMode: .fit)
             .overlay(alignment: .topTrailing) {
-                if chooseIsValid {
-                    if !store.tappedSpotList.contains(item.spotId) {
+                if store.chooseIsValid {
+                    if !store.selectedSpotList.contains(item.spotId) {
                         Circle()
                             .fill(Color.white)
                             .overlay(
@@ -105,10 +140,6 @@ extension ArchiveView {
                             .frame(width: 24, height: 24)
                             .padding(.trailing, 12)
                             .padding(.top, 12)
-                            .onTapGesture {
-                                checkSpots = true
-                            }
-                        
                     } else {
                         Image("CircleCheck")
                             .resizable()
@@ -116,9 +147,6 @@ extension ArchiveView {
                             .frame(width: 24, height: 24)
                             .padding(.trailing, 12)
                             .padding(.top, 12)
-                            .onTapGesture {
-                                checkSpots = false
-                            }
                     }
                 }
             }

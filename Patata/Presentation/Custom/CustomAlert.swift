@@ -13,6 +13,7 @@ struct CustomAlert: View {
     let message: String
     let cancelText: String
     let confirmText: String
+    let onCancle: (() -> Void)?
     let onConfirm: () -> Void
     
     @Binding var isPresented: Bool
@@ -23,6 +24,7 @@ struct CustomAlert: View {
         message: String,
         cancelText: String = "취소",
         confirmText: String = "확인",
+        onCancle: (() -> Void)? = nil,
         onConfirm: @escaping () -> Void
     ) {
         self._isPresented = isPresented
@@ -30,6 +32,7 @@ struct CustomAlert: View {
         self.message = message
         self.cancelText = cancelText
         self.confirmText = confirmText
+        self.onCancle = onCancle
         self.onConfirm = onConfirm
     }
     
@@ -85,6 +88,7 @@ extension CustomAlert {
             .padding(.vertical, 14)
             .asButton {
                 isPresented = false
+                onCancle?()
             }
             
             Divider()
