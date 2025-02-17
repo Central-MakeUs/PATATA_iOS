@@ -127,6 +127,8 @@ final class LoginManager: @unchecked Sendable  {
             // 사용자 이메일 (최초 로그인 시만)
             let email = appleIDCredential.email
             print("Email: \(email ?? "No Email")")
+            
+            UserDefaultsManager.email = email ?? ""
 
             // 사용자 이름 (최초 로그인 시만)
             if let fullName = appleIDCredential.fullName {

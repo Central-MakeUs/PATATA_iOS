@@ -12,7 +12,7 @@ enum LoginRouter: Router {
     case apple(AppleLoginRequestDTO)
     case google(GoogleLoginRequestDTO)
     case refresh(refreshToken: String)
-    case nick
+    case revokeApple(auth: String)
 }
 
 extension LoginRouter {
@@ -20,8 +20,8 @@ extension LoginRouter {
         switch self {
         case .apple, .google, .refresh:
             return .post
-        case .nick:
-            return .patch
+        case .revokeApple:
+            return .delete
         }
     }
     
@@ -33,8 +33,8 @@ extension LoginRouter {
             return "/auth/google/login"
         case .refresh:
             return "/auth/refresh"
-        case .nick:
-            return "/member/nickname"
+        case .revokeApple:
+            return "/auth/delete/apple"
         }
     }
     
@@ -51,17 +51,17 @@ extension LoginRouter {
                 HTTPHeader(name: "RefreshToken", value: "Bearer \(token)")
             ])
             
-        case .nick:
+        case let .revokeApple(authToken):
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json"),
-                HTTPHeader(name: "Authorization", value: UserDefaultsManager.accessToken)
+                HTTPHeader(name: "authorization-code", value: authToken)
             ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case .apple, .google, .refresh, .nick:
+        case .apple, .google, .refresh, .revokeApple:
             return nil
         }
     }
@@ -72,16 +72,16 @@ extension LoginRouter {
             return requestToBody(appleLoginRequest)
         case .google(let googleLoginRequest):
             return requestToBody(googleLoginRequest)
-        case .refresh:
+        case .refresh, .revokeApple:
             return nil
-        case .nick:
-            return requestToBody(Nick(nickName: "멜론테스트"))
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .apple, .google, .refresh, .nick:
+        case .revokeApple:
+            return .url
+        case .apple, .google, .refresh:
             return .json
         }
     }

@@ -34,6 +34,7 @@ struct MyPageCoordinator {
         
         enum Delegate {
             case tappedLogout
+            case successRevoke
         }
     }
     
@@ -63,6 +64,9 @@ extension MyPageCoordinator {
                 
             case .router(.routeAction(id: .deleteID, action: .deleteID(.delegate(.tappedBackButton)))):
                 state.routes.pop()
+                
+            case .router(.routeAction(id: .deleteID, action: .deleteID(.delegate(.succesRevoke)))):
+                return .send(.delegate(.successRevoke))
                 
             default:
                 break

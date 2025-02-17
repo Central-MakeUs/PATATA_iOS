@@ -35,6 +35,7 @@ struct TabCoordinator {
         
         enum Delegate {
             case tappedLogout
+            case successRevoke
         }
     }
     
@@ -68,6 +69,9 @@ extension TabCoordinator {
                 
             case .myPageTabAction(.delegate(.tappedLogout)):
                 return .send(.delegate(.tappedLogout))
+                
+            case .myPageTabAction(.delegate(.successRevoke)):
+                return .send(.delegate(.successRevoke))
                 
             default:
                 break

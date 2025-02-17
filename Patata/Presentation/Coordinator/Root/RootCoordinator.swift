@@ -146,6 +146,17 @@ struct RootCoordinator {
             case .tabCoordinatorAction(.delegate(.tappedLogout)):
                 UserDefaultsManager.accessToken = ""
                 UserDefaultsManager.refreshToken = ""
+                UserDefaultsManager.nickname = ""
+                UserDefaultsManager.email = ""
+                
+                state.viewState = .start
+                state.routes.push(.login(LoginFeature.State()))
+                
+            case .tabCoordinatorAction(.delegate(.successRevoke)):
+                UserDefaultsManager.accessToken = ""
+                UserDefaultsManager.refreshToken = ""
+                UserDefaultsManager.nickname = ""
+                UserDefaultsManager.email = ""
                 
                 state.viewState = .start
                 state.routes.push(.login(LoginFeature.State()))

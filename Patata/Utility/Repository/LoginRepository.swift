@@ -33,6 +33,12 @@ extension LoginRepository {
         
         return mapper.dtoToEntity(data)
     }
+    
+    func revokeApple(authToken: String) async throws(PAError) -> Bool {
+        let isValid = try await networkManager.requestNetworkWithRefresh(dto: AddSpotDTO.self, router: LoginRouter.revokeApple(auth: authToken)).isSuccess
+        
+        return isValid
+    }
 }
 
 extension LoginRepository: DependencyKey {
