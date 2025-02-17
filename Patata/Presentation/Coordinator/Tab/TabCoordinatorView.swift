@@ -46,6 +46,16 @@ struct TabCoordinatorView: View {
                                 .tag(TabCase.archive)
                                 .ignoresSafeArea(.all, edges: .bottom)
                         }
+                        
+                        Tab(
+                            "My",
+                            image: store.tabState == .myPage ? "MyPageActive" : "MyPageInActive",
+                            value: .myPage
+                        ) {
+                            MyPageCoordinatorView(store: store.scope(state: \.myPageTabState, action: \.myPageTabAction))
+                                .tag(TabCase.myPage)
+                                .ignoresSafeArea(.all, edges: .bottom)
+                        }
                     }
                     .tint(.textDefault)
                     .onAppear {
@@ -92,6 +102,13 @@ struct TabCoordinatorView: View {
                                 Image(store.tabState == .archive ?  "ArchiveActiveTap" : "ArchiveInActiveTap")
                             }
                             .tag(TabCase.archive)
+                            .ignoresSafeArea(.all, edges: .bottom)
+                        
+                        MyPageCoordinatorView(store: store.scope(state: \.myPageTabState, action: \.myPageTabAction))
+                            .tabItem {
+                                Image(store.tabState == .myPage ?  "MyPageActive" : "MyPageInActive")
+                            }
+                            .tag(TabCase.myPage)
                             .ignoresSafeArea(.all, edges: .bottom)
                     }
                     .tint(.textDefault)
