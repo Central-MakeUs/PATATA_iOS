@@ -10,15 +10,15 @@ import ComposableArchitecture
 
 struct MapMapper: Sendable {
     func dtoToEntity(_ dtos: [MapSpotItemDTO]) async -> [MapSpotEntity] {
-        return await dtos.asyncMap { dtoToEntity($0) }
+        return await dtos.asyncMap { await dtoToEntity($0) }
     }
     
     func dtoToEntity(_ dtos: [AddSpotItemDTO]) async -> [MapSpotEntity] {
         return await dtos.asyncMap { dtoToEntity($0) }.asyncMap { entityToEntity($0) }
     }
     
-    func dtoToEntity(_ dto: MapSpotItemDTO) -> MapSpotEntity {
-        return MapSpotEntity(
+    func dtoToEntity(_ dto: MapSpotItemDTO) async -> MapSpotEntity {
+        return await MapSpotEntity(
             spotId: dto.spotId,
             spotName: dto.spotName,
             spotAddress: dto.spotAddress,
@@ -26,7 +26,7 @@ struct MapMapper: Sendable {
             coordinate: Coordinate(latitude: dto.latitude, longitude: dto.longitude),
             category: CategoryCase(rawValue: dto.categoryId) ?? .houseSpot,
             tags: dto.tags,
-            representativeImageUrl: dto.representativeImageUrl,
+            images: dto.images.asyncMap { URL(string: $0) },
             isScraped: dto.isScraped,
             distance: DistanceUnit.formatDistance(dto.distance)
         )
@@ -39,7 +39,7 @@ extension MapMapper {
     }
     
     private func entityToEntity(_ dto: AddSpotEntity) -> MapSpotEntity {
-        return MapSpotEntity(spotId: dto.spotId, spotName: "", spotAddress: "", spotAddressDetail: "", coordinate: dto.coord, category: .all, tags: [], representativeImageUrl: "", isScraped: false, distance: "")
+        return MapSpotEntity(spotId: dto.spotId, spotName: "", spotAddress: "", spotAddressDetail: "", coordinate: dto.coord, category: .all, tags: [], images: [], isScraped: false, distance: "")
     }
 }
 

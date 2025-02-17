@@ -53,7 +53,7 @@ final class MapRepository: @unchecked Sendable {
         do {
             let dtos = try await networkManager.requestNetworkWithRefresh(dto: SearchMapDTO.self, router: MapRouter.searchMap(spotName: spotName, mbrLocation: mbrLocation, userLocation: userLocation)).result
             
-            return mapper.dtoToEntity(dtos)
+            return await mapper.dtoToEntity(dtos)
         } catch {
             switch error {
             case .errorMessage(.search(.noData)):

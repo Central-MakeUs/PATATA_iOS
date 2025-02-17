@@ -321,7 +321,7 @@ extension SearchMapView {
                 }
             }
             
-            DownImageView(url: URL(string: spot.representativeImageUrl), option: .max, fallBackImg: "ImageDefault")
+            DownImageView(url: spot.images[safe: 0] ?? nil, option: .max, fallBackImg: "ImageDefault")
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth: .infinity)
                 .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)

@@ -30,7 +30,7 @@ struct MapSpotItemDTO: DTO {
     let longitude: Double
     let categoryId: Int
     let tags: [String]
-    let representativeImageUrl: String
+    let images: [String]
     let isScraped: Bool
     let distance: Double
 }

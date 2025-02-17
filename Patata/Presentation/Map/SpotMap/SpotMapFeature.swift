@@ -239,7 +239,7 @@ extension SpotMapFeature {
                     coordinate: state.mapSpotEntity[state.selectIndex].coordinate,
                     category: state.mapSpotEntity[state.selectIndex].category,
                     tags: state.mapSpotEntity[state.selectIndex].tags,
-                    representativeImageUrl: state.mapSpotEntity[state.selectIndex].representativeImageUrl,
+                    images: state.mapSpotEntity[state.selectIndex].images,
                     isScraped: data.isArchive,
                     distance: state.mapSpotEntity[state.selectIndex].distance
                 )

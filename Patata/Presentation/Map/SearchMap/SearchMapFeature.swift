@@ -301,7 +301,7 @@ extension SearchMapFeature {
                     coordinate: state.searchSpotItems[state.selectedIndex].coordinate,
                     category: state.searchSpotItems[state.selectedIndex].category,
                     tags: state.searchSpotItems[state.selectedIndex].tags,
-                    representativeImageUrl: state.searchSpotItems[state.selectedIndex].representativeImageUrl,
+                    images: state.searchSpotItems[state.selectedIndex].images,
                     isScraped: data.isArchive,
                     distance: state.searchSpotItems[state.selectedIndex].distance
                 )

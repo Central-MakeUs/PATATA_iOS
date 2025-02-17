@@ -43,16 +43,17 @@ struct DownImageView: View {
                 )
             )
             .placeholder {
-                Group {
-                    if let fallBackImg {
-                        Image(fallBackImg)
-                            .resizable()
-                            .saturation(0)
-                    } else {
-                        KFImage(fallbackURL)
-                            .resizable()
-                    }
-                }
+                ProgressView()
+//                Group {
+//                    if let fallBackImg {
+//                        Image(fallBackImg)
+//                            .resizable()
+//                            .saturation(0)
+//                    } else {
+//                        KFImage(fallbackURL)
+//                            .resizable()
+//                    }
+//                }
             }
             .onFailure { error in
 #if DEBUG
