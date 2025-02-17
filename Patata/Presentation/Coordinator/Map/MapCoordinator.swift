@@ -50,7 +50,7 @@ extension MapCoordinator {
             switch action {
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSideButton(mbrLocation))))):
                 state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation)))
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation, isSearch: false, searchText: "")))
                 
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
@@ -101,9 +101,9 @@ extension MapCoordinator {
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.bottomSheetDismiss)))):
                 state.isHideTabBar = true
                 
-            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSideButton(mbrLocation))))):
+            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSideButton(mbrLocation, searchText, isSearch))))):
                 state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation)))
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .mapSearch, mbrLocation: mbrLocation, isSearch: isSearch, searchText: searchText)))
                 
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true

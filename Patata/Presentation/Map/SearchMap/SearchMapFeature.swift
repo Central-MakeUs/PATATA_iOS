@@ -26,6 +26,7 @@ struct SearchMapFeature {
         var isFirst: Bool = false
         var isOtherFirst: Bool = false
         var reloadButtonIsHide: Bool = true
+        var isTappedReload: Bool = false
         
         // bindingState
         var isPresented: Bool = false
@@ -47,7 +48,7 @@ struct SearchMapFeature {
         case bindingErrorIsPresent(Bool)
         
         enum Delegate {
-            case tappedSideButton(MBRCoordinates)
+            case tappedSideButton(MBRCoordinates, searchText: String, isSearch: Bool)
             case tappedMarker
             case bottomSheetDismiss
             case tappedSpotAddButton(Coordinate)
@@ -130,6 +131,7 @@ extension SearchMapFeature {
                 
             case let .viewEvent(.tappedMenu(index)):
                 state.selectedMenuIndex = index
+                state.isTappedReload = true
                 
                 if !state.searchSpotItems.isEmpty {
                     let spotName = state.searchSpotItems[state.selectedIndex].spotName
@@ -149,8 +151,10 @@ extension SearchMapFeature {
                 
             case .viewEvent(.tappedSideButton):
                 let mbrLocation = state.mbrLocation
+                let searchText = state.searchText
+                let isSearch = state.isTappedReload
                 
-                return .send(.delegate(.tappedSideButton(mbrLocation)))
+                return .send(.delegate(.tappedSideButton(mbrLocation, searchText: searchText, isSearch: isSearch)))
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
@@ -171,6 +175,7 @@ extension SearchMapFeature {
                 
             case .viewEvent(.tappedReloadButton):
                 state.selectedMenuIndex = 0
+                state.isTappedReload = true
                 
                 let userLocation = state.userLocation
                 let mbr = state.mbrLocation

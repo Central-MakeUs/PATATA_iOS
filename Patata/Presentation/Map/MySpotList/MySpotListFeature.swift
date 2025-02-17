@@ -23,6 +23,8 @@ struct MySpotListFeature {
         var selectedIndex: Int = 0
         var imageCount: Int = 4
         var archive: Bool = false
+        var isSearch: Bool
+        var searchText: String
     }
     
     enum ViewState {
@@ -55,6 +57,7 @@ struct MySpotListFeature {
         case fetchSpotList(Coordinate)
         case patchArchiveState(Int)
         case fetchSpot(MBRCoordinates, Coordinate, CategoryCase, Bool)
+        case fetchSearchSpot(MBRCoordinates?, Coordinate, String)
     }
     
     enum DataTransType {
@@ -63,6 +66,7 @@ struct MySpotListFeature {
         case todaySpotList([TodaySpotListEntity])
         case archiveState(ArchiveEntity, Int)
         case fetchSpot([MapSpotEntity])
+        case fetchSearchSpot(MapSpotEntity?)
     }
     
     enum ViewEvent {
@@ -100,6 +104,25 @@ extension MySpotListFeature {
                 
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
+                
+                let mbrLocation = state.mbrLocation
+                let userLocation = state.userCoord
+                let category = CategoryCase.getCategory(id: index)
+                let isSearch = state.viewState == .mapSearch ? true : false
+                
+                if state.viewState == .mapSearch {
+                    let mbrLocation = state.mbrLocation
+                    let userLocation = state.userCoord
+                    let searchText = state.searchText
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
+                    }
+                } else {
+                    return .run { send in
+                        await send(.networkType(.fetchSpot(mbrLocation, userLocation, category, isSearch)))
+                    }
+                }
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
@@ -147,6 +170,17 @@ extension MySpotListFeature {
                     }
                 }
                 
+            case let .networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)):
+                return .run { send in
+                    do {
+                        let data = try await mapRepository.fetchSearchSpot(userLocation: userLocation, mbrLocation: mbrLocation, spotName: searchText)
+                        
+                        await send(.dataTransType(.fetchSearchSpot(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -154,7 +188,11 @@ extension MySpotListFeature {
                 }
                 
             case let .dataTransType(.fetchSpot(data)):
-                state.mapSpotEntity = data
+                if state.viewState == .map {
+                    state.mapSpotEntity = data
+                } else {
+                    state.mapSpotEntity.append(contentsOf: data)
+                }
                 
             case let .dataTransType(.userLocation(coord)):
                 state.userCoord = coord
@@ -170,10 +208,43 @@ extension MySpotListFeature {
                     return .run { send in
                         await send(.networkType(.fetchSpot(mbrCoord, userLocation, .all, false)))
                     }
+                } else {
+                    let mbrCoord = state.isSearch ? nil : state.mbrLocation
+                    let userLocation = state.userCoord
+                    let searchText = state.searchText
+                    
+                    print("searchText", searchText)
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSearchSpot(mbrCoord, userLocation, searchText)))
+                    }
                 }
                 
             case let .dataTransType(.todaySpotList(spotList)):
                 state.spotListEntity = spotList
+                
+                let mbrLocation = state.isSearch ? nil : state.mbrLocation
+                let userLocation = state.userCoord
+                let searchText = state.searchText
+                
+                return .run { send in
+                    await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
+                }
+                
+            case let .dataTransType(.fetchSearchSpot(data)):
+                if let data {
+                    state.mapSpotEntity = [data]
+                    
+                    let mbrLocation = state.mbrLocation
+                    let userLocation = state.userCoord
+                    let category = CategoryCase(rawValue: state.selectedIndex)
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSpot(mbrLocation, userLocation, category ?? .all, true)))
+                    }
+                } else {
+                    // 데이터 없을때 화면 보여줘야됨
+                }
                 
             case let .dataTransType(.archiveState(data, index)):
                 state.spotListEntity[index] = TodaySpotListEntity(
