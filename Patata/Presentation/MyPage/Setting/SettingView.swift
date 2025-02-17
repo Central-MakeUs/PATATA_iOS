@@ -84,6 +84,9 @@ extension SettingView {
             
             Text("회원탈퇴")
                 .foregroundColor(.gray)
+                .asButton {
+                    store.send(.viewEvent(.tappedDeleteID))
+                }
         }
         .textStyle(.captionM)
         .foregroundStyle(.textDisabled)

@@ -1,5 +1,5 @@
 //
-//  SettingFeature.swift
+//  DeleteIDFeature.swift
 //  Patata
 //
 //  Created by 김진수 on 2/17/25.
@@ -9,10 +9,10 @@ import Foundation
 import ComposableArchitecture
 
 @Reducer
-struct SettingFeature {
+struct DeleteIDFeature {
     @ObservableState
     struct State: Equatable {
-        
+        var checkIsValid: Bool = false
     }
     
     enum Action {
@@ -21,10 +21,7 @@ struct SettingFeature {
         case delegate(Delegate)
         
         enum Delegate {
-            case tappedSpot
-            case tappedProfileEdit
             case tappedBackButton
-            case tappedLogout
             case tappedDeleteID
         }
     }
@@ -34,10 +31,8 @@ struct SettingFeature {
     }
     
     enum ViewEvent {
-        case tappedSpot
-        case tappedProfileEdit
         case tappedBackButton
-        case tappedLogout
+        case tappedCheckButton
         case tappedDeleteID
     }
     
@@ -46,18 +41,18 @@ struct SettingFeature {
     }
 }
 
-extension SettingFeature {
+extension DeleteIDFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
                 
-            case .viewEvent(.tappedLogout):
-                return .send(.delegate(.tappedLogout))
-                
             case .viewEvent(.tappedDeleteID):
                 return .send(.delegate(.tappedDeleteID))
+                
+            case .viewEvent(.tappedCheckButton):
+                state.checkIsValid.toggle()
                 
             default:
                 break

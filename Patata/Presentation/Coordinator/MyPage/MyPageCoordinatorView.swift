@@ -24,6 +24,10 @@ struct MyPageCoordinatorView: View {
                 case let .setting(settingStore):
                     SettingView(store: settingStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .deleteID(deleteIDStore):
+                    DeleteIDView(store: deleteIDStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
         }
@@ -37,12 +41,15 @@ extension MyPageScreen.State: Identifiable {
             return ID.myPage
         case .setting:
             return ID.setting
+        case .deleteID:
+            return ID.deleteID
         }
     }
     
     enum ID: Identifiable {
         case myPage
         case setting
+        case deleteID
         
         var id: ID {
             return self

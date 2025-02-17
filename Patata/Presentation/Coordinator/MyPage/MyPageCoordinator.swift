@@ -13,6 +13,7 @@ import ComposableArchitecture
 enum MyPageScreen {
     case myPage(MyPageFeature)
     case setting(SettingFeature)
+    case deleteID(DeleteIDFeature)
 }
 
 @Reducer
@@ -56,6 +57,12 @@ extension MyPageCoordinator {
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedLogout)))):
                 return .send(.delegate(.tappedLogout))
+                
+            case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedDeleteID)))):
+                state.routes.push(.deleteID(DeleteIDFeature.State()))
+                
+            case .router(.routeAction(id: .deleteID, action: .deleteID(.delegate(.tappedBackButton)))):
+                state.routes.pop()
                 
             default:
                 break
