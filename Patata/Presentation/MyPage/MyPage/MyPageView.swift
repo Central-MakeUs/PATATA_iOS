@@ -160,6 +160,9 @@ extension MyPageView {
             
             ForEach(store.mySpots, id: \.spotId) { item in
                 myPageItem(item)
+                    .asButton {
+                        store.send(.viewEvent(.tappedSpot(item.spotId)))
+                    }
             }
         }
     }

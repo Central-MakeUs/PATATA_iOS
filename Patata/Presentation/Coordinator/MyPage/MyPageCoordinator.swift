@@ -16,6 +16,7 @@ enum MyPageScreen {
     case deleteID(DeleteIDFeature)
     case profileEdit(ProfileEditFeature)
     case success(SuccessFeature)
+    case spotDetail(SpotDetailFeature)
 }
 
 @Reducer
@@ -27,17 +28,25 @@ struct MyPageCoordinator {
         var routes: IdentifiedArrayOf<Route<MyPageScreen.State>>
         
         var isHideTabBar: Bool = false
+        var popupIsPresent: Bool = false
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<MyPageScreen>)
         
+        case viewEvent(ViewEventType)
         case delegate(Delegate)
+        
+        case bindingPopupIsPresent(Bool)
         
         enum Delegate {
             case tappedLogout
             case successRevoke
         }
+    }
+    
+    enum ViewEventType {
+        case dismissPopup
     }
     
     var body: some ReducerOf<Self> {
@@ -57,6 +66,19 @@ extension MyPageCoordinator {
             case .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedProfileEdit)))):
                 state.isHideTabBar = true
                 state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .edit, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
+                
+            case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedSpot(spotId))))):
+                state.isHideTabBar = true
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
+                state.isHideTabBar = false
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
+                state.routes.pop()
+                state.isHideTabBar = false
+                state.popupIsPresent = true
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
@@ -94,6 +116,12 @@ extension MyPageCoordinator {
                             )))
                         }
                     }
+                
+            case .viewEvent(.dismissPopup):
+                state.popupIsPresent = false
+                
+            case let .bindingPopupIsPresent(popup):
+                state.popupIsPresent = popup
                 
             default:
                 break
