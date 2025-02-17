@@ -19,6 +19,11 @@ struct MyPageCoordinatorView: View {
                 switch screen.case {
                 case let .myPage(myPageStore):
                     MyPageView(store: myPageStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .setting(settingStore):
+                    SettingView(store: settingStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
         }
@@ -30,11 +35,14 @@ extension MyPageScreen.State: Identifiable {
         switch self {
         case .myPage:
             return ID.myPage
+        case .setting:
+            return ID.setting
         }
     }
     
     enum ID: Identifiable {
         case myPage
+        case setting
         
         var id: ID {
             return self

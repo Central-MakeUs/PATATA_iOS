@@ -12,6 +12,7 @@ import ComposableArchitecture
 @Reducer(state: .equatable)
 enum MyPageScreen {
     case myPage(MyPageFeature)
+    case setting(SettingFeature)
 }
 
 @Reducer
@@ -27,8 +28,13 @@ struct MyPageCoordinator {
     
     enum Action {
         case router(IdentifiedRouterActionOf<MyPageScreen>)
+        
+        case delegate(Delegate)
+        
+        enum Delegate {
+            case tappedLogout
+        }
     }
-    
     
     var body: some ReducerOf<Self> {
         core()
@@ -39,6 +45,17 @@ extension MyPageCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+                
+            case .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedSetting)))):
+                state.isHideTabBar = true
+                state.routes.push(.setting(SettingFeature.State()))
+                
+            case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
+                state.isHideTabBar = false
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedLogout)))):
+                return .send(.delegate(.tappedLogout))
                 
             default:
                 break

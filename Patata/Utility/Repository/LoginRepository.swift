@@ -21,11 +21,15 @@ extension LoginRepository {
     func googleLogin(idToken: String) async throws(PAError) -> LoginEntity {
         let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.google(GoogleLoginRequestDTO(idToken: idToken)))
         
+        UserDefaultsManager.appleUser = false
+        
         return mapper.dtoToEntity(data)
     }
     
     func appleLogin(identityToken: String) async throws(PAError) -> LoginEntity {
         let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(identityToken: identityToken)))
+        
+        UserDefaultsManager.appleUser = true
         
         return mapper.dtoToEntity(data)
     }

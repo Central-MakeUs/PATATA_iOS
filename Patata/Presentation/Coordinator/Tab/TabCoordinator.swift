@@ -28,8 +28,14 @@ struct TabCoordinator {
         case archiveTabAction(ArchiveCoordinator.Action)
         case myPageTabAction(MyPageCoordinator.Action)
         
+        case delegate(Delegate)
+        
         // binding
         case bindingTab(TabCase)
+        
+        enum Delegate {
+            case tappedLogout
+        }
     }
     
     var body: some ReducerOf<Self> {
@@ -59,6 +65,9 @@ extension TabCoordinator {
             switch action {
             case let .bindingTab(tab):
                 state.tabState = tab
+                
+            case .myPageTabAction(.delegate(.tappedLogout)):
+                return .send(.delegate(.tappedLogout))
                 
             default:
                 break

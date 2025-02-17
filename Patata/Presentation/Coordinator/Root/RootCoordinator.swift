@@ -119,7 +119,7 @@ struct RootCoordinator {
                 
                 if trigger {
                     state.routes.push(.onboarding(OnboardPageFeature.State()))
-                } else if UserDefaultsManager.nickname.isEmpty {
+                } else if UserDefaultsManager.refreshToken.isEmpty {
                     state.routes.push(.login(LoginFeature.State()))
                 } else {
                     state.viewState = .tab
@@ -142,6 +142,13 @@ struct RootCoordinator {
                 if viewState == .first {
                     state.routes.pop()
                 }
+                
+            case .tabCoordinatorAction(.delegate(.tappedLogout)):
+                UserDefaultsManager.accessToken = ""
+                UserDefaultsManager.refreshToken = ""
+                
+                state.viewState = .start
+                state.routes.push(.login(LoginFeature.State()))
                 
             case .tokenExpired:
                 state.routes.removeAll()

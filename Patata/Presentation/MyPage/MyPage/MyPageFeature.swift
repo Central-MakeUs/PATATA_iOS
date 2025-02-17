@@ -30,6 +30,7 @@ struct MyPageFeature {
         enum Delegate {
             case tappedSpot
             case tappedProfileEdit
+            case tappedSetting
         }
     }
     
@@ -40,6 +41,7 @@ struct MyPageFeature {
     enum ViewEvent {
         case tappedSpot
         case tappedProfileEdit
+        case tappedSetting
     }
     
     enum NetworkType {
@@ -72,6 +74,9 @@ extension MyPageFeature {
                 
             case .viewEvent(.tappedProfileEdit):
                 return .send(.viewEvent(.tappedProfileEdit))
+                
+            case .viewEvent(.tappedSetting):
+                return .send(.delegate(.tappedSetting))
                 
             case .networkType(.fetchMySpot):
                 return .run { send in
