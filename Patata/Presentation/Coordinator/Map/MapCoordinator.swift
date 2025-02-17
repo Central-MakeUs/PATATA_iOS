@@ -48,71 +48,71 @@ extension MapCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSideButton)))):
+            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSideButton(mbrLocation))))):
                 state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation)))
                 
-            case let .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
+            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
                 state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
                 
-            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedMarker)))):
+            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
                 
-            case .router(.routeAction(id: _, action: .spotMap(.delegate(.bottomSheetDismiss)))):
+            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.bottomSheetDismiss)))):
                 state.isHideTabBar = false
                 
-            case .router(.routeAction(id: _, action: .spotMap(.delegate(.tappedSearch)))):
+            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSearch)))):
                 state.isHideTabBar = true
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
                 
-            case .router(.routeAction(id: _, action: .mySpotList(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 
-            case let .router(.routeAction(id: _, action: .search(.delegate(.successSearch(searchText))))):
+            case let .router(.routeAction(id: .search, action: .search(.delegate(.successSearch(searchText))))):
                 state.isHideTabBar = true
                 state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 
-            case .router(.routeAction(id: _, action: .search(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 
-            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = true
                 state.routes.pop()
                 
-            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.tappedXButton)))):
+            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedXButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 
-            case .router(.routeAction(id: _, action: .spotEditorView(.delegate(.successSpotAdd)))):
+            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotAdd)))):
                 state.isHideTabBar = true
                 state.routes.push(.successView(SuccessFeature.State()))
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSearch)))):
+            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSearch)))):
                 state.isHideTabBar = true
                 state.routes.pop()
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.bottomSheetDismiss)))):
+            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.bottomSheetDismiss)))):
                 state.isHideTabBar = true
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSideButton)))):
+            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSideButton(mbrLocation))))):
                 state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map)))
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation)))
                 
-            case let .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
+            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
                 state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
                 
-            case .router(.routeAction(id: _, action: .searchMap(.delegate(.tappedMarker)))):
+            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
                 
-            case .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
                 if state.routes.contains(where: { $0.id == .searchMap }) {
                     state.isHideTabBar = true
                 } else {
@@ -120,10 +120,10 @@ extension MapCoordinator {
                 }
                 state.routes.pop()
                 
-            case let .router(.routeAction(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress))))):
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress))))):
                 state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotLocation: spotCoord, spotAddress: spotAddress)))
                 
-            case .router(.routeAction(id: _, action: .successView(.delegate(.tappedConfirmButton)))):
+            case .router(.routeAction(id: .successView, action: .successView(.delegate(.tappedConfirmButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 

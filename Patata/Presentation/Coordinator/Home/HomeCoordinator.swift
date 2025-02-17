@@ -64,7 +64,7 @@ extension HomeCoordinator {
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedMoreButton)))):
                 state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .home)))
+                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .home, mbrLocation: MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0)))))
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedCategoryButton(category))))):
                 state.isHideTabBar = true

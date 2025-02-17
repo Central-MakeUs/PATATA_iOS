@@ -39,12 +39,22 @@ extension MySpotListView {
             
             ScrollView(.vertical) {
                 VStack {
-                    ForEach(Array(store.spotListEntity.enumerated()), id: \.element.spotId) { index, item in
-                        spotListView(spot: item, index: index)
-                            .background(.white)
-                            .asButton {
-                                store.send(.viewEvent(.tappedSpot(item.spotId)))
-                            }
+                    if store.viewState == .home {
+                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.spotId) { index, item in
+                            spotListView(spot: item, index: index)
+                                .background(.white)
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                }
+                        }
+                    } else {
+                        ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.spotId) { index, item in
+                            mapSpotView(spot: item, index: index)
+                                .background(.white)
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                }
+                        }
                     }
                 }
                 .padding(.top, 8)
@@ -213,13 +223,78 @@ extension MySpotListView {
         }
     }
     
+    private func mapSpotView(spot: MapSpotEntity, index: Int) -> some View {
+        VStack {
+            mapSpotItemView(spot: spot, index: index)
+                .padding(.horizontal, 15)
+            
+            spotImageView(spotImage: spot.images)
+                .padding(.bottom, 15)
+        }
+    }
+    
+    private func mapSpotItemView(spot: MapSpotEntity, index: Int) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                if spot.category == .recommendSpot {
+                    Text("작가추천")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.blue50)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 4)
+                        .background(.navy100)
+                        .clipShape(RoundedRectangle(cornerRadius: 22))
+                }
+                
+                Text(spot.spotName)
+                    .textStyle(.subtitleS)
+                    .foregroundStyle(.blue100)
+                
+                Image(spot.category.getCategoryCase().image ?? "SnapIcon")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 12, height: 12)
+                
+                Text(spot.category.getCategoryCase().title)
+                    .foregroundStyle(.gray70)
+                    .textStyle(.captionS)
+                
+                Spacer()
+
+                SpotArchiveButton(height: 24, width: 24, isSaved: spot.isScraped) {
+                    store.send(.viewEvent(.tappedArchiveButton(index)))
+                }
+            }
+            .padding(.top, 16)
+            
+            HStack(spacing: 4) {
+                Text(spot.distance)
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textSub)
+                
+                Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.textInfo)
+                
+                Spacer()
+            }
+            
+            HStack(spacing: 8) {
+                ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
+                    Text("#\(tag)")
+                        .hashTagStyle()
+                }
+            }
+        }
+    }
+    
     private func spotImageView(spotImage: [URL?]) -> some View {
         let imageWidth: CGFloat = UIScreen.main.bounds.width - 30
         let imageDefault = "ImageDefault"
         
         return Group {
             if spotImage.count == 1{
-                DownImageView(url: spotImage[0], option: .max, fallBackImg: imageDefault)
+                DownImageView(url: spotImage[0], option: .custom(CGSize(width: 600, height: 600)), fallBackImg: imageDefault)
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity)
                     .frame(height: imageWidth * 0.5)
@@ -229,7 +304,7 @@ extension MySpotListView {
             } else if spotImage.count == 2 {
                 HStack(spacing: 8) {
                     ForEach(spotImage, id: \.self) { image in
-                        DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
+                        DownImageView(url: image, option: .max, fallBackImg: imageDefault)
                             .aspectRatio(1, contentMode: .fill)
                             .frame(width: (imageWidth - 8) / 2)
                             .clipped()

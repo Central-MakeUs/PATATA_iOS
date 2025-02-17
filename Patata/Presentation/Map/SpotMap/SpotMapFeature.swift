@@ -43,7 +43,7 @@ struct SpotMapFeature {
         case bindingArchive(Bool)
         
         enum Delegate {
-            case tappedSideButton
+            case tappedSideButton(MBRCoordinates)
             case tappedMarker
             case bottomSheetDismiss
             case tappedSpotAddButton(Coordinate)
@@ -138,7 +138,8 @@ extension SpotMapFeature {
                 return .send(.delegate(.tappedSpotAddButton(state.cameraLocation)))
                 
             case .viewEvent(.tappedSideButton):
-                return .send(.delegate(.tappedSideButton))
+                let mbrLocation = state.mbrLocation
+                return .send(.delegate(.tappedSideButton(mbrLocation)))
                 
             case .viewEvent(.bottomSheetDismiss):
                 return .send(.delegate(.bottomSheetDismiss))

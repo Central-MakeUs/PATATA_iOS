@@ -16,8 +16,10 @@ struct MySpotListFeature {
     struct State: Equatable {
         let viewState: ViewState
         var spotListEntity: [TodaySpotListEntity] = []
+        var mapSpotEntity: [MapSpotEntity] = []
         let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운"]
         var userCoord: Coordinate =  Coordinate(latitude: 37.5666791, longitude: 126.9784147)
+        var mbrLocation: MBRCoordinates
         var selectedIndex: Int = 0
         var imageCount: Int = 4
         var archive: Bool = false
@@ -26,6 +28,7 @@ struct MySpotListFeature {
     enum ViewState {
         case home
         case map
+        case mapSearch
     }
     
     enum Action {
@@ -51,6 +54,7 @@ struct MySpotListFeature {
     enum NetworkType {
         case fetchSpotList(Coordinate)
         case patchArchiveState(Int)
+        case fetchSpot(MBRCoordinates, Coordinate, CategoryCase, Bool)
     }
     
     enum DataTransType {
@@ -58,6 +62,7 @@ struct MySpotListFeature {
         case userLocation(Coordinate)
         case todaySpotList([TodaySpotListEntity])
         case archiveState(ArchiveEntity, Int)
+        case fetchSpot([MapSpotEntity])
     }
     
     enum ViewEvent {
@@ -68,6 +73,7 @@ struct MySpotListFeature {
     }
     
     @Dependency(\.spotRepository) var spotRepository
+    @Dependency(\.mapRepository) var mapRepository
     @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.locationManager) var locationManager
     @Dependency(\.errorManager) var errorManager
@@ -130,11 +136,25 @@ extension MySpotListFeature {
                     }
                 }
                 
+            case let .networkType(.fetchSpot(mbrLocation, userLocation, category, isSearch)):
+                return .run { send in
+                    do {
+                        let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: category.rawValue, isSearch: isSearch)
+                        
+                        await send(.dataTransType(.fetchSpot(data)))
+                    } catch {
+                        print(errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
                     await send(.dataTransType(.userLocation(coord)))
                 }
+                
+            case let .dataTransType(.fetchSpot(data)):
+                state.mapSpotEntity = data
                 
             case let .dataTransType(.userLocation(coord)):
                 state.userCoord = coord
@@ -142,6 +162,13 @@ extension MySpotListFeature {
                 if state.viewState == .home {
                     return .run { send in
                         await send(.networkType(.fetchSpotList(coord)))
+                    }
+                } else if state.viewState == .map {
+                    let mbrCoord = state.mbrLocation
+                    let userLocation = state.userCoord
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSpot(mbrCoord, userLocation, .all, false)))
                     }
                 }
                 
