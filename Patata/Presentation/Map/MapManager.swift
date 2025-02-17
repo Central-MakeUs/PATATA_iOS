@@ -68,7 +68,7 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
         let cameraUpdate = NMFCameraUpdate(scrollTo: specificLocation)
         
         cameraUpdate.animation = .fly
-        cameraUpdate.animationDuration = 1
+        cameraUpdate.animationDuration = 0.5
         
         view.mapView.moveCamera(cameraUpdate)
     }

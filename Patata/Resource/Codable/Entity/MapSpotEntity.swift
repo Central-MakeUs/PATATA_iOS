@@ -8,6 +8,7 @@
 import Foundation
 
 struct MapSpotEntity: Entity {
+    let id: UUID
     let spotId: Int
     let spotName: String
     let spotAddress: String
@@ -20,6 +21,7 @@ struct MapSpotEntity: Entity {
     let distance: String
     
     init(spotId: Int = 0, spotName: String = "", spotAddress: String = "", spotAddressDetail: String = "", coordinate: Coordinate = Coordinate(latitude: 0, longitude: 0), category: CategoryCase = .all, tags: [String] = [], images: [URL?] = [], isScraped: Bool = false, distance: String = "") {
+        self.id = UUID()
         self.spotId = spotId
         self.spotName = spotName
         self.spotAddress = spotAddress

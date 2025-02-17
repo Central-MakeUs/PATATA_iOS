@@ -107,7 +107,9 @@ struct SearchMapFeature {
 
 extension SearchMapFeature {
     private func core() -> some ReducerOf<Self> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .viewCycle(.onAppear):
                 state.isFirst = true
@@ -216,7 +218,7 @@ extension SearchMapFeature {
                         print("error", errorManager.handleError(error) ?? "")
                     }
                 }
-            
+                
             case let .networkType(.otherSpot(mbrLocation, userLocation, category)):
                 return .run { send in
                     do {
@@ -259,14 +261,10 @@ extension SearchMapFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
-                if state.isFirst {
-                    state.isFirst = false
-                    
-                    let spotName = state.searchText
-                    
-                    return .run { send in
-                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
-                    }
+                let spotName = state.searchText
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
                 }
                 
             case let .dataTransType(.searchSpotDatas(data)):
@@ -277,6 +275,22 @@ extension SearchMapFeature {
                     let mbrLocation = state.mbrLocation
                     let userLocation = state.userLocation
                     let menuItem = state.selectedMenuIndex
+                    
+                    if state.isFirst {
+                        state.isFirst = false
+                        return .run { send in
+                            let initialMBR = calculateInitialMBR(userLocation: userLocation)
+                            await send(
+                                .networkType(
+                                    .otherSpot(
+                                        mbrLocation: initialMBR,
+                                        userLocation: userLocation,
+                                        category: CategoryCase(rawValue: menuItem) ?? .all
+                                    )
+                                )
+                            )
+                        }
+                    }
                     
                     return .run { send in
                         await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: CategoryCase(rawValue: menuItem) ?? .all)))
@@ -371,5 +385,27 @@ extension SearchMapFeature {
         )
         
         return effects
+    }
+}
+
+extension SearchMapFeature {
+    private func calculateInitialMBR(userLocation: Coordinate, zoomLevel: Int = 17) -> MBRCoordinates {
+        // 줌 레벨 17에서의 적절한 오프셋 계산
+        // 줌 레벨이 증가할수록 표시되는 영역이 작아짐
+        // 줌 레벨 17은 대략 도시 블록 수준의 상세도
+        let latOffset = 0.003  // 약 300-400m (위도)
+        let lngOffset = 0.004  // 약 300-400m (경도, 서울 위도 기준)
+        
+        let northEast = Coordinate(
+            latitude: userLocation.latitude + latOffset,
+            longitude: userLocation.longitude + lngOffset
+        )
+        
+        let southWest = Coordinate(
+            latitude: userLocation.latitude - latOffset,
+            longitude: userLocation.longitude - lngOffset
+        )
+        
+        return MBRCoordinates(northEast: northEast, southWest: southWest)
     }
 }

@@ -7,7 +7,8 @@
 
 import Foundation
 
-struct TodaySpotListEntity: Entity {
+struct TodaySpotListEntity: Entity, Identifiable {
+    let id: UUID
     let spotId: Int
     let spotAddress: String
     let spotAddressDetail: String
@@ -19,6 +20,7 @@ struct TodaySpotListEntity: Entity {
     let tags: [String]
     
     init(spotId: Int = 0, spotAddress: String = "", spotAddressDetail: String = "", spotName: String = "", categoryId: CategoryCase = .all, images: [URL?] = [], isScraped: Bool = false, distance: String = "", tags: [String] = []) {
+        self.id = UUID()
         self.spotId = spotId
         self.spotAddress = spotAddress
         self.spotAddressDetail = spotAddressDetail

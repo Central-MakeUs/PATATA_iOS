@@ -28,7 +28,7 @@ extension MySpotListView {
             VStack {
                 fakeNavgationBar
                 
-                if store.viewState == .map {
+                if store.viewState != .home {
                     scrollMenuView
                         .padding(.top, 10)
                         .padding(.horizontal, 15)
@@ -40,7 +40,7 @@ extension MySpotListView {
             ScrollView(.vertical) {
                 VStack {
                     if store.viewState == .home {
-                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.spotId) { index, item in
+                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
                             spotListView(spot: item, index: index)
                                 .background(.white)
                                 .asButton {
@@ -48,7 +48,7 @@ extension MySpotListView {
                                 }
                         }
                     } else {
-                        ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.spotId) { index, item in
+                        ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
                             mapSpotView(spot: item, index: index)
                                 .background(.white)
                                 .asButton {
@@ -65,7 +65,7 @@ extension MySpotListView {
     
     private var fakeNavgationBar: some View {
         Group {
-            if store.viewState == .map {
+            if store.viewState != .home {
                 HStack(spacing: 5) {
                     Image("MapActive")
                         .resizable()
