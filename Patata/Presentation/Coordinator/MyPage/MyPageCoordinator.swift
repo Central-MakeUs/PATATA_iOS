@@ -71,7 +71,7 @@ extension MyPageCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 

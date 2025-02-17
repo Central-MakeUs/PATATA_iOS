@@ -18,13 +18,17 @@ struct SearchFeature {
         var itemTotalCount: Int = 0
         var pageTotalCount: Int = 0
         var currentPage: Int = 0
-        var filter: FilterCase = .recommend
+        var filter: FilterCase = .distance
         var beforeViewState: BeforeViewState
         var searchText: String = ""
         var searchResult: Bool = true
         var listLoadTrigger: Bool = true
         var viewState: ViewState = .search
-        var userLocation: Coordinate = Coordinate(latitude: 126.9784147, longitude: 37.5666885)
+        var userLocation: Coordinate = Coordinate(latitude: 37.5666885, longitude: 126.9784147)
+        var scrollToTop: Bool = false
+        var filterIsvalid: Bool = false
+        var filterText: String = "거리순"
+        var selectSpotIndex: Int = 0
     }
     
     enum ViewState {
@@ -48,11 +52,14 @@ struct SearchFeature {
         
         // bindingAction
         case bindingSearchText(String)
+        case bindingFilterIsValid(Bool)
         
         enum Delegate {
             case tappedBackButton
             case successSearch(String)
             case tappedSpotDetail(Int)
+            case deletePop
+            case detailBack(Bool)
         }
     }
     
@@ -64,13 +71,15 @@ struct SearchFeature {
         case tappedBackButton
         case searchOnSubmit
         case searchStart
-        case tappedSpotDetail(Int)
+        case tappedSpotDetail(Int, index: Int)
         case tappedArchiveButton(Int)
         case nextPage
+        case dismissFilter(String)
+        case openFilter
     }
     
     enum NetworkType {
-        case searchSpot(page: Int, filter: FilterCase, scroll: Bool)
+        case searchSpot(page: Int, filter: FilterCase, scroll: Bool, userLocation: Coordinate)
         case patchArchiveState(Int)
     }
     
@@ -122,10 +131,11 @@ extension SearchFeature {
                 }
                 
                 let searchText = state.searchText
+                let userLocation = state.userLocation
                 
                 if state.beforeViewState == .home {
                     return .run { [state = state] send in
-                        await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false)))
+                        await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false, userLocation: userLocation)))
                     }
                 } else {
                     return .send(.delegate(.successSearch(searchText)))
@@ -133,9 +143,12 @@ extension SearchFeature {
                 
             case .viewEvent(.searchStart):
                 state.searchText = ""
+                state.scrollToTop = false
                 state.viewState = .search
                 
-            case let .viewEvent(.tappedSpotDetail(spotId)):
+            case let .viewEvent(.tappedSpotDetail(spotId, index)):
+                state.selectSpotIndex = index
+                state.scrollToTop = false
                 return .send(.delegate(.tappedSpotDetail(spotId)))
                 
             case let .viewEvent(.tappedArchiveButton(index)):
@@ -146,14 +159,68 @@ extension SearchFeature {
             case .viewEvent(.nextPage):
                 state.listLoadTrigger = false
                 
-                return .run { [state = state] send in
-                    await send(.networkType(.searchSpot(page: state.currentPage + 1, filter: .recommend, scroll: true)))
+                let userLocation = state.userLocation
+                let currentPage = state.currentPage
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(page: currentPage + 1, filter: .recommend, scroll: true, userLocation: userLocation)))
                 }
                 
-            case let .networkType(.searchSpot(page, filer, scroll)):
+            case let .viewEvent(.dismissFilter(text)):
+                state.filterIsvalid = false
+                state.filterText = text
+                state.filter = FilterCase.getFilter(text: text)
+                
+                state.currentPage = 0
+                state.pageTotalCount = 0
+                
+                let currentPage = state.currentPage
+                let filter = state.filter
+                let userLocation = state.userLocation
+                
+                return .run { send in
+                    await send(
+                        .networkType(
+                            .searchSpot(
+                                page: currentPage,
+                                filter: filter,
+                                scroll: false, userLocation: userLocation
+                            )
+                        )
+                    )
+                }
+                
+            case .viewEvent(.openFilter):
+                state.filterIsvalid = true
+                
+            case .delegate(.deletePop):
+                state.scrollToTop = true
+                state.currentPage = 0
+                
+                let userLocation = state.userLocation
+                let filter = state.filter
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(page: 0, filter: filter, scroll: false, userLocation: userLocation)))
+                }
+                
+            case let .delegate(.detailBack(isArchive)):
+                if state.searchSpotItems[state.selectSpotIndex].isScraped != isArchive {
+                    state.searchSpotItems[state.selectSpotIndex] = SearchSpotEntity(
+                        spotId: state.searchSpotItems[state.selectSpotIndex].spotId,
+                        spotName: state.searchSpotItems[state.selectSpotIndex].spotName,
+                        imageUrl: state.searchSpotItems[state.selectSpotIndex].imageUrl,
+                        spotScraps: state.searchSpotItems[state.selectSpotIndex].spotScraps,
+                        isScraped: isArchive,
+                        reviews: state.searchSpotItems[state.selectSpotIndex].reviews,
+                        distance: state.searchSpotItems[state.selectSpotIndex].distance
+                    )
+                }
+                
+            case let .networkType(.searchSpot(page, filer, scroll, userLocation)):
                 return .run { [state = state] send in
                     do {
-                        let data = try await spotRepository.fetchSearch(searchText: state.searchText, page: page, sortBy: filer)
+                        let data = try await spotRepository.fetchSearch(searchText: state.searchText, page: page, latitude: userLocation.latitude, longitude: userLocation.longitude, sortBy: filer)
                         
                         await send(.dataTransType(.searchSpot(data, scroll)))
                     } catch {
@@ -193,7 +260,6 @@ extension SearchFeature {
                         state.currentPage = data.currentPage
                         state.searchSpotItems.append(contentsOf: data.spots)
                         state.listLoadTrigger = true
-                        
                     } else {
                         state.searchResult = true
                         state.itemTotalCount = data.totalCount
@@ -230,6 +296,9 @@ extension SearchFeature {
                 
             case let .bindingSearchText(text):
                 state.searchText = text
+                
+            case let .bindingFilterIsValid(isValid):
+                state.filterIsvalid = isValid
                 
             default:
                 break

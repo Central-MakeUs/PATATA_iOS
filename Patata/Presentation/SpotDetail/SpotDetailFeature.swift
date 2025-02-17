@@ -40,7 +40,7 @@ struct SpotDetailFeature {
         case bindingAlertIsPresent(Bool)
         
         enum Delegate {
-            case tappedNavBackButton
+            case tappedNavBackButton(Bool)
             case tappedDismissIcon
             case delete
         }
@@ -98,7 +98,7 @@ extension SpotDetailFeature {
                 }
                 
             case .viewEvent(.tappedNavBackButton):
-                return .send(.delegate(.tappedNavBackButton))
+                return .send(.delegate(.tappedNavBackButton(state.spotDetailData.isScraped)))
                 
             case .viewEvent(.bottomSheetOpen):
                 state.bottomSheetIsPresent = true

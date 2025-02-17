@@ -17,10 +17,9 @@ import ComposableArchitecture
 struct SearchResultView: View {
     
     @Perception.Bindable var store: StoreOf<SearchFeature>
-//    @Binding var spotItems: SpotItems
     @State var isPresent: Bool = false
     var isSaved: Bool = false
-    @State var filter: String = "거리순"
+    private let scrollViewTopID = "ScrollTop"
     
     private let columns = [
         GridItem(.flexible(), spacing: 8),
@@ -31,10 +30,9 @@ struct SearchResultView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarHidden(true)
-                .presentBottomSheet(isPresented: $isPresent) {
+                .presentBottomSheet(isPresented: $store.filterIsvalid.sending(\.bindingFilterIsValid)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
-                        isPresent = false
-                        filter = item
+                        store.send(.viewEvent(.dismissFilter(item)))
                         // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
@@ -47,15 +45,22 @@ extension SearchResultView {
         VStack {
             fakeNavBar
             
-            ScrollView {
-                
-                filterView
-                    .padding(.top, 12)
-                    .padding(.horizontal, 15)
-                
-                spotGridView
+            ScrollViewReader { proxy in
+                ScrollView {
+                    filterView
+                        .padding(.top, 12)
+                        .padding(.horizontal, 15)
+                        .id(scrollViewTopID)
+                    
+                    spotGridView
+                }
+                .background(.gray10)
+                .onChange(of: store.scrollToTop) { newValue in
+                    withAnimation {
+                        proxy.scrollTo(scrollViewTopID)
+                    }
+                }
             }
-            .background(.gray10)
         }
     }
     
@@ -102,12 +107,9 @@ extension SearchResultView {
             Spacer()
             
             HStack(spacing: 1) {
-                Text(filter)
+                Text(store.filterText)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
-                    .asButton {
-                        isPresent = true
-                    }
                 
                 Image("UnderIcon")
                     .resizable()
@@ -115,21 +117,20 @@ extension SearchResultView {
                     .frame(width: 18, height: 18)
             }
             .asButton {
-                print("tap")
-                isPresent = true
+                store.send(.viewEvent(.openFilter))
             }
         }
     }
     
     private var spotGridView: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.spotId) { index, item in
+            ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.id) { index, item in
                 spotView(item: item, index: index)
                     .asButton {
-                        store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[index].spotId)))
+                        store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[index].spotId, index: index)))
                     }
                     .onAppear {
-                        if store.pageTotalCount != 1 && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
+                        if store.pageTotalCount != store.currentPage && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
                             store.send(.viewEvent(.nextPage))
                         }
                     }
@@ -142,12 +143,12 @@ extension SearchResultView {
 extension SearchResultView {
     private func spotView(item: SearchSpotEntity, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            DownImageView(url: item.imageUrl, option: .min, fallBackImg: "ImageDefault")
+            DownImageView(url: item.imageUrl, option: .max, fallBackImg: "ImageDefault")
                 .aspectRatio(1, contentMode: .fit)
                 .frame(maxWidth: .infinity)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(alignment: .bottomLeading) {
+                .overlay(alignment: .topTrailing) {
                     SpotArchiveButton(height: 24, width: 24, isSaved: item.isScraped) {
                         store.send(.viewEvent(.tappedArchiveButton(index)))
                     }
@@ -161,7 +162,7 @@ extension SearchResultView {
                 .padding(.top, 12)
             
             HStack(spacing: 8) {
-                Text("\(item.distance)" + "Km")
+                Text("\(item.distance)")
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 

@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import TCACoordinators
+import PopupView
 
 struct ArchiveCoordinatorView: View {
     
@@ -26,6 +27,37 @@ struct ArchiveCoordinatorView: View {
                         .hideTabBar(store.isHideTabBar)
                 }
             }
+            .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
+                HStack {
+                    Spacer()
+                    
+                    Text("게시물이 정상적으로 삭제되었습니다.")
+                        .textStyle(.subtitleXS)
+                        .foregroundStyle(.blue20)
+                        .padding(.vertical, 10)
+                    
+                    Spacer()
+                }
+                .background(.gray100)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .padding(.horizontal, 15)
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        store.send(.viewEvent(.dismissPopup))
+                    }
+                }
+            }, customize: {
+                $0
+                    .type(.floater())
+                    .position(.bottom)
+                    .animation(.spring())
+                    .closeOnTap(true)
+                    .closeOnTapOutside(true)
+                    .backgroundColor(.black.opacity(0.5))
+                    .dismissCallback {
+                        store.send(.viewEvent(.dismissPopup))
+                    }
+            })
         }
     }
 }

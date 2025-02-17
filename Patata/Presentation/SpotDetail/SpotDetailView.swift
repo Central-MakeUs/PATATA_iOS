@@ -170,7 +170,7 @@ extension SpotDetailView {
         ZStack(alignment: .topTrailing) {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
                 ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
-                    DownImageView(url: image, option: .max, fallBackImg: "ImageDefault")
+                    DownImageView(url: image, option: .custom(CGSize(width: 650, height: 650)), fallBackImg: "ImageDefault")
                         .aspectRatio(contentMode: .fill)
                 }
             }

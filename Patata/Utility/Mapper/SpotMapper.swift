@@ -115,7 +115,7 @@ extension SpotMapper {
             spotScraps: dto.spotScraps,
             isScraped: dto.isScraped,
             reviews: dto.reviews,
-            distance: dto.distance
+            distance: DistanceUnit.formatDistance(dto.distance)
         )
     }
     

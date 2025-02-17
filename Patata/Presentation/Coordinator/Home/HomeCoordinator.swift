@@ -27,11 +27,11 @@ struct HomeCoordinator {
         var routes: IdentifiedArrayOf<Route<HomeScreen.State>>
         
         var popupIsPresent: Bool = false
+        var isHideTabBar: Bool = false
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<HomeScreen>)
-        case navigationAction(NavigationAction)
         
         case viewEvent(ViewEventType)
         case bindingPopupIsPresent(Bool)
@@ -39,10 +39,6 @@ struct HomeCoordinator {
     
     enum ViewEventType {
         case dismissPopup
-    }
-    
-    enum NavigationAction {
-        case pushSearch
     }
     
     var body: some ReducerOf<Self> {
@@ -55,27 +51,34 @@ extension HomeCoordinator {
         Reduce { state, action in
             switch action {
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedSearch)))):
-                return .send(.navigationAction(.pushSearch))
+                state.isHideTabBar = true
+                state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedAddButton)))):
+                state.isHideTabBar = true
                 state.routes.push(.category(SpotCategoryFeature.State(selectedIndex: 0)))
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot(spotId))))):
+                state.isHideTabBar = true
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedMoreButton)))):
+                state.isHideTabBar = true
                 state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .home)))
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedCategoryButton(category))))):
+                state.isHideTabBar = true
                 state.routes.push(.category(SpotCategoryFeature.State(selectedIndex: category.rawValue)))
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
+                state.isHideTabBar = false
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
+                state.isHideTabBar = false
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .category, action: .category(.delegate(.tappedSpot(spotId))))):
@@ -85,17 +88,40 @@ extension HomeCoordinator {
                 state.routes.pop()
                 state.popupIsPresent = true
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
+                if state.routes.count == 1{
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
+                
+                return .run { [routes = state.routes] send in
+                    if let _ = routes.last(where: { $0.id == .search }) {
+                        await send(.router(.routeAction(
+                            id: .search,
+                            action: .search(.delegate(.deletePop))
+                        )))
+                    }
+                }
+                
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(archive))))):
                 state.routes.pop()
+                if state.routes.count == 1 {
+                    state.isHideTabBar = false
+                }
+                
+                return .run { [routes = state.routes] send in
+                    if let _ = routes.last(where: { $0.id == .search }) {
+                        await send(.router(.routeAction(id: .search, action: .search(.delegate(.detailBack(archive))))))
+                    }
+                }
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()
+                state.isHideTabBar = false
                 
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
-                
-            case .navigationAction(.pushSearch):
-                state.routes.push(.search(SearchFeature.State(beforeViewState: .home)))
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

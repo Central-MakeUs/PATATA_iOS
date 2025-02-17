@@ -52,6 +52,8 @@ extension SpotRepository {
         longitude: Double = 0,
         sortBy: FilterCase
     ) async throws(PAError) -> SearchSpotCountEntity {
+        print("onSubmit", latitude, longitude)
+        
         let dto = try await networkManager.requestNetworkWithRefresh(
             dto: SearchSpotDTO.self,
             router: SpotRouter.fetchSearchResult(

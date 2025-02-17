@@ -18,24 +18,25 @@ struct HomeCoordinatorView: View {
         WithPerceptionTracking {
             TCARouter(store.scope(state: \.routes, action: \.router)) { screen in
                 switch screen.case {
-                case let .home(store):
-                    PatataMainView(store: store)
+                case let .home(homeStore):
+                    PatataMainView(store: homeStore)
+                        .hideTabBar(store.isHideTabBar)
                     
-                case let .search(store):
-                    SearchView(store: store)
-                        .hideTabBar(true)
+                case let .search(searchStore):
+                    SearchView(store: searchStore)
+                        .hideTabBar(store.isHideTabBar)
                     
-                case let .category(store):
-                    SpotCategoryView(store: store)
-                        .hideTabBar(true)
+                case let .category(categoryStore):
+                    SpotCategoryView(store: categoryStore)
+                        .hideTabBar(store.isHideTabBar)
                     
-                case let .spotDetail(store):
-                    SpotDetailView(store: store)
-                        .hideTabBar(true)
+                case let .spotDetail(detailStore):
+                    SpotDetailView(store: detailStore)
+                        .hideTabBar(store.isHideTabBar)
                     
-                case let .mySpotList(store):
-                    MySpotListView(store: store)
-                        .hideTabBar(true)
+                case let .mySpotList(listStore):
+                    MySpotListView(store: listStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {

@@ -17,23 +17,31 @@ struct SearchView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            switch store.viewState {
-            case .loading:
-                ProgressView()
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationBarBackButtonHidden(true)
-            case .search:
-                contentView
-                    .navigationBarBackButtonHidden(true)
-                    .background(
-                        Color.clear
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                hideKeyboard()
-                            }
-                    )
-            case .searchResult:
-                SearchResultView(store: store)
+            ZStack {
+                Color.gray10
+                    .ignoresSafeArea()
+                
+                switch store.viewState {
+                case .loading:
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .navigationBarBackButtonHidden(true)
+                case .search:
+                    contentView
+                        .navigationBarBackButtonHidden(true)
+                        .background(
+                            Color.gray10
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    hideKeyboard()
+                                }
+                        )
+                        .onAppear {
+                            store.send(.viewCycle(.onAppear))
+                        }
+                case .searchResult:
+                    SearchResultView(store: store)
+                }
             }
         }
     }

@@ -24,12 +24,20 @@ struct ArchiveCoordinator {
         var routes: IdentifiedArrayOf<Route<ArchiveScreen.State>>
         
         var isHideTabBar: Bool = false
+        var popupIsPresent: Bool = false
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<ArchiveScreen>)
+        
+        case viewEvent(ViewEventType)
+        
+        case bindingPopupIsPresent(Bool)
     }
     
+    enum ViewEventType {
+        case dismissPopup
+    }
     
     var body: some ReducerOf<Self> {
         core()
@@ -44,9 +52,17 @@ extension ArchiveCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton)))):
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
                 state.isHideTabBar = false
                 state.routes.pop()
+                
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
+                state.isHideTabBar = false
+                state.routes.pop()
+                state.popupIsPresent = true
+                
+            case .viewEvent(.dismissPopup):
+                state.popupIsPresent = false
                 
             default:
                 break

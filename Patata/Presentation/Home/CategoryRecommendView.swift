@@ -19,7 +19,7 @@ struct CategoryRecommendView: View {
 extension CategoryRecommendView {
     private var contentView: some View {
         HStack(alignment: .top) {
-            DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .min, fallBackImg: "ImageDefault")
+            DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
@@ -66,7 +66,7 @@ extension CategoryRecommendView {
                 .padding(.top, 1)
                 .padding(.bottom, 6)
             
-            SaveCommentCountView(archiveCount: 117, commentCount: 117, imageSize: 12)
+            SaveCommentCountView(archiveCount: spotItem.spotScraps, commentCount: spotItem.reviews, imageSize: 12)
                 .padding(.bottom, 25)
             
             HStack {

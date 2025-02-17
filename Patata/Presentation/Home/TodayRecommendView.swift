@@ -30,11 +30,40 @@ struct TodayRecommendView: View {
 extension TodayRecommendView {
     private var contentView: some View {
            VStack(spacing: 10) {
-               DownImageView(url: URL(string: item.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
+               DownImageView(url: URL(string: item.imageUrl ?? ""), option: .custom(CGSize(width: 600, height: 600)), fallBackImg: "ImageDefault")
                    .aspectRatio(5/6, contentMode: .fit)
                    .clipped()
                    .clipShape(RoundedRectangle(cornerRadius: 8))
                    .padding(.top, 15)
+                   .overlay(alignment: .bottomLeading) {
+                       VStack(spacing: 0){
+                           HStack(spacing: 0) {
+                               Image("WhitePin")
+                                   .resizable()
+                                   .aspectRatio(contentMode: .fit)
+                                   .frame(width: 30, height: 30)
+                                   .padding(.leading, 0)
+                               
+                               Text(item.spotAddress)
+                                   .textStyle(.subtitleXS)
+                                   .foregroundStyle(.white)
+                                   .offset(x: -4)
+                               
+                               Spacer()
+                           }
+                           .offset(x: -8)
+                           
+                           HStack {
+                               Text(item.spotName)
+                                   .textStyle(.subtitleL)
+                                   .foregroundStyle(.white)
+                               
+                               Spacer()
+                           }
+                       }
+                       .padding(.leading, 8)
+                       .padding(.bottom, 12)
+                   }
                    
                HStack {
                    

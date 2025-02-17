@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import TCACoordinators
+import PopupView
 
 struct MyPageCoordinatorView: View {
     
