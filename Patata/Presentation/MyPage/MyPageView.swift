@@ -14,31 +14,22 @@ struct MyPageView: View {
     private let imageCount: Int = 0
     
     var body: some View {
-        contentView
+        WithPerceptionTracking {
+            contentView
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
+        }
     }
 }
 
 extension MyPageView {
     private var contentView: some View {
-//        VStack(spacing: 0) {
-//            fakeNavgationBar
-//                .padding(.bottom, 4)
-//                .background(.white)
-//            
-//            if imageCount == 0 {
-//                noArchiveView
-//            } else {
-//                ArchiveView
-//                    .padding(.top, 50)
-//            }
-//        }
-//        .background(.gray20)
-        
         VStack(spacing: 0) {
             fakeNavgationBar
                 .padding(.bottom, 4)
                 
-            if imageCount == 0 {
+            if store.spotCount == 0 {
                 noArchiveView
             } else {
                 ArchiveView
@@ -145,7 +136,7 @@ extension MyPageView {
                 
                 Spacer()
                 
-                Text("6")
+                Text("\(store.spotCount)")
                     .textStyle(.subtitleSM)
                     .foregroundStyle(.blue100)
                     .padding(.trailing, 15)
@@ -163,13 +154,9 @@ extension MyPageView {
         ]
         
         return LazyVGrid(columns: columns, spacing: 4) {
-            ForEach(0..<2) { _ in
-                Rectangle()
-                    .foregroundStyle(.red)
-                    .aspectRatio(1, contentMode: .fit)
-                    .asButton {
-                        store.send(.viewEvent(.tappedSpot))
-                    }
+            
+            ForEach(store.mySpots, id: \.spotId) { item in
+                myPageItem(item)
             }
         }
     }
@@ -198,4 +185,11 @@ extension MyPageView {
     }
     
     
+}
+
+extension MyPageView {
+    private func myPageItem(_ item: ArchiveListEntity) -> some View {
+        DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
+            .aspectRatio(1, contentMode: .fill)
+    }
 }

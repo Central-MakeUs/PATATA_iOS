@@ -19,6 +19,10 @@ struct ArchiveMapper: Sendable {
     func dtoToEntity(_ dtos: [ArchiveItemDTO]) async -> [ArchiveListEntity] {
         return await dtos.asyncMap { dtoToEntity($0) }
     }
+    
+    func dtoToEntity(_ dto: MySpotCountDTO) async -> MySpotsEntity {
+        return await MySpotsEntity(spotCount: dto.totalSpots, mySpots: dto.spots.asyncMap { dtoToEntity($0) })
+    }
 }
 
 extension ArchiveMapper {
