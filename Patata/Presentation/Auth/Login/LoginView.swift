@@ -66,7 +66,6 @@ struct LoginView: View {
                                     .cornerRadius(4, corners: [.topLeft, .bottomLeft])
                                     .padding(.leading, 90)
                                     
-                                
                                 Spacer()
                                 
                                 Rectangle()
@@ -83,9 +82,8 @@ struct LoginView: View {
                 
                 VStack(spacing: 16) {
                     customAppleLoginButton
-                        .overlay {
-                            oriAppleLoginButton
-                                .blendMode(.overlay)
+                        .asButton {
+                            store.send(.viewEvent(.tappedAppleLogin))
                         }
                         .padding(.top, 40)
                     
@@ -143,14 +141,14 @@ extension LoginView {
         .clipShape(RoundedRectangle(cornerRadius: 50))
     }
     
-    private var oriAppleLoginButton: some View {
-        SignInWithAppleButton { _ in
-
-        } onCompletion: { result in
-            store.send(.viewEvent(.tappedAppleLogin(result)))
-        }
-        .clipShape(RoundedRectangle(cornerRadius: 50))
-    }
+//    private var oriAppleLoginButton: some View {
+//        SignInWithAppleButton { _ in
+//
+//        } onCompletion: { result in
+//            store.send(.viewEvent(.tappedAppleLogin(result)))
+//        }
+//        .clipShape(RoundedRectangle(cornerRadius: 50))
+//    }
 
     
     private var oriGoogleLoginButton: some View {

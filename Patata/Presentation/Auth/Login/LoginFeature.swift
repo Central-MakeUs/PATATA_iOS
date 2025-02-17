@@ -33,7 +33,7 @@ struct LoginFeature {
     }
     
     enum ViewEvent {
-        case tappedAppleLogin(Result<ASAuthorization, any Error>)
+        case tappedAppleLogin
         case tappedGoogleLogin
         case tappedStartButton
     }
@@ -61,11 +61,16 @@ struct LoginFeature {
                     state.currentIndex += 1
                 }
                 
-            case let .viewEvent(.tappedAppleLogin(result)):
+            case .viewEvent(.tappedAppleLogin):
                 return .run { send in
                     do {
-                        let identityToken = try await loginManager.appleLoginResult(result: result)
-                        await send(.networkType(.appleLogin(identityToken)))
+                        let authorization = try await loginManager.getASAuthorization()
+                        
+                        let tokens = loginManager.handleAuthorization(authorization)
+                        
+                        if let idToken = tokens.id {
+                            await send(.networkType(.appleLogin(idToken)))
+                        }
                     } catch {
                         print(error)
                     }
