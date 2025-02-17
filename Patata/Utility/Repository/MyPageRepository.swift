@@ -14,7 +14,13 @@ final class MyPageRepository: @unchecked Sendable {
     @Dependency(\.networkManager) var networkManager
     
     func chageNickname(nickname: String) async throws(PAError) -> Bool {
-        return try await networkManager.requestNetworkWithRefresh(dto: APIResponseErrorDTO.self, router: MyPageRouter.changeNickname(NicknameRequestDTO(nickName: nickname))).isSuccess
+        let isSuccess = try await networkManager.requestNetworkWithRefresh(dto: APIResponseErrorDTO.self, router: MyPageRouter.changeNickname(NicknameRequestDTO(nickName: nickname))).isSuccess
+        
+        if isSuccess {
+            UserDefaultsManager.nickname = nickname
+        }
+        
+        return isSuccess
     }
     
     func fetchMySpots() async throws(PAError) -> MySpotsEntity {

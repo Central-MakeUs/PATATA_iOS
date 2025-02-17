@@ -14,6 +14,8 @@ enum MyPageScreen {
     case myPage(MyPageFeature)
     case setting(SettingFeature)
     case deleteID(DeleteIDFeature)
+    case profileEdit(ProfileEditFeature)
+    case success(SuccessFeature)
 }
 
 @Reducer
@@ -52,6 +54,10 @@ extension MyPageCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.setting(SettingFeature.State()))
                 
+            case .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedProfileEdit)))):
+                state.isHideTabBar = true
+                state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .edit, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
+                
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.pop()
@@ -67,6 +73,27 @@ extension MyPageCoordinator {
                 
             case .router(.routeAction(id: .deleteID, action: .deleteID(.delegate(.succesRevoke)))):
                 return .send(.delegate(.successRevoke))
+                
+            case let .router(.routeAction(id: .profileEdit, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
+                if viewState == .edit {
+                    state.isHideTabBar = false
+                    state.routes.pop()
+                }
+                
+            case .router(.routeAction(id: .profileEdit, action: .profileEdit(.delegate(.successChangeNickname)))):
+                state.routes.push(.success(SuccessFeature.State()))
+                
+            case .router(.routeAction(id: .success, action: .success(.delegate(.tappedConfirmButton)))):
+                state.isHideTabBar = false
+                state.routes.popToRoot()
+                return .run { [routes = state.routes] send in
+                        if let archiveIndex = routes.index(id: .myPage) {
+                            await send(.router(.routeAction(
+                                id: routes[archiveIndex].id,
+                                action: .myPage(.delegate(.changeNickName))
+                            )))
+                        }
+                    }
                 
             default:
                 break

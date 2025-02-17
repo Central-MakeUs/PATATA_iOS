@@ -14,6 +14,7 @@ enum RootScreen {
     case onboarding(OnboardPageFeature)
     case login(LoginFeature)
     case profileEdit(ProfileEditFeature)
+    case success(SuccessFeature)
 }
 
 @Reducer
@@ -136,12 +137,15 @@ struct RootCoordinator {
                 }
                 
             case .router(.routeAction(id: _, action: .profileEdit(.delegate(.successChangeNickname)))):
-                state.viewState = .tab
+                state.routes.push(.success(SuccessFeature.State()))
                 
             case let .router(.routeAction(id: _, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .first {
                     state.routes.pop()
                 }
+                
+            case .router(.routeAction(id: _, action: .success(.delegate(.tappedConfirmButton)))):
+                state.viewState = .tab
                 
             case .tabCoordinatorAction(.delegate(.tappedLogout)):
                 UserDefaultsManager.accessToken = ""

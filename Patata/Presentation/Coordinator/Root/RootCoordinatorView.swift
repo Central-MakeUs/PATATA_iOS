@@ -30,6 +30,8 @@ struct RootCoordinatorView: View {
                             LoginView(store: store)
                         case let .profileEdit(store):
                             ProfileEditView(store: store)
+                        case let .success(successStore):
+                            SuccessView(store: successStore)
                         }
                     }
 
@@ -77,6 +79,8 @@ extension RootScreen.State: Identifiable {
             return .login
         case .profileEdit:
             return .profileEdit
+        case .success:
+            return .success
         }
     }
 
@@ -85,6 +89,7 @@ extension RootScreen.State: Identifiable {
         case onboarding
         case login
         case profileEdit
+        case success
 
         var id: ID {
             return self

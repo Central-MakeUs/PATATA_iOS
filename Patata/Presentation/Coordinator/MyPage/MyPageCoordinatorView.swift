@@ -28,6 +28,14 @@ struct MyPageCoordinatorView: View {
                 case let .deleteID(deleteIDStore):
                     DeleteIDView(store: deleteIDStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .profileEdit(profileStore):
+                    ProfileEditView(store: profileStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .success(successStore):
+                    SuccessView(store: successStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
         }
@@ -43,6 +51,10 @@ extension MyPageScreen.State: Identifiable {
             return ID.setting
         case .deleteID:
             return ID.deleteID
+        case .profileEdit:
+            return ID.profileEdit
+        case .success:
+            return ID.success
         }
     }
     
@@ -50,6 +62,8 @@ extension MyPageScreen.State: Identifiable {
         case myPage
         case setting
         case deleteID
+        case profileEdit
+        case success
         
         var id: ID {
             return self

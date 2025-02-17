@@ -31,6 +31,7 @@ struct MyPageFeature {
             case tappedSpot
             case tappedProfileEdit
             case tappedSetting
+            case changeNickName
         }
     }
     
@@ -70,10 +71,10 @@ extension MyPageFeature {
                 }
                 
             case .viewEvent(.tappedSpot):
-                return .send(.viewEvent(.tappedSpot))
+                return .send(.delegate(.tappedSpot))
                 
             case .viewEvent(.tappedProfileEdit):
-                return .send(.viewEvent(.tappedProfileEdit))
+                return .send(.delegate(.tappedProfileEdit))
                 
             case .viewEvent(.tappedSetting):
                 return .send(.delegate(.tappedSetting))
@@ -88,6 +89,9 @@ extension MyPageFeature {
                         print("fail", errorManager.handleError(error) ?? "")
                     }
                 }
+                
+            case .delegate(.changeNickName):
+                state.nickname = UserDefaultsManager.nickname
                 
             case let .dataTransType(.fetchMySpot(data)):
                 state.spotCount = data.spotCount
