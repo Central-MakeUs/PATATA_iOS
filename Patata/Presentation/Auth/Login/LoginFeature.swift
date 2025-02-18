@@ -15,6 +15,8 @@ struct LoginFeature {
     @ObservableState
     struct State: Equatable {
         var currentIndex: Int = 0
+        var errorMSG: String = ""
+        var isPresent: Bool = false
     }
     
     enum Action {
@@ -30,12 +32,14 @@ struct LoginFeature {
         
         // bindingAction
         case bindingCurrentIndex(Int)
+        case bindingIsPresent(Bool)
     }
     
     enum ViewEvent {
         case tappedAppleLogin
         case tappedGoogleLogin
         case tappedStartButton
+        case dismiss
     }
     
     enum NetworkType {
@@ -45,10 +49,12 @@ struct LoginFeature {
     
     enum DataTransType {
         case loginEntity(LoginEntity)
+        case error(Error)
     }
     
     @Dependency(\.loginManager) var loginManager
     @Dependency(\.loginRepository) var loginRepository
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         Reduce { state, action in
@@ -72,7 +78,7 @@ struct LoginFeature {
                             await send(.networkType(.appleLogin(idToken)))
                         }
                     } catch {
-                        print(error)
+                        await send(.dataTransType(.error(error)))
                     }
                 }
                 
@@ -83,9 +89,12 @@ struct LoginFeature {
                         print("success", idToken)
                         await send(.networkType(.googleLogin(idToken.tokenString)))
                     } catch {
-                        print(error)
+                        await send(.dataTransType(.error(error)))
                     }
                 }
+                
+            case .viewEvent(.dismiss):
+                state.isPresent = false
                 
             case let .networkType(.googleLogin(token)):
                 return .run { send in
@@ -94,7 +103,7 @@ struct LoginFeature {
                         
                         await send(.dataTransType(.loginEntity(data)))
                     } catch {
-                        print(error)
+                        await send(.dataTransType(.error(error)))
                     }
                 }
                 
@@ -105,7 +114,7 @@ struct LoginFeature {
                         
                         await send(.dataTransType(.loginEntity(data)))
                     } catch {
-                        print(error)
+                        await send(.dataTransType(.error(error)))
                     }
                 }
                 
@@ -113,9 +122,28 @@ struct LoginFeature {
                 UserDefaultsManager.nickname = loginEntity.nickName ?? ""
                 return .send(.delegate(.loginSuccess))
                 
+            case let .dataTransType(.error(error)):
+                if let error = error as? PAError {
+                    switch error {
+                    case .errorMessage(.member(.usedNickname)):
+                        state.errorMSG = "이미 다른 소셜로 회원가입한 회원입니다.\n다른 계정으로 로그인해주세요."
+                        state.isPresent = true
+                    case .errorMessage(.member(.deleteMember)):
+                        state.errorMSG = "탈퇴한 회원입니다.\n30일 내에 가입이 불가능합니다."
+                        state.isPresent = true
+                    default:
+                        print(error, errorManager.handleError(error) ?? "")
+                    }
+                } else {
+                    print(error, errorManager.handleError(error) ?? "")
+                }
+                
             case let .bindingCurrentIndex(index):
                 state.currentIndex = index
              
+            case let .bindingIsPresent(isPresent):
+                state.isPresent = isPresent
+                
             default:
                 break
             }

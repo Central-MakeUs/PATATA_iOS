@@ -89,6 +89,8 @@ extension ErrorManager {
             switch memberError {
             case .usedNickname:
                 return "이미 사용중인 닉네임입니다."
+            default:
+                return nil
             }
             
         case .common(let commonError):

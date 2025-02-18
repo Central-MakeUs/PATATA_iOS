@@ -28,6 +28,8 @@ enum APIError: Error {
             
         case "MEMBER4001":
             return .member(.usedNickname)
+        case "MEMBER4004":
+            return .member(.deleteMember)
             
         case "OAUTH4003":
             return .oauth(.failApplelogin)

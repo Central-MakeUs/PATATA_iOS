@@ -9,4 +9,6 @@ import Foundation
 
 enum MemberError: Error {
     case usedNickname
+    case deleteMember
+    case duplicate
 }

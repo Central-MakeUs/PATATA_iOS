@@ -99,7 +99,7 @@ extension CustomAlert {
                 Spacer()
                 
                 Text(confirmText)
-                    .foregroundStyle(confirmText == "설정으로 이동" ? .textDefault : .red100)
+                    .foregroundStyle(confirmText == "설정으로 이동" || confirmText == "확인" ? .textDefault : .red100)
                     .textStyle(.subtitleS)
                     .asButton {
                         onConfirm()

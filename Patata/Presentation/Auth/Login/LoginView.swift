@@ -23,87 +23,92 @@ struct LoginView: View {
     @State private var sizeState: CGSize = .zero
     
     var body: some View {
-        ZStack {
-            Color.blue20
-                .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
+        WithPerceptionTracking {
+            ZStack {
+                Color.blue20
+                    .ignoresSafeArea()
                 
-                ZStack {
-                    Image("Polaroid")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 200, height: 200)
-                        .offset(y: imageOffset)
+                VStack(spacing: 0) {
                     
-                    Color.blue20
-                        .frame(width: 200, height: 200)
-                    
-                    VStack {
-                        Image("PatataMain")
+                    ZStack {
+                        Image("Polaroid")
                             .resizable()
                             .scaledToFit()
-                            .padding(.horizontal, 100)
-                            .padding(.top, 70)
+                            .frame(width: 200, height: 200)
+                            .offset(y: imageOffset)
+                        
+                        Color.blue20
+                            .frame(width: 200, height: 200)
+                        
+                        VStack {
+                            Image("PatataMain")
+                                .resizable()
+                                .scaledToFit()
+                                .padding(.horizontal, 100)
+                                .padding(.top, 70)
+                        }
                     }
-                }
-                
-                Rectangle()
-                    .aspectRatio(10, contentMode: .fit)
-                    .frame(maxWidth: .infinity)
-                    .foregroundStyle(.black)
-                    .clipShape(RoundedRectangle(cornerRadius: 4))
-                    .padding(.horizontal, 90)
-                    .sizeState(size: $sizeState)
-                    .opacity(barOpacity)
-                    .scaleEffect(x: scale, y: scale, anchor: .top)
-                    .overlay {
-                        if sideValid {
-                            HStack {
-                                Rectangle()
-                                    .foregroundStyle(.black)
-                                    .frame(width: 20 , height: sizeState.height)
-                                    .cornerRadius(4, corners: [.topLeft, .bottomLeft])
-                                    .padding(.leading, 90)
+                    
+                    Rectangle()
+                        .aspectRatio(10, contentMode: .fit)
+                        .frame(maxWidth: .infinity)
+                        .foregroundStyle(.black)
+                        .clipShape(RoundedRectangle(cornerRadius: 4))
+                        .padding(.horizontal, 90)
+                        .sizeState(size: $sizeState)
+                        .opacity(barOpacity)
+                        .scaleEffect(x: scale, y: scale, anchor: .top)
+                        .overlay {
+                            if sideValid {
+                                HStack {
+                                    Rectangle()
+                                        .foregroundStyle(.black)
+                                        .frame(width: 20 , height: sizeState.height)
+                                        .cornerRadius(4, corners: [.topLeft, .bottomLeft])
+                                        .padding(.leading, 90)
+                                        
+                                    Spacer()
                                     
-                                Spacer()
-                                
-                                Rectangle()
-                                    .foregroundStyle(.black)
-                                    .frame(width: 20, height: sizeState.height)
-                                    .cornerRadius(4, corners: [.topRight, .bottomRight])
-                                    .padding(.trailing, 90)
-                                    
+                                    Rectangle()
+                                        .foregroundStyle(.black)
+                                        .frame(width: 20, height: sizeState.height)
+                                        .cornerRadius(4, corners: [.topRight, .bottomRight])
+                                        .padding(.trailing, 90)
+                                        
+                                }
                             }
                         }
+                    
+                    Spacer()
+                    
+                    VStack(spacing: 16) {
+                        customAppleLoginButton
+                            .asButton {
+                                store.send(.viewEvent(.tappedAppleLogin))
+                            }
+                            .padding(.top, 40)
+                        
+                        
+                        customGoogleLoginButton
+                            .asButton {
+                                store.send(.viewEvent(.tappedGoogleLogin))
+                            }
                     }
-                
-                Spacer()
-                
-                VStack(spacing: 16) {
-                    customAppleLoginButton
-                        .asButton {
-                            store.send(.viewEvent(.tappedAppleLogin))
-                        }
-                        .padding(.top, 40)
-                    
-                    
-                    customGoogleLoginButton
-                        .asButton {
-                            store.send(.viewEvent(.tappedGoogleLogin))
-                        }
+                    .padding(.horizontal, 15)
+                    .padding(.bottom, 25)
+                    .background(.blue20)
                 }
-                .padding(.horizontal, 15)
-                .padding(.bottom, 25)
-                .background(.blue20)
             }
-        }
-        .navigationBarBackButtonHidden()
-        .onAppear {
-            startAnimation()
-        }
-        .onDisappear {
-            stopAnimation()
+            .customAlert(isPresented: $store.isPresent.sending(\.bindingIsPresent), message: store.errorMSG, onConfirm: {
+                store.send(.viewEvent(.dismiss))
+            })
+            .navigationBarBackButtonHidden()
+            .onAppear {
+                startAnimation()
+            }
+            .onDisappear {
+                stopAnimation()
+            }
         }
     }
 }
