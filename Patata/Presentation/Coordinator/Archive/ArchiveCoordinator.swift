@@ -15,6 +15,7 @@ enum ArchiveScreen {
     case spotDetail(SpotDetailFeature)
     case spotedit(SpotEditorFeature)
     case addSpotMap(AddSpotMapFeature)
+    case report(ReportFeature)
 }
 
 @Reducer
@@ -27,14 +28,20 @@ struct ArchiveCoordinator {
         
         var isHideTabBar: Bool = false
         var popupIsPresent: Bool = false
+        var errorMSG: String = ""
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<ArchiveScreen>)
         
         case viewEvent(ViewEventType)
+        case delegate(Delegate)
         
         case bindingPopupIsPresent(Bool)
+        
+        enum Delegate {
+            case tappedConfirmButton
+        }
     }
     
     enum ViewEventType {
@@ -54,6 +61,16 @@ extension ArchiveCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
+            case .router(.routeAction(id: .archive, action: .archive(.delegate(.tappedConfirmButton)))):
+                return .send(.delegate(.tappedConfirmButton))
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
+                if type == "Post" {
+                    state.routes.push(.report(ReportFeature.State(viewState: .post)))
+                } else {
+                    state.routes.push(.report(ReportFeature.State(viewState: .user)))
+                }
+                
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
                 state.isHideTabBar = false
                 state.routes.pop()
@@ -61,6 +78,7 @@ extension ArchiveCoordinator {
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 state.isHideTabBar = false
                 state.routes.pop()
+                state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
@@ -91,6 +109,15 @@ extension ArchiveCoordinator {
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
+                state.errorMSG = "정상적으로 신고되었습니다."
+                state.routes.popToRoot()
+                state.isHideTabBar = false
+                state.popupIsPresent = true
                 
             default:
                 break

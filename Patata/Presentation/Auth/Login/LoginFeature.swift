@@ -80,6 +80,7 @@ struct LoginFeature {
                 return .run { send in
                     do {
                         let idToken = try await loginManager.googleLogin()
+                        print("success", idToken)
                         await send(.networkType(.googleLogin(idToken.tokenString)))
                     } catch {
                         print(error)

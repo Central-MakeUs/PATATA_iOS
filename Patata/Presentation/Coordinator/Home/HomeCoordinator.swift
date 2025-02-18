@@ -18,6 +18,7 @@ enum HomeScreen {
     case mySpotList(MySpotListFeature)
     case spotedit(SpotEditorFeature)
     case addSpotMap(AddSpotMapFeature)
+    case report(ReportFeature)
 }
 
 @Reducer
@@ -30,6 +31,7 @@ struct HomeCoordinator {
         
         var popupIsPresent: Bool = false
         var isHideTabBar: Bool = false
+        var errorMSG: String = ""
     }
     
     enum Action {
@@ -89,6 +91,7 @@ extension HomeCoordinator {
                 
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 state.routes.pop()
+                state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
                 if state.routes.count == 1{
@@ -116,6 +119,13 @@ extension HomeCoordinator {
                     if let _ = routes.last(where: { $0.id == .search }) {
                         await send(.router(.routeAction(id: .search, action: .search(.delegate(.detailBack(archive))))))
                     }
+                }
+            
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
+                if type == "Post" {
+                    state.routes.push(.report(ReportFeature.State(viewState: .post)))
+                } else {
+                    state.routes.push(.report(ReportFeature.State(viewState: .user)))
                 }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
@@ -151,6 +161,20 @@ extension HomeCoordinator {
                 
             case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
                 state.routes.pop()
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
+                state.errorMSG = "정상적으로 신고되었습니다."
+                state.popupIsPresent = true
+                state.routes.popToRoot()
+                
+                if state.routes.count == 1 {
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

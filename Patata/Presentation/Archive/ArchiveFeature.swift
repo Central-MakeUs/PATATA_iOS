@@ -30,6 +30,7 @@ struct ArchiveFeature {
         
         enum Delegate {
             case tappedSpot(Int)
+            case tappedConfirmButton
         }
         
         // bindingAction
@@ -47,6 +48,7 @@ struct ArchiveFeature {
         case tappedDeleteButton
         case dismissAlert
         case dismissPopup
+        case tappedConfirmButton
     }
     
     enum NetworkType {
@@ -102,6 +104,9 @@ extension ArchiveFeature {
                 return .run { send in
                     await send(.networkType(.patchArchiveState(deleteList)))
                 }
+                
+            case .viewEvent(.tappedConfirmButton):
+                return .send(.delegate(.tappedConfirmButton))
                 
             case .viewEvent(.dismissAlert):
                 state.selectedSpotList = []

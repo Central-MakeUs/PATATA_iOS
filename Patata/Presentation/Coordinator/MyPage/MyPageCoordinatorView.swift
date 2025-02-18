@@ -56,7 +56,7 @@ struct MyPageCoordinatorView: View {
                 HStack {
                     Spacer()
                     
-                    Text("게시물이 정상적으로 삭제되었습니다.")
+                    Text(store.errorMSG)
                         .textStyle(.subtitleXS)
                         .foregroundStyle(.blue20)
                         .padding(.vertical, 10)

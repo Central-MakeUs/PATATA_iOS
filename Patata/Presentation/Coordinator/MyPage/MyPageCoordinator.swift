@@ -31,6 +31,7 @@ struct MyPageCoordinator {
         
         var isHideTabBar: Bool = false
         var popupIsPresent: Bool = false
+        var errorMSG: String = ""
     }
     
     enum Action {
@@ -80,6 +81,7 @@ extension MyPageCoordinator {
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 state.routes.pop()
                 state.isHideTabBar = false
+                state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):

@@ -72,29 +72,40 @@ extension ArchiveView {
     private var contentView: some View {
         VStack {
             fakeNavBar
-            
-            ScrollView(.vertical) {
-                LazyVGrid(columns: columns, spacing: 4) {
-                    ForEach(Array(store.archiveList.enumerated()), id: \.element.spotId) { index, item in
-                        archiveItem(item)
-                            .overlay(
-                                Group {
-                                    if store.chooseIsValid {
-                                        Rectangle()
-                                            .stroke(store.selectedSpotList.contains(item.spotId) ? Color.blue100 : Color.clear)
-                                            .foregroundStyle(.clear)
-                                    }
-                                }
-                            )
-                            .asButton {
-                                store.send(.viewEvent(.tappedSpot(item.spotId)))
-                            }
-                    }
-                }
+                .padding(.bottom, 12)
                 .background(.white)
-                .padding(.top, 4)
+            
+            if store.archiveList.isEmpty {
+                Spacer()
+                
+                searchFailView
+                
+                Spacer()
+            } else {
+                ScrollView(.vertical) {
+                    LazyVGrid(columns: columns, spacing: 4) {
+                        ForEach(Array(store.archiveList.enumerated()), id: \.element.spotId) { index, item in
+                            archiveItem(item)
+                                .overlay(
+                                    Group {
+                                        if store.chooseIsValid {
+                                            Rectangle()
+                                                .stroke(store.selectedSpotList.contains(item.spotId) ? Color.blue100 : Color.clear)
+                                                .foregroundStyle(.clear)
+                                        }
+                                    }
+                                )
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                }
+                        }
+                    }
+                    .background(.white)
+                    .padding(.top, 4)
+                }
             }
         }
+        .background(store.archiveList.isEmpty ? .gray20 : .white)
     }
 }
 
@@ -115,6 +126,40 @@ extension ArchiveView {
                     .asButton {
                         store.send(.viewEvent(.tappedChoseButton))
                     }
+            }
+        }
+    }
+    
+    private var searchFailView: some View {
+        VStack {
+            Image("SearchFail")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 130, height: 150)
+            
+            VStack(alignment: .center) {
+                Text("아직 아카이빙한 스팟이 없어요!")
+            }
+            .textStyle(.subtitleL)
+            .foregroundStyle(.textDisabled)
+            
+            HStack {
+                Spacer()
+                
+                Text("스팟 둘러보러 가기")
+                    .textStyle(.subtitleM)
+                    .foregroundStyle(.white)
+                    .padding(.vertical, 14)
+                
+                Spacer()
+            }
+            .background(.black)
+            .clipShape(RoundedRectangle(cornerRadius: 30))
+            .padding(.bottom, 20)
+            .padding(.top, 8)
+            .padding(.horizontal, 75)
+            .asButton {
+                store.send(.viewEvent(.tappedConfirmButton))
             }
         }
     }

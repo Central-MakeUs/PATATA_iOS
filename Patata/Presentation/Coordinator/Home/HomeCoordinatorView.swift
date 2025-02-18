@@ -45,13 +45,17 @@ struct HomeCoordinatorView: View {
                 case let .addSpotMap(addSpotMapStore):
                     AddSpotMapView(store: addSpotMapStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .report(reportStore):
+                    ReportView(store: reportStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
                 HStack {
                     Spacer()
                     
-                    Text("게시물이 정상적으로 삭제되었습니다.")
+                    Text(store.errorMSG)
                         .textStyle(.subtitleXS)
                         .foregroundStyle(.blue20)
                         .padding(.vertical, 10)
@@ -99,6 +103,8 @@ extension HomeScreen.State: Identifiable {
             return ID.spotedit
         case .addSpotMap:
             return ID.addSpotMap
+        case .report:
+            return ID.report
         }
     }
     
@@ -110,6 +116,7 @@ extension HomeScreen.State: Identifiable {
         case mySpotList
         case spotedit
         case addSpotMap
+        case report
         
         var id: ID {
             return self
