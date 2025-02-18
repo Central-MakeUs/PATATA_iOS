@@ -19,6 +19,7 @@ enum MyPageScreen {
     case spotDetail(SpotDetailFeature)
     case spotedit(SpotEditorFeature)
     case addSpotMap(AddSpotMapFeature)
+    case openSource(OpenSourceFeature)
 }
 
 @Reducer
@@ -148,6 +149,12 @@ extension MyPageCoordinator {
                 
             case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
                 state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+                
+            case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedOpenSource)))):
+                state.routes.push(.openSource(OpenSourceFeature.State()))
+                
+            case .router(.routeAction(id: .openSource, action: .openSource(.delegate(.tappedBackButton)))):
+                state.routes.pop()
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

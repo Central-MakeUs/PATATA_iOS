@@ -13,8 +13,13 @@ struct SettingView: View {
     @Perception.Bindable var store: StoreOf<SettingFeature>
     
     var body: some View {
-        contentView
-            .navigationBarBackButtonHidden()
+        WithPerceptionTracking {
+            contentView
+                .navigationBarBackButtonHidden()
+                .onAppear {
+                    store.send(.viewCycle(.onAppear))
+                }
+        }
     }
 }
 
@@ -36,12 +41,35 @@ extension SettingView {
             }
             VStack(spacing: 1) {
                 settingBar("이용약관")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
                 
                 settingBar("개인정보 수집 및 이용 동의")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
                 
                 settingBar("오픈소스 라이선스")
+                    .asButton {
+                        store.send(.viewEvent(.tappedOpenSource))
+                    }
                 
-                settingBar("버전")
+                HStack {
+                    Text("버전")
+                        .textStyle(.bodyS)
+                        .foregroundStyle(.black)
+                        .padding(.vertical, 16)
+                        .padding(.leading, 15)
+                    
+                    Spacer()
+                    
+                    Text(store.appVersion)
+                        .foregroundStyle(.blue100)
+                        .textStyle(.subtitleS)
+                        .padding(.trailing, 15)
+                }
+                .background(.white)
             }
             
             HStack {
@@ -56,12 +84,24 @@ extension SettingView {
             
             VStack(spacing: 1) {
                 settingBar("PATATA 팀 정보 찾아가기")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
                 
                 settingBar("공지사항")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
                 
                 settingBar("FAQ")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
                 
                 settingBar("문의하기")
+                    .asButton {
+                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                    }
             }
             
             Spacer()

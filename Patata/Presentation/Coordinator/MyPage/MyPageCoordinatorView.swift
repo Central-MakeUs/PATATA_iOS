@@ -50,6 +50,10 @@ struct MyPageCoordinatorView: View {
                     AddSpotMapView(store: addSpotMapStore)
                         .hideTabBar(store.isHideTabBar)
                     
+                case let .openSource(openSource):
+                    OpenSourceView(store: openSource)
+                        .hideTabBar(store.isHideTabBar)
+                    
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
@@ -106,6 +110,8 @@ extension MyPageScreen.State: Identifiable {
             return ID.spotedit
         case .addSpotMap:
             return ID.addSpotMap
+        case .openSource:
+            return ID.openSource
         }
     }
     
@@ -118,6 +124,7 @@ extension MyPageScreen.State: Identifiable {
         case spotDetail
         case spotedit
         case addSpotMap
+        case openSource
         
         var id: ID {
             return self

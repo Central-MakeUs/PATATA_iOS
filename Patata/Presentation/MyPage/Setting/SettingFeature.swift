@@ -12,7 +12,7 @@ import ComposableArchitecture
 struct SettingFeature {
     @ObservableState
     struct State: Equatable {
-        
+        var appVersion: String = ""
     }
     
     enum Action {
@@ -26,6 +26,7 @@ struct SettingFeature {
             case tappedBackButton
             case tappedLogout
             case tappedDeleteID
+            case tappedOpenSource
         }
     }
     
@@ -39,6 +40,7 @@ struct SettingFeature {
         case tappedBackButton
         case tappedLogout
         case tappedDeleteID
+        case tappedOpenSource
     }
     
     var body: some ReducerOf<Self> {
@@ -50,6 +52,11 @@ extension SettingFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
+                
+                state.appVersion = appVersion
+                
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))
                 
@@ -58,6 +65,9 @@ extension SettingFeature {
                 
             case .viewEvent(.tappedDeleteID):
                 return .send(.delegate(.tappedDeleteID))
+                
+            case .viewEvent(.tappedOpenSource):
+                return .send(.delegate(.tappedOpenSource))
                 
             default:
                 break
