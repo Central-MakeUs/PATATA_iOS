@@ -87,6 +87,7 @@ extension SearchMapView {
             
             ZStack(alignment: .top) {
                 UIMapView(mapManager: store.mapManager)
+                    .ignoresSafeArea(edges: .bottom)
                 
                 Color.black
                     .opacity(0.1)
@@ -297,7 +298,7 @@ extension SearchMapView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: store.searchSpotItems.isEmpty ? false : store.searchSpotItems[store.selectedIndex].isScraped) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: ((store.searchSpotItems.isEmpty ? false : store.searchSpotItems[safe: store.selectedIndex]?.isScraped) != nil)) {
                     store.send(.viewEvent(.tappedArchiveButton))
                 }
             }

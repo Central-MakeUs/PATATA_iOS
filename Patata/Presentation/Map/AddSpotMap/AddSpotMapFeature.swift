@@ -97,7 +97,6 @@ extension AddSpotMapFeature {
             case .viewEvent(.dismissPopup):
                 state.isPresent = false
                 state.addSpotEntity = []
-                state.mapManager.clearCurrentMarkers()
                 
             case let .networkType(.checkValidAddSpot(coord)):
                 return .run { send in
@@ -127,6 +126,7 @@ extension AddSpotMapFeature {
                 .cancellable(id: "location-lookup")
                 
             case .mapAction(.moveCamera):
+                state.mapManager.clearCurrentMarkers()
                 state.addValid = true
                 
             case let .dataTransType(.locationText(location, lat, long)):
@@ -167,7 +167,6 @@ extension AddSpotMapFeature {
             .publisher {
                 state.mapManager.cameraIdlePass
                     .map { cameraLocation in
-                        print("dfadfadsf", cameraLocation)
                         return Action.mapAction(.getCameraLocation(cameraLocation))
                     }
             }

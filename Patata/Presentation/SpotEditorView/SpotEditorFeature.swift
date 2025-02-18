@@ -322,6 +322,6 @@ extension SpotEditorFeature {
     }
     
     private func validateEditorState(_ state: inout State) {
-        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요" && !state.hashTags.isEmpty
+        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요"
     }
 }

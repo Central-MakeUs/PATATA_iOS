@@ -39,7 +39,7 @@ struct AddSpotMapView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 4))
                     .padding(.horizontal, 15)
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                             store.send(.viewEvent(.dismissPopup))
                         }
                     }
@@ -50,7 +50,7 @@ struct AddSpotMapView: View {
                         .animation(.spring())
                         .closeOnTap(true)
                         .closeOnTapOutside(true)
-                        .backgroundColor(.black.opacity(0.5))
+                        .backgroundColor(.black.opacity(0.2))
                         .dismissCallback {
                             store.send(.viewEvent(.dismissPopup))
                         }
@@ -145,7 +145,9 @@ extension AddSpotMapView {
             .background(store.addValid ? .navy100 : .gray50)
             .clipShape(RoundedRectangle(cornerRadius: 38))
             .asButton {
-                store.send(.viewEvent(.tappedAddConfirmButton))
+                if store.addValid {
+                    store.send(.viewEvent(.tappedAddConfirmButton))
+                }
             }
         }
     }
