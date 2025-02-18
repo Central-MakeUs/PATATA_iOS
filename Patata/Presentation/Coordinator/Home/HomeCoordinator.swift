@@ -17,6 +17,7 @@ enum HomeScreen {
     case spotDetail(SpotDetailFeature)
     case mySpotList(MySpotListFeature)
     case spotedit(SpotEditorFeature)
+    case addSpotMap(AddSpotMapFeature)
 }
 
 @Reducer
@@ -126,6 +127,27 @@ extension HomeCoordinator {
                 
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                
+            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                state.isHideTabBar = true
+                
+            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedXButton)))):
+                state.routes.popToRoot()
+                state.isHideTabBar = false
+                
+            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord))))):
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: Coordinate(latitude: 0, longitude: 0))))
+                
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
+                state.routes.pop()
+                
+                return .run { send in
+                    await send(.router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
+                }
+                
+            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
+                state.routes.pop()
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

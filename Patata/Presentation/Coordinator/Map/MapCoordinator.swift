@@ -132,7 +132,7 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.successView(SuccessFeature.State()))
                 
-            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(viewState))))):
+            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState))))):
                 if viewState == .edit {
                     state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: Coordinate(latitude: 37.5666791, longitude: 126.9784147))))
                 } else {

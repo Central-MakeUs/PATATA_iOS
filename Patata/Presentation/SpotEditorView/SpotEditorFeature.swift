@@ -52,7 +52,7 @@ struct SpotEditorFeature {
             case tappedBackButton
             case successSpotAdd
             case tappedXButton
-            case tappedLocation(ViewState)
+            case tappedLocation(Coordinate, ViewState)
             case changeAddress(Coordinate, String)
         }
         
@@ -159,7 +159,8 @@ extension SpotEditorFeature {
                 
             case .viewEvent(.tappedLocation):
                 let viewState = state.viewState
-                return .send(.delegate(.tappedLocation(viewState)))
+                let coord = state.spotLocation
+                return .send(.delegate(.tappedLocation(coord, viewState)))
                 
             case let .delegate(.changeAddress(spotCoord, address)):
                 state.spotLocation = spotCoord
