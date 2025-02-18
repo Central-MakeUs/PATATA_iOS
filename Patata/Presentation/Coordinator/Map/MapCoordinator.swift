@@ -25,6 +25,7 @@ enum MapScreen {
     case addSpotMap(AddSpotMapFeature)
     case successView(SuccessFeature)
     case spotDetail(SpotDetailFeature)
+    case report(ReportFeature)
 }
 
 @Reducer
@@ -36,6 +37,7 @@ struct MapCoordinator {
         
         var isHideTabBar: Bool = false
         var popupIsPresent: Bool = false
+        var errorMSG: String = ""
     }
     
     enum Action {
@@ -90,7 +92,6 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSearch)))):
-                print("aaaaaaa")
                 state.routes.remove(id: .search)
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
                 
@@ -193,13 +194,20 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
                 state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotAddress: spotAddress)))
                 
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
+                if type == "Post" {
+                    state.routes.push(.report(ReportFeature.State(viewState: .post)))
+                } else {
+                    state.routes.push(.report(ReportFeature.State(viewState: .user)))
+                }
+                
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
                 if state.routes.count == 2 {
                     state.isHideTabBar = false
                 } else {
                     state.isHideTabBar = true
                 }
-                
+                state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
                 state.routes.pop()
@@ -212,6 +220,19 @@ extension MapCoordinator {
                     return .run { send in
                         await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.deleteSpot)))))
                     }
+                }
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):
+                state.routes.pop()
+                
+            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
+                state.errorMSG = "정상적으로 신고되었습니다."
+                state.routes.popToRoot()
+                state.popupIsPresent = true
+                state.isHideTabBar = false
+                
+                return .run { send in
+                    await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
                 }
                 
             case .viewEvent(.dismissPopup):

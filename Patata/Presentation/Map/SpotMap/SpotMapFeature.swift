@@ -50,6 +50,7 @@ struct SpotMapFeature {
             case tappedSearch
             case tappedSpotDetail(Int)
             case deleteSpot
+            case succesReport
         }
     }
     
@@ -196,6 +197,9 @@ extension SpotMapFeature {
                 return .run { send in
                     await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: category)))
                 }
+                
+            case .delegate(.succesReport):
+                state.isPresented = false
                 
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
                 return .run { send in

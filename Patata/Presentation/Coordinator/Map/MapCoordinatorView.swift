@@ -49,13 +49,18 @@ struct MapCoordinatorView: View {
                 case let .spotDetail(detailStore):
                     SpotDetailView(store: detailStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .report(reportStore):
+                    ReportView(store: reportStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
                 HStack {
                     Spacer()
                     
-                    Text("게시물이 정상적으로 삭제되었습니다.")
+                    Text(store.errorMSG)
                         .textStyle(.subtitleXS)
                         .foregroundStyle(.blue20)
                         .padding(.vertical, 10)
@@ -105,6 +110,8 @@ extension MapScreen.State: Identifiable {
             return ID.successView
         case .spotDetail:
             return ID.spotDetail
+        case .report:
+            return ID.report
         }
     }
     
@@ -117,6 +124,7 @@ extension MapScreen.State: Identifiable {
         case addSpotMap
         case successView
         case spotDetail
+        case report
         
         var id: ID {
             return self
