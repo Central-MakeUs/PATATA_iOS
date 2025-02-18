@@ -15,11 +15,13 @@ struct SpotEditorFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
+        var spotDetail: SpotDetailEntity
         var initViewState: ViewState = .add
         var spotLocation: Coordinate
         var spotAddress: String
         var spotEditorIsValid: Bool = false
         var categoryText: String = "카테고리를 선택해주세요"
+        var imageURLs: [URL?] = []
         var hashTags: [String] = []
         var imageDatas: [Data] = []
         var errorMsg: String = ""
@@ -46,6 +48,7 @@ struct SpotEditorFeature {
         case viewEvent(ViewEvent)
         case networkType(NetworkType)
         case errorHandle(ErrorHandleType)
+        case dataTransType(DataTransType)
         case delegate(Delegate)
         
         enum Delegate {
@@ -54,6 +57,7 @@ struct SpotEditorFeature {
             case tappedXButton
             case tappedLocation(Coordinate, ViewState)
             case changeAddress(Coordinate, String)
+            case successSpotEdit
         }
         
         // bindingAction
@@ -89,15 +93,21 @@ struct SpotEditorFeature {
         case dismissPopup
         case tappedXButton
         case tappedLocation
+        case tappedSpotEditButton
     }
     
     enum NetworkType {
         case createSpot
+        case spotEdit
     }
     
     enum ErrorHandleType {
         case imageResize(Error)
         case networkFail(Error)
+    }
+    
+    enum DataTransType {
+        case checkViewState
     }
     
     @Dependency(\.spotRepository) var spotRepository
@@ -114,6 +124,8 @@ extension SpotEditorFeature {
             switch action {
             case .viewCycle(.onAppear):
                 state.initViewState = state.viewState
+                
+                return .send(.dataTransType(.checkViewState))
                 
             case let .viewEvent(.tappedBottomSheet(category)):
                 state.categoryText = category
@@ -148,10 +160,13 @@ extension SpotEditorFeature {
             case let .viewEvent(.tappedSpotAddButton(imageDatas)):
                 state.imageDatas = imageDatas
                 
-                if state.viewState == .add {
-                    return .run { send in
-                        await send(.networkType(.createSpot))
-                    }
+                return .run { send in
+                    await send(.networkType(.createSpot))
+                }
+                
+            case .viewEvent(.tappedSpotEditButton):
+                return .run { send in
+                    await send(.networkType(.spotEdit))
                 }
                 
             case .viewEvent(.tappedXButton):
@@ -165,6 +180,17 @@ extension SpotEditorFeature {
             case let .delegate(.changeAddress(spotCoord, address)):
                 state.spotLocation = spotCoord
                 state.spotAddress = address
+                
+            case .dataTransType(.checkViewState):
+                if state.viewState == .edit {
+                    state.title = state.spotDetail.spotName
+                    state.spotAddress = state.spotDetail.spotAddress
+                    state.location = state.spotDetail.spotAddressDetail
+                    state.detail = state.spotDetail.spotDescription
+                    state.hashTags = state.spotDetail.tags
+                    state.imageURLs = state.spotDetail.images
+                    state.categoryText = state.spotDetail.categoryId.getCategoryCase().title
+                }
                 
             case .networkType(.createSpot):
                 let categoryId = CategoryCase.getCategoryId(text: state.categoryText)
@@ -186,6 +212,27 @@ extension SpotEditorFeature {
                     } catch {
                         print("fail", errorManager.handleError(error) ?? "")
                         await send(.errorHandle(.networkFail(error)))
+                    }
+                }
+                
+            case .networkType(.spotEdit):
+                let title = state.title
+                let address = state.spotAddress
+                let addressDetail = state.location
+                let spotDetail = state.detail
+                let category = CategoryCase.getCategoryId(text: state.categoryText)
+                let hashTag = state.hashTags
+                let spotId = state.spotDetail.spotId
+                
+                return .run { send in
+                    do {
+                        let result = try await spotRepository.spotEdit(title: title, spotAddress: address, spotAddressDetail: addressDetail, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotDetail: spotDetail, spotCategory: CategoryCase(rawValue: category) ?? .houseSpot, hashTag: hashTag, spotId: spotId)
+                        
+                        if result {
+                            await send(.delegate(.successSpotEdit))
+                        }
+                    } catch {
+                        print("fail", errorManager.handleError(error) ?? "")
                     }
                 }
                 

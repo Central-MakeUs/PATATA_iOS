@@ -55,7 +55,7 @@ struct SpotEditorView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 4))
                         .padding(.horizontal, 15)
                         .onAppear {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                                 store.send(.viewEvent(.dismissPopup))
                             }
                         }
@@ -154,7 +154,7 @@ extension SpotEditorView {
                 Spacer()
             }
             
-            Text("스팟 추가하기")
+            Text(store.viewState == .add ? "스팟 추가하기" : "스팟 수정하기")
                 .textStyle(.subtitleL)
                 .foregroundStyle(.textDefault)
             
@@ -311,64 +311,102 @@ extension SpotEditorView {
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
-                    PhotoPickerView(
-                        selectedImages: $selectedImages,
-                        showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission)
-                    ) {
-                        VStack(alignment: .center) {
-                            Image("ImageDefault")
-                                .resizable()
-                                .aspectRatio(1, contentMode: .fit)
-                                .frame(width: 36)
-                            
-                            Text("사진 추가하기")
-                                .textStyle(.captionS)
-                                .foregroundStyle(.gray60)
+                    if store.viewState == .add {
+                        PhotoPickerView(
+                            selectedImages: $selectedImages,
+                            showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission)
+                        ) {
+                            VStack(alignment: .center) {
+                                Image("ImageDefault")
+                                    .resizable()
+                                    .aspectRatio(1, contentMode: .fit)
+                                    .frame(width: 36)
+                                
+                                Text("사진 추가하기")
+                                    .textStyle(.captionS)
+                                    .foregroundStyle(.gray60)
+                            }
+                            .padding(.vertical, 20)
+                            .padding(.horizontal, 20)
+                            .sizeState(size: $sizeState)
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .strokeBorder(.gray30, lineWidth: 1)
+                                    .background(.gray20)
+                            )
                         }
-                        .padding(.vertical, 20)
-                        .padding(.horizontal, 20)
-                        .sizeState(size: $sizeState)
-                        .background(
-                            RoundedRectangle(cornerRadius: 10)
-                                .strokeBorder(.gray30, lineWidth: 1)
-                                .background(.gray20)
-                        )
-                    }
-                    .padding(.leading, 15)
-                    
-                    ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
-                        ZStack(alignment: .topTrailing) {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: sizeState.width, height: sizeState.height)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                                .overlay(alignment: .bottom) {
-                                    if index == 0 {
-                                        HStack {
-                                            Spacer()
-                                            
-                                            Text("대표 이미지")
-                                                .textStyle(.captionS)
-                                                .foregroundColor(.white)
-                                                .padding(.vertical, 7)
-                                                .padding(.horizontal, 8)
-                                            
-                                            Spacer()
+                        .padding(.leading, 15)
+                        
+                        
+                        ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
+                            ZStack(alignment: .topTrailing) {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .scaledToFill()
+                                    .frame(width: sizeState.width, height: sizeState.height)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .overlay(alignment: .bottom) {
+                                        if index == 0 {
+                                            HStack {
+                                                Spacer()
+                                                
+                                                Text("대표 이미지")
+                                                    .textStyle(.captionS)
+                                                    .foregroundColor(.white)
+                                                    .padding(.vertical, 7)
+                                                    .padding(.horizontal, 8)
+                                                
+                                                Spacer()
+                                            }
+                                            .background(.blue100)
+                                            .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
                                         }
-                                        .background(.blue100)
-                                        .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
                                     }
-                                }
-                                .overlay(alignment: .topTrailing) {
-                                    Image("WhiteX")
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 34, height: 34)
-                                        .onTapGesture {
-                                            selectedImages.remove(at: index)
+                                    .overlay(alignment: .topTrailing) {
+                                        Image("WhiteX")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 34, height: 34)
+                                            .onTapGesture {
+                                                selectedImages.remove(at: index)
+                                            }
+                                    }
+                            }
+                        }
+                    } else {
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 4) {
+                                Spacer()
+                                    .frame(width: 11)
+                                
+                                ForEach(Array(store.imageURLs.enumerated()), id: \.offset) { index, url in
+                                    let imageWidth: CGFloat = UIScreen.main.bounds.width - 30
+                                    
+                                    DownImageView(url: url, option: .mid, fallBackImg: "ImageDefault")
+                                        .aspectRatio(1, contentMode: .fill)
+                                        .frame(width: (imageWidth - 8) / 2.5)
+                                        .clipped()
+                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                        .overlay(alignment: .bottom) {
+                                            if index == 0 {
+                                                HStack {
+                                                    Spacer()
+                                                    
+                                                    Text("대표 이미지")
+                                                        .textStyle(.captionS)
+                                                        .foregroundColor(.white)
+                                                        .padding(.vertical, 7)
+                                                        .padding(.horizontal, 8)
+                                                    
+                                                    Spacer()
+                                                }
+                                                .background(.blue100)
+                                                .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
+                                            }
                                         }
                                 }
+                            }
+                            .padding(.horizontal, 0)
                         }
                     }
                 }
@@ -429,25 +467,29 @@ extension SpotEditorView {
         HStack {
             Spacer()
             
-            Text("등록하기")
+            Text(store.viewState == .add ? "등록하기" : "수정하기")
                 .textStyle(.subtitleM)
                 .foregroundStyle(.white)
                 
             Spacer()
         }
         .padding(.vertical, 14)
-        .background(store.spotEditorIsValid && !selectedImages.isEmpty ? .black : .gray50)
+        .background(store.viewState == .add ? (store.spotEditorIsValid && !selectedImages.isEmpty ? .black : .gray50) : (store.spotEditorIsValid ? .black : .gray50))
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .asButton {
             if store.spotEditorIsValid {
-                Task {
-                    do {
-                        let data = try await imageResizeManager.resizeImages(selectedImages)
-                        
-                        store.send(.viewEvent(.tappedSpotAddButton(data)))
-                    } catch {
-                        store.send(.errorHandle(.imageResize(error)))
+                if store.viewState == .add && !selectedImages.isEmpty {
+                    Task {
+                        do {
+                            let data = try await imageResizeManager.resizeImages(selectedImages)
+                            
+                            store.send(.viewEvent(.tappedSpotAddButton(data)))
+                        } catch {
+                            store.send(.errorHandle(.imageResize(error)))
+                        }
                     }
+                } else {
+                    store.send(.viewEvent(.tappedSpotEditButton))
                 }
             }
         }

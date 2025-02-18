@@ -16,6 +16,7 @@ enum SpotRouter: Router {
     case deleteSpot(Int)
     case createSpot(CreateSpotRequestDTO)
     case fetchTodaySpotList(Coordinate)
+    case spotEdit(title: String, spotAddress: String, spotAddressDetail: String, spotLocation: Coordinate, spotDetail: String, spotCategory: CategoryCase, hashTag: [String], spotId: Int)
 }
 
 extension SpotRouter {
@@ -27,6 +28,8 @@ extension SpotRouter {
             return .delete
         case .createSpot:
             return .post
+        case .spotEdit:
+            return .patch
         }
     }
     
@@ -46,12 +49,14 @@ extension SpotRouter {
             return "/spot/create"
         case .fetchTodaySpotList:
             return "/spot/today/list"
+        case let .spotEdit(_, _, _, _, _, _, _,spotId):
+            return "/spot/\(spotId)"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .fetchTodaySpotList:
+        case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .fetchTodaySpotList, .spotEdit:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -64,7 +69,7 @@ extension SpotRouter {
     
     var parameters: Parameters? {
         switch self {
-        case .fetchTodayMain, .fetchSpot, .deleteSpot, .createSpot:
+        case .fetchTodayMain, .fetchSpot, .deleteSpot, .createSpot, .spotEdit:
             return nil
             
         case let .fetchCategorySpot(all, categoryId, page, latitude, longitude, sortBy):
@@ -106,6 +111,19 @@ extension SpotRouter {
         switch self {
         case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .createSpot, .fetchTodaySpotList:
             return nil
+            
+        case let .spotEdit(title, spotAddress, spotAddressDetail, spotLocation, spotDetail, spotCategory, hashTag, _):
+            let request = SpotEditRequestDTO(
+                spotName: title,
+                spotDescription: spotDetail,
+                spotAddress: spotAddress,
+                spotAddressDetail: spotAddressDetail,
+                latitude: spotLocation.latitude,
+                longitude: spotLocation.longitude,
+                tags: hashTag,
+                categoryId: spotCategory.rawValue
+            )
+            return requestToBody(request)
         }
     }
     
@@ -113,6 +131,9 @@ extension SpotRouter {
         switch self {
         case .fetchCategorySpot, .fetchTodayMain, .fetchSearchResult, .fetchSpot, .deleteSpot, .fetchTodaySpotList:
             return .url
+            
+        case .spotEdit:
+            return .json
             
         case let .createSpot(request):
             let formData = MultipartFormData()

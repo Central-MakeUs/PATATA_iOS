@@ -84,8 +84,8 @@ extension MyPageCoordinator {
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotAddress)))
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress)))
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
@@ -137,12 +137,14 @@ extension MyPageCoordinator {
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
+            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotEdit)))):
+                state.errorMSG = "게시물이 수정되었습니다."
+                state.routes.pop()
+                state.popupIsPresent = true
+                
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedXButton)))):
                 state.routes.popToRoot()
                 state.isHideTabBar = false
-                
-            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotAdd)))):
-                state.routes.pop()
                 
             case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
                 state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))

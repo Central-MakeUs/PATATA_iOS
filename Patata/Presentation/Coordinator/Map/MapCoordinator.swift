@@ -140,6 +140,17 @@ extension MapCoordinator {
                     state.routes.pop()
                 }
                 
+            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotEdit)))):
+                state.errorMSG = "게시물이 수정되었습니다."
+                state.routes.pop()
+                state.popupIsPresent = true
+                
+                if state.routes.contains(where: { $0.id == .searchMap }) {
+                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.successEdit)))))
+                } else {
+                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.successEdit)))))
+                }
+                
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
@@ -175,7 +186,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
                 if viewState == .map {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotLocation: spotCoord, spotAddress: spotAddress)))
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress)))
                 } else {
                     state.routes.pop()
                     return .run { send in
@@ -191,8 +202,8 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.pop()
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotAddress: spotAddress)))
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
+                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress)))
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
                 if type == "Post" {

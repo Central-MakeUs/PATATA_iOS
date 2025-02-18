@@ -94,6 +94,14 @@ extension SpotRepository {
         
         return await mapper.dtoToEntity(dtos: dto)
     }
+    
+    func spotEdit(title: String, spotAddress: String, spotAddressDetail: String, spotLocation: Coordinate, spotDetail: String, spotCategory: CategoryCase, hashTag: [String], spotId: Int) async throws(PAError) -> Bool {
+        let isSuccess = try await networkManager.requestNetworkWithRefresh(dto: EditSpotDTO.self, router: SpotRouter.spotEdit(title: title, spotAddress: spotAddress, spotAddressDetail: spotAddressDetail, spotLocation: spotLocation, spotDetail: spotDetail, spotCategory: spotCategory, hashTag: hashTag, spotId: spotId)).isSuccess
+        
+        print("success", isSuccess)
+        
+        return isSuccess
+    }
 }
 
 extension SpotRepository: DependencyKey {

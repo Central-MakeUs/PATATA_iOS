@@ -43,7 +43,7 @@ struct SpotDetailFeature {
             case tappedNavBackButton(Bool)
             case tappedDismissIcon
             case delete
-            case editSpotDetail(String)
+            case editSpotDetail(SpotDetailEntity)
             case report(String)
         }
     }
@@ -113,7 +113,7 @@ extension SpotDetailFeature {
                 } else if text == "사용자 신고하기" {
                     return .send(.delegate(.report("User")))
                 } else if text == "게시글 수정하기" {
-                    return .send(.delegate(.editSpotDetail(state.spotDetailData.spotAddress)))
+                    return .send(.delegate(.editSpotDetail(state.spotDetailData)))
                 } else {
                     state.alertIsPresent = true
                 }

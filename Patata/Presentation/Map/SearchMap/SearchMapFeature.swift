@@ -57,6 +57,7 @@ struct SearchMapFeature {
             case mySpotListSearch(String)
             case tappedSpotDetail(Int)
             case deleteSpot
+            case successEdit
         }
     }
     
@@ -226,6 +227,9 @@ extension SearchMapFeature {
                 return .run { send in
                     await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
                 }
+                
+            case .delegate(.successEdit):
+                state.isPresented = false
                 
             case let .delegate(.mySpotListSearch(searchText)):
                 state.searchSpotItems = []

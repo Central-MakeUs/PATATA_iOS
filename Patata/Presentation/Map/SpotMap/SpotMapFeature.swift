@@ -51,6 +51,7 @@ struct SpotMapFeature {
             case tappedSpotDetail(Int)
             case deleteSpot
             case succesReport
+            case successEdit
         }
     }
     
@@ -199,6 +200,9 @@ extension SpotMapFeature {
                 }
                 
             case .delegate(.succesReport):
+                state.isPresented = false
+                
+            case .delegate(.successEdit):
                 state.isPresented = false
                 
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
