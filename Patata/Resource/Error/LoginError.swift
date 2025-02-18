@@ -20,4 +20,7 @@ enum AppleLoginError: Error {
 enum GoogleLoginError: Error {
     case noPresentingViewController
     case noIdToken
+    case noUser
+    case noAccessToken
+    case apiError
 }

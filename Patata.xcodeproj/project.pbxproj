@@ -10,6 +10,7 @@
 		DF0715722D5B77B0001CFF31 /* RealmSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DF0715712D5B77B0001CFF31 /* RealmSwift */; };
 		DF0715732D5B7874001CFF31 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = DF0715712D5B77B0001CFF31 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = DF1764902D5139F9003FA3B3 /* PopupView */; };
+		DF37A23C2D650693000D0CCB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */; };
 		DF8D2B392D527EC10081561A /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = DF8D2B382D527EC10081561A /* Logging */; };
 		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
 		DFA57A742D35241F001E785A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DFA57A732D35241F001E785A /* .gitignore */; };
@@ -36,6 +37,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		DFA57A602D35214B001E785A /* Patata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Patata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFA57A732D35241F001E785A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -85,6 +87,7 @@
 		DFA57A572D35214B001E785A = {
 			isa = PBXGroup;
 			children = (
+				DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */,
 				DFA57A732D35241F001E785A /* .gitignore */,
 				DFA57A622D35214B001E785A /* Patata */,
 				DFA57A612D35214B001E785A /* Products */,
@@ -185,6 +188,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DF37A23C2D650693000D0CCB /* PrivacyInfo.xcprivacy in Resources */,
 				DFA57A742D35241F001E785A /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -334,6 +338,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Patata;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 현재 위치를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
@@ -349,7 +354,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.melon.Patata;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
@@ -375,6 +380,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Patata/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Patata;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "앱이 백그라운드에서도 위치 정보를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "앱이 현재 위치를 확인하여 더 나은 서비스를 제공하기 위해 위치 정보 접근 권한이 필요합니다.";
@@ -390,7 +396,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.melon.Patata;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";

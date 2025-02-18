@@ -41,10 +41,12 @@ struct DeleteIDFeature {
     
     enum NetworkType {
         case appleRevoke(String)
+        case googleRevoke(String)
     }
     
     enum DataTransType {
         case appleAuthToken(String)
+        case googleAccessToken(String)
         case revokeResult(Bool)
     }
     
@@ -80,7 +82,15 @@ extension DeleteIDFeature {
                         }
                     }
                 } else {
-                    print("a")
+                    return .run { send in
+                        do {
+                            let token = try await loginManager.getGoogleAccessToken()
+                            
+                            await send(.dataTransType(.googleAccessToken(token)))
+                        } catch {
+                            print(error, errorManager.handleError(error) ?? "")
+                        }
+                    }
                 }
                 
             case .viewEvent(.tappedCheckButton):
@@ -98,9 +108,26 @@ extension DeleteIDFeature {
                     }
                 }
                 
+            case let .networkType(.googleRevoke(accessToken)):
+                return .run { send in
+                    do {
+                        let isValid = try await loginRepository.revokeGoogle(accessToken: accessToken)
+                        
+                        print(isValid)
+                        await send(.dataTransType(.revokeResult(isValid)))
+                    } catch {
+                        print("fail", errorManager.handleError(error) ?? "")
+                    }
+                }
+                
             case let .dataTransType(.appleAuthToken(authToken)):
                 return .run { send in
                     await send(.networkType(.appleRevoke(authToken)))
+                }
+                
+            case let .dataTransType(.googleAccessToken(token)):
+                return .run { send in
+                    await send(.networkType(.googleRevoke(token)))
                 }
                 
             case let .dataTransType(.revokeResult(isValid)):

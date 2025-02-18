@@ -39,6 +39,12 @@ extension LoginRepository {
         
         return isValid
     }
+    
+    func revokeGoogle(accessToken: String) async throws(PAError) -> Bool {
+        let isValid = try await networkManager.requestNetworkWithRefresh(dto: AddSpotDTO.self, router: LoginRouter.revokeGoogle(accessToken: accessToken)).isSuccess
+        
+        return isValid
+    }
 }
 
 extension LoginRepository: DependencyKey {

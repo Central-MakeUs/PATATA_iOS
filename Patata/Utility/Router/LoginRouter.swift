@@ -13,6 +13,7 @@ enum LoginRouter: Router {
     case google(GoogleLoginRequestDTO)
     case refresh(refreshToken: String)
     case revokeApple(auth: String)
+    case revokeGoogle(accessToken: String)
 }
 
 extension LoginRouter {
@@ -20,7 +21,7 @@ extension LoginRouter {
         switch self {
         case .apple, .google, .refresh:
             return .post
-        case .revokeApple:
+        case .revokeApple, .revokeGoogle:
             return .delete
         }
     }
@@ -35,6 +36,8 @@ extension LoginRouter {
             return "/auth/refresh"
         case .revokeApple:
             return "/auth/delete/apple"
+        case .revokeGoogle:
+            return "/auth/delete/google"
         }
     }
     
@@ -56,12 +59,18 @@ extension LoginRouter {
                 HTTPHeader(name: "Content-Type", value: "application/json"),
                 HTTPHeader(name: "authorization-code", value: authToken)
             ])
+            
+        case let .revokeGoogle(accessToken):
+            return HTTPHeaders([
+                HTTPHeader(name: "Content-Type", value: "application/json"),
+                HTTPHeader(name: "google-accessToken", value: accessToken)
+            ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case .apple, .google, .refresh, .revokeApple:
+        case .apple, .google, .refresh, .revokeApple, .revokeGoogle:
             return nil
         }
     }
@@ -72,14 +81,14 @@ extension LoginRouter {
             return requestToBody(appleLoginRequest)
         case .google(let googleLoginRequest):
             return requestToBody(googleLoginRequest)
-        case .refresh, .revokeApple:
+        case .refresh, .revokeApple, .revokeGoogle:
             return nil
         }
     }
     
     var encodingType: EncodingType {
         switch self {
-        case .revokeApple:
+        case .revokeApple, .revokeGoogle:
             return .url
         case .apple, .google, .refresh:
             return .json

@@ -188,6 +188,34 @@ final class LoginManager: @unchecked Sendable  {
                 }
         }
     }
+    
+    @MainActor
+    func getGoogleAccessToken() async throws -> String {
+        
+        guard let presentingViewController = (
+            UIApplication.shared.connectedScenes.first as? UIWindowScene
+        )?.windows.first?.rootViewController else {
+            throw LoginError.googleLoginError(.noPresentingViewController)
+        }
+        
+        return try await withCheckedThrowingContinuation { continuation in
+            GIDSignIn.sharedInstance.signIn(
+                withPresenting: presentingViewController
+            ) { signInResult, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                    return
+                }
+                
+                guard let accessToken = signInResult?.user.accessToken.tokenString else {
+                    continuation.resume(throwing: LoginError.googleLoginError(.noAccessToken))
+                    return
+                }
+                
+                continuation.resume(returning: accessToken)
+            }
+        }
+    }
 }
 
 final class AppleSignInDelegateStore {
