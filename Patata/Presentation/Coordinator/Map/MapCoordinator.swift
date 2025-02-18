@@ -125,7 +125,7 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedXButton)))):
-                state.isHideTabBar = false
+                state.isHideTabBar = true
                 state.routes.popToRoot()
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotAdd)))):
@@ -161,6 +161,9 @@ extension MapCoordinator {
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
                 
+            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotDetail(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                
             case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
                 if state.routes.contains(where: { $0.id == .searchMap }) {
                     state.isHideTabBar = true
@@ -184,12 +187,7 @@ extension MapCoordinator {
                 state.routes.popToRoot()
                 
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
-                if state.routes.count == 2 {
-                    state.isHideTabBar = false
-                } else {
-                    state.isHideTabBar = true
-                }
-                
+                state.isHideTabBar = true
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
@@ -205,8 +203,15 @@ extension MapCoordinator {
                 state.popupIsPresent = true
                 
                 state.routes.pop()
-                return .run { send in
-                    await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
+                
+                if state.routes.count == 2 {
+                    return .run { send in
+                        await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
+                    }
+                } else {
+                    return .run { send in
+                        await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.deleteSpot)))))
+                    }
                 }
                 
             case .viewEvent(.dismissPopup):

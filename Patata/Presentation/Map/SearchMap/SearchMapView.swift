@@ -23,6 +23,9 @@ struct SearchMapView: View {
                     AnyView(
                         WithPerceptionTracking {
                             spotDetailSheet(spot: store.searchSpotItems[safe: store.selectedIndex] ?? MapSpotEntity())
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[safe: store.selectedIndex]?.spotId ?? 0)))
+                                }
                         }
                     )
                 }, onDismiss: {
@@ -59,7 +62,7 @@ struct SearchMapView: View {
                         .animation(.spring())
                         .closeOnTap(true)
                         .closeOnTapOutside(true)
-                        .backgroundColor(.black.opacity(0.5))
+                        .backgroundColor(.gray.opacity(0.2))
                         .dismissCallback {
                             store.send(.viewEvent(.dismissPopup))
                         }

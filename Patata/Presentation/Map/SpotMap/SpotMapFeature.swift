@@ -154,6 +154,7 @@ extension SpotMapFeature {
                 state.mapManager.moveCamera(coord: state.userLocation)
                 
             case .viewEvent(.tappedReloadButton):
+                state.isPresented = false
                 state.selectedMenuIndex = 0
                 
                 let userLocation = state.userLocation

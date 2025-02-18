@@ -55,6 +55,8 @@ struct SearchMapFeature {
             case tappedBackButton
             case tappedSearch
             case mySpotListSearch(String)
+            case tappedSpotDetail(Int)
+            case deleteSpot
         }
     }
     
@@ -73,6 +75,7 @@ struct SearchMapFeature {
         case tappedArchiveButton
         case tappedReloadButton
         case dismissPopup
+        case tappedSpotDetail(Int)
     }
     
     enum DataTransType {
@@ -177,6 +180,7 @@ extension SearchMapFeature {
                 }
                 
             case .viewEvent(.tappedReloadButton):
+                state.isPresented = false
                 state.selectedMenuIndex = 0
                 state.isTappedReload = true
                 
@@ -193,6 +197,9 @@ extension SearchMapFeature {
             case .viewEvent(.dismissPopup):
                 state.errorIsPresented = false
                 
+            case let .viewEvent(.tappedSpotDetail(spotId)):
+                return .send(.delegate(.tappedSpotDetail(spotId)))
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -207,6 +214,18 @@ extension SearchMapFeature {
                 
             case .mapAction(.moveCamera):
                 state.reloadButtonIsHide = false
+                
+            case .delegate(.deleteSpot):
+                state.isPresented = false
+                
+                state.mapManager.clearCurrentMarkers()
+                
+                let spotName = state.searchText
+                let coord = state.userLocation
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
+                }
                 
             case let .delegate(.mySpotListSearch(searchText)):
                 state.searchSpotItems = []

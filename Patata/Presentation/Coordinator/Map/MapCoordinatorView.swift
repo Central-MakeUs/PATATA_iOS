@@ -77,7 +77,7 @@ struct MapCoordinatorView: View {
                     .animation(.spring())
                     .closeOnTap(true)
                     .closeOnTapOutside(true)
-                    .backgroundColor(.black.opacity(0.5))
+                    .backgroundColor(.gray.opacity(0.2))
                     .dismissCallback {
                         store.send(.viewEvent(.dismissPopup))
                     }

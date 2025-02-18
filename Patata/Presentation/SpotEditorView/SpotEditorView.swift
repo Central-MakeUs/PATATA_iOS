@@ -167,8 +167,8 @@ extension SpotEditorView {
                     .frame(width: 24, height: 24)
                     .padding(.trailing, 15)
                     .asButton {
-                        print("X")
                         hideKeyboard()
+                        store.send(.viewEvent(.tappedXButton))
                     }
             }
         }
