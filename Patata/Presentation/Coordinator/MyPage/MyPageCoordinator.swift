@@ -123,6 +123,8 @@ extension MyPageCoordinator {
                     }
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
+                state.routes.pop()
+                
                 return .run { send in
                     await send(.router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
                 }

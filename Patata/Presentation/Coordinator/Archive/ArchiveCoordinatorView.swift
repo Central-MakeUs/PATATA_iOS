@@ -25,6 +25,14 @@ struct ArchiveCoordinatorView: View {
                 case let .spotDetail(detailStore):
                     SpotDetailView(store: detailStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .spotedit(spotEditStore):
+                    SpotEditorView(store: spotEditStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .addSpotMap(addSpotMapStore):
+                    AddSpotMapView(store: addSpotMapStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
@@ -69,12 +77,18 @@ extension ArchiveScreen.State: Identifiable {
             return ID.archive
         case .spotDetail:
             return ID.spotDetail
+        case .spotedit:
+            return ID.spotedit
+        case .addSpotMap:
+            return ID.addSpotMap
         }
     }
     
     enum ID: Identifiable {
         case archive
         case spotDetail
+        case spotedit
+        case addSpotMap
         
         var id: ID {
             return self

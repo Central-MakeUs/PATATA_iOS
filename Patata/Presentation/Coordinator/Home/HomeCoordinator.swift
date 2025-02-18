@@ -139,6 +139,9 @@ extension HomeCoordinator {
             case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord))))):
                 state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: Coordinate(latitude: 0, longitude: 0))))
                 
+            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotAdd)))):
+                state.routes.pop()
+                
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
                 state.routes.pop()
                 
