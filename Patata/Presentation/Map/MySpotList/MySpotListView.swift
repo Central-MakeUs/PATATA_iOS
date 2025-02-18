@@ -37,29 +37,39 @@ extension MySpotListView {
             .padding(.bottom, 12)
             .background(.white)
             
-            ScrollView(.vertical) {
-                VStack {
-                    if store.viewState == .home {
-                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
-                            spotListView(spot: item, index: index)
-                                .background(.white)
-                                .asButton {
-                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                }
-                        }
-                    } else {
-                        ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
-                            mapSpotView(spot: item, index: index)
-                                .background(.white)
-                                .asButton {
-                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                }
+            if store.mapSpotEntity.isEmpty {
+                Spacer()
+                
+                noSpotView
+                
+                Spacer()
+            } else {
+                ScrollView(.vertical) {
+                    
+                    VStack {
+                        if store.viewState == .home {
+                            ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
+                                spotListView(spot: item, index: index)
+                                    .background(.white)
+                                    .asButton {
+                                        store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                    }
+                            }
+                        } else {
+                            ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
+                                mapSpotView(spot: item, index: index)
+                                    .background(.white)
+                                    .asButton {
+                                        store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                    }
+                            }
                         }
                     }
+                    .padding(.top, 8)
+                    
                 }
-                .padding(.top, 8)
+                .background(.gray20)
             }
-            .background(.gray20)
         }
     }
     
@@ -84,15 +94,15 @@ extension MySpotListView {
                         
                         Image(systemName: "magnifyingglass")
                             .foregroundStyle(.gray70)
-                            .asButton {
-                                print("imageOnSubmit")
-                            }
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
                     .padding(.vertical, 12)
                     .background(.gray20)
                     .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .asButton {
+                        store.send(.viewEvent(.tappedSearch))
+                    }
                 }
                 .padding(.horizontal, 15)
             } else {
@@ -133,6 +143,22 @@ extension MySpotListView {
                 }
             }
             .scrollIndicators(.hidden)
+        }
+    }
+    
+    private var noSpotView: some View {
+        VStack {
+            Image("SearchFail")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 130, height: 150)
+            
+            VStack(alignment: .center) {
+                Text("이런! 주변에 스팟이 없어요")
+                Text("파타타와 함께 스팟을 채워가요!")
+            }
+            .textStyle(.subtitleL)
+            .foregroundStyle(.textDisabled)
         }
     }
 }

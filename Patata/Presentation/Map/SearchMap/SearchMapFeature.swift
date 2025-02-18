@@ -54,6 +54,7 @@ struct SearchMapFeature {
             case tappedSpotAddButton(Coordinate)
             case tappedBackButton
             case tappedSearch
+            case mySpotListSearch(String)
         }
     }
     
@@ -206,6 +207,17 @@ extension SearchMapFeature {
                 
             case .mapAction(.moveCamera):
                 state.reloadButtonIsHide = false
+                
+            case let .delegate(.mySpotListSearch(searchText)):
+                state.searchSpotItems = []
+                state.searchText = searchText
+                state.mapManager.clearCurrentMarkers()
+                
+                let userLocation = state.userLocation
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(spotName: searchText, userLocation: userLocation)))
+                }
                 
             case let .networkType(.searchSpot(spotName, userLocation, mbrLocation)):
                 return .run { send in

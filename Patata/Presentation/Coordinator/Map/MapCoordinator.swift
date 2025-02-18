@@ -67,15 +67,43 @@ extension MapCoordinator {
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
-                state.isHideTabBar = false
+                if let _ = state.routes.last(where: { $0.id == .spotMap }) {
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
+                
                 state.routes.pop()
+                
+            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSearch)))):
+                print("aaaaaaa")
+                state.routes.remove(id: .search)
+                state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
                 
             case let .router(.routeAction(id: .search, action: .search(.delegate(.successSearch(searchText))))):
                 state.isHideTabBar = true
-                state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
+                
+                if state.routes.count >= 4 {
+                    state.routes.popTo(id: .searchMap)
+                    
+                    return .run { send in
+                        await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.mySpotListSearch(searchText))))))
+                    }
+                } else if state.routes.count == 3 {
+                    state.routes.remove(id: .mySpotList)
+                    state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
+                } else {
+                    state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
+                }
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
-                state.isHideTabBar = false
+                
+                if let _ = state.routes.last(where: { $0.id == .mySpotList }) {
+                    state.isHideTabBar = true
+                } else {
+                    state.isHideTabBar = false
+                }
+                
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedBackButton)))):

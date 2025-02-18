@@ -161,9 +161,10 @@ extension SearchFeature {
                 
                 let userLocation = state.userLocation
                 let currentPage = state.currentPage
+                let filter = state.filter
                 
                 return .run { send in
-                    await send(.networkType(.searchSpot(page: currentPage + 1, filter: .recommend, scroll: true, userLocation: userLocation)))
+                    await send(.networkType(.searchSpot(page: currentPage + 1, filter: filter, scroll: true, userLocation: userLocation)))
                 }
                 
             case let .viewEvent(.dismissFilter(text)):

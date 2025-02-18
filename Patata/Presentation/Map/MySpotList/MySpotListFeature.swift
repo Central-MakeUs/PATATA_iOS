@@ -46,6 +46,7 @@ struct MySpotListFeature {
         enum Delegate {
             case tappedBackButton
             case tappedSpot(Int)
+            case tappedSearch
         }
     }
     
@@ -74,6 +75,7 @@ struct MySpotListFeature {
         case tappedBackButton
         case tappedArchiveButton(Int)
         case tappedSpot(Int)
+        case tappedSearch
     }
     
     @Dependency(\.spotRepository) var spotRepository
@@ -105,22 +107,24 @@ extension MySpotListFeature {
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
                 
-                let mbrLocation = state.mbrLocation
-                let userLocation = state.userCoord
-                let category = CategoryCase.getCategory(id: index)
-                let isSearch = state.viewState == .mapSearch ? true : false
-                
-                if state.viewState == .mapSearch {
+                if !state.mapSpotEntity.isEmpty {
                     let mbrLocation = state.mbrLocation
                     let userLocation = state.userCoord
-                    let searchText = state.searchText
+                    let category = CategoryCase.getCategory(id: index)
+                    let isSearch = state.viewState == .mapSearch ? true : false
                     
-                    return .run { send in
-                        await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
-                    }
-                } else {
-                    return .run { send in
-                        await send(.networkType(.fetchSpot(mbrLocation, userLocation, category, isSearch)))
+                    if state.viewState == .mapSearch {
+                        let mbrLocation = state.mbrLocation
+                        let userLocation = state.userCoord
+                        let searchText = state.searchText
+                        
+                        return .run { send in
+                            await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
+                        }
+                    } else {
+                        return .run { send in
+                            await send(.networkType(.fetchSpot(mbrLocation, userLocation, category, isSearch)))
+                        }
                     }
                 }
                 
@@ -134,6 +138,9 @@ extension MySpotListFeature {
                 
             case let .viewEvent(.tappedSpot(spotId)):
                 return .send(.delegate(.tappedSpot(spotId)))
+                
+            case .viewEvent(.tappedSearch):
+                return .send(.delegate(.tappedSearch))
                 
             case let .networkType(.fetchSpotList(userCoord)):
                 return .run { send in
