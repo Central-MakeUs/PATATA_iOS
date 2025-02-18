@@ -48,6 +48,8 @@ struct SpotMapFeature {
             case bottomSheetDismiss
             case tappedSpotAddButton(Coordinate)
             case tappedSearch
+            case tappedSpotDetail(Int)
+            case deleteSpot
         }
     }
     
@@ -64,6 +66,7 @@ struct SpotMapFeature {
         case bottomSheetDismiss
         case tappedReloadButton
         case tappedArchiveButton
+        case tappedSpotDetail(Int)
     }
     
     enum LocationAction {
@@ -165,6 +168,9 @@ extension SpotMapFeature {
                     await send(.networkType(.patchArchiveState))
                 }
                 
+            case let .viewEvent(.tappedSpotDetail(spotId)):
+                return .send(.delegate(.tappedSpotDetail(spotId)))
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -178,6 +184,17 @@ extension SpotMapFeature {
                 state.selectIndex = index
                 state.isPresented = true
                 return .send(.delegate(.tappedMarker))
+                
+            case .delegate(.deleteSpot):
+                state.isPresented = false
+                
+                let userLocation = state.userLocation
+                let mbr = state.mbrLocation
+                let category = CategoryCase(rawValue: state.selectedMenuIndex) ?? .all
+                
+                return .run { send in
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: category)))
+                }
                 
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
                 return .run { send in

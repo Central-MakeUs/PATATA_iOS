@@ -15,12 +15,18 @@ struct AddSpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
+        var viewState: ViewState
         var mapManager: NaverMapManager = NaverMapManager.addSpotShared
         var address: String = ""
         var spotCoord: Coordinate
         var addSpotEntity: [MapSpotEntity] = []
         var addValid: Bool = false
         var isPresent: Bool = false
+    }
+    
+    enum ViewState {
+        case map
+        case edit
     }
     
     enum Action {
@@ -35,7 +41,7 @@ struct AddSpotMapFeature {
         
         enum Delegate {
             case tappedBackButton
-            case tappedAddConfirmButton(Coordinate, String)
+            case tappedAddConfirmButton(Coordinate, String, ViewState)
         }
     }
     
@@ -142,7 +148,8 @@ extension AddSpotMapFeature {
                 
                 if state.addValid {
                     state.isPresent = false
-                    return .send(.delegate(.tappedAddConfirmButton(coord, address)))
+                    
+                    return .send(.delegate(.tappedAddConfirmButton(coord, address, state.viewState)))
                 } else {
                     state.mapManager.updateMarkers(markers: state.addSpotEntity)
                     state.isPresent = true

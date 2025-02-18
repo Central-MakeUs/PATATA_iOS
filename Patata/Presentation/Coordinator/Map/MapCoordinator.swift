@@ -24,6 +24,7 @@ enum MapScreen {
     case searchMap(SearchMapFeature)
     case addSpotMap(AddSpotMapFeature)
     case successView(SuccessFeature)
+    case spotDetail(SpotDetailFeature)
 }
 
 @Reducer
@@ -32,11 +33,21 @@ struct MapCoordinator {
     struct State: Equatable, Sendable {
         static let initialState = State(routes: [.root(.spotMap(SpotMapFeature.State()), embedInNavigationView: true)])
         var routes: IdentifiedArrayOf<Route<MapScreen.State>>
+        
         var isHideTabBar: Bool = false
+        var popupIsPresent: Bool = false
     }
     
     enum Action {
         case router(IdentifiedRouterActionOf<MapScreen>)
+        
+        case viewEvent(ViewEventType)
+        
+        case bindingPopupIsPresent(Bool)
+    }
+    
+    enum ViewEventType {
+        case dismissPopup
     }
     
     var body: some ReducerOf<Self> {
@@ -54,7 +65,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: coord)))
                 
             case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -65,6 +76,9 @@ extension MapCoordinator {
             case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSearch)))):
                 state.isHideTabBar = true
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
+                
+            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotDetail(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 if let _ = state.routes.last(where: { $0.id == .spotMap }) {
@@ -118,6 +132,13 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.successView(SuccessFeature.State()))
                 
+            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(viewState))))):
+                if viewState == .edit {
+                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: Coordinate(latitude: 37.5666791, longitude: 126.9784147))))
+                } else {
+                    state.routes.pop()
+                }
+                
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
@@ -135,7 +156,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: coord)))
                 
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -148,12 +169,51 @@ extension MapCoordinator {
                 }
                 state.routes.pop()
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress))))):
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotLocation: spotCoord, spotAddress: spotAddress)))
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
+                if viewState == .map {
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotLocation: spotCoord, spotAddress: spotAddress)))
+                } else {
+                    state.routes.pop()
+                    return .run { send in
+                        await send(.router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.changeAddress(spotCoord, spotAddress))))))
+                    }
+                }
                 
             case .router(.routeAction(id: .successView, action: .successView(.delegate(.tappedConfirmButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
+                
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
+                if state.routes.count == 2 {
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
+                
+                state.routes.pop()
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
+                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotAddress: spotAddress)))
+                
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
+                if state.routes.count == 2 {
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
+                
+                state.popupIsPresent = true
+                
+                state.routes.pop()
+                return .run { send in
+                    await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
+                }
+                
+            case .viewEvent(.dismissPopup):
+                state.popupIsPresent = false
+                
+            case let .bindingPopupIsPresent(isPresent):
+                state.popupIsPresent = isPresent
                 
             default:
                 break

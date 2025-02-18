@@ -16,6 +16,7 @@ enum HomeScreen {
     case category(SpotCategoryFeature)
     case spotDetail(SpotDetailFeature)
     case mySpotList(MySpotListFeature)
+    case spotedit(SpotEditorFeature)
 }
 
 @Reducer
@@ -104,7 +105,6 @@ extension HomeCoordinator {
                     }
                 }
                 
-                
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(archive))))):
                 state.routes.pop()
                 if state.routes.count == 1 {
@@ -116,6 +116,9 @@ extension HomeCoordinator {
                         await send(.router(.routeAction(id: .search, action: .search(.delegate(.detailBack(archive))))))
                     }
                 }
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotAddress))))):
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotAddress: spotAddress)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()

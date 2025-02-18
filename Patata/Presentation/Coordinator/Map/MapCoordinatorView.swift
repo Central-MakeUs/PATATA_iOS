@@ -8,6 +8,7 @@
 import SwiftUI
 import TCACoordinators
 import ComposableArchitecture
+import PopupView
 
 struct MapCoordinatorView: View {
     
@@ -44,8 +45,43 @@ struct MapCoordinatorView: View {
                 case let .successView(successStore):
                     SuccessView(store: successStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .spotDetail(detailStore):
+                    SpotDetailView(store: detailStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
+            .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
+                HStack {
+                    Spacer()
+                    
+                    Text("게시물이 정상적으로 삭제되었습니다.")
+                        .textStyle(.subtitleXS)
+                        .foregroundStyle(.blue20)
+                        .padding(.vertical, 10)
+                    
+                    Spacer()
+                }
+                .background(.gray100)
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .padding(.horizontal, 15)
+                .onAppear {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                        store.send(.viewEvent(.dismissPopup))
+                    }
+                }
+            }, customize: {
+                $0
+                    .type(.floater())
+                    .position(.bottom)
+                    .animation(.spring())
+                    .closeOnTap(true)
+                    .closeOnTapOutside(true)
+                    .backgroundColor(.black.opacity(0.5))
+                    .dismissCallback {
+                        store.send(.viewEvent(.dismissPopup))
+                    }
+            })
         }
     }
 }
@@ -67,6 +103,8 @@ extension MapScreen.State: Identifiable {
             return ID.addSpotMap
         case .successView:
             return ID.successView
+        case .spotDetail:
+            return ID.spotDetail
         }
     }
     
@@ -78,6 +116,7 @@ extension MapScreen.State: Identifiable {
         case searchMap
         case addSpotMap
         case successView
+        case spotDetail
         
         var id: ID {
             return self

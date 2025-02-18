@@ -217,6 +217,9 @@ extension SpotEditorView {
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             )
+            .asButton {
+                store.send(.viewEvent(.tappedLocation))
+            }
             
             textFieldView(
                 bindingText: $store.location.sending(\.bindingLocation),

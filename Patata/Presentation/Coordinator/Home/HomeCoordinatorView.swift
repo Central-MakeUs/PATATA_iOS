@@ -37,6 +37,10 @@ struct HomeCoordinatorView: View {
                 case let .mySpotList(listStore):
                     MySpotListView(store: listStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .spotedit(spotEditStore):
+                    SpotEditorView(store: spotEditStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
@@ -87,6 +91,8 @@ extension HomeScreen.State: Identifiable {
             return ID.spotDetail
         case .mySpotList:
             return ID.mySpotList
+        case .spotedit:
+            return ID.spotedit
         }
     }
     
@@ -96,6 +102,7 @@ extension HomeScreen.State: Identifiable {
         case category
         case spotDetail
         case mySpotList
+        case spotedit
         
         var id: ID {
             return self

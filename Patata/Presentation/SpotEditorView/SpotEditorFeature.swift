@@ -52,6 +52,8 @@ struct SpotEditorFeature {
             case tappedBackButton
             case successSpotAdd
             case tappedXButton
+            case tappedLocation(ViewState)
+            case changeAddress(Coordinate, String)
         }
         
         // bindingAction
@@ -86,6 +88,7 @@ struct SpotEditorFeature {
         case tappedSpotAddButton([Data])
         case dismissPopup
         case tappedXButton
+        case tappedLocation
     }
     
     enum NetworkType {
@@ -145,12 +148,22 @@ extension SpotEditorFeature {
             case let .viewEvent(.tappedSpotAddButton(imageDatas)):
                 state.imageDatas = imageDatas
                 
-                return .run { send in
-                    await send(.networkType(.createSpot))
+                if state.viewState == .add {
+                    return .run { send in
+                        await send(.networkType(.createSpot))
+                    }
                 }
                 
             case .viewEvent(.tappedXButton):
                 return .send(.delegate(.tappedXButton))
+                
+            case .viewEvent(.tappedLocation):
+                let viewState = state.viewState
+                return .send(.delegate(.tappedLocation(viewState)))
+                
+            case let .delegate(.changeAddress(spotCoord, address)):
+                state.spotLocation = spotCoord
+                state.spotAddress = address
                 
             case .networkType(.createSpot):
                 let categoryId = CategoryCase.getCategoryId(text: state.categoryText)
