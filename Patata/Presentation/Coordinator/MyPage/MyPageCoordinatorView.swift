@@ -41,6 +41,15 @@ struct MyPageCoordinatorView: View {
                 case let .spotDetail(spotDetailStore):
                     SpotDetailView(store: spotDetailStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .spotedit(spotEditStore):
+                    SpotEditorView(store: spotEditStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
+                case let .addSpotMap(addSpotMapStore):
+                    AddSpotMapView(store: addSpotMapStore)
+                        .hideTabBar(store.isHideTabBar)
+                    
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
@@ -93,6 +102,10 @@ extension MyPageScreen.State: Identifiable {
             return ID.success
         case .spotDetail:
             return ID.spotDetail
+        case .spotedit:
+            return ID.spotedit
+        case .addSpotMap:
+            return ID.addSpotMap
         }
     }
     
@@ -103,6 +116,8 @@ extension MyPageScreen.State: Identifiable {
         case profileEdit
         case success
         case spotDetail
+        case spotedit
+        case addSpotMap
         
         var id: ID {
             return self
