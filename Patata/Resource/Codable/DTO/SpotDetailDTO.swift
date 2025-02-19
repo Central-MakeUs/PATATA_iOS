@@ -24,6 +24,8 @@ struct SpotDetailItemDTO: DTO {
     let categoryId: Int
     let memberName: String
     let images: [String]
+    let latitude: Double
+    let longitude: Double
     let reviewCount: Int
     let isScraped: Bool
     let tags: [String]

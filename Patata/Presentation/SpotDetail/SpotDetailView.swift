@@ -255,7 +255,7 @@ extension SpotDetailView {
             
             // hashTag
             HStack {
-                ForEach(store.spotDetailData.tags, id: \.self) { tag in
+                ForEach(Array(store.spotDetailData.tags.enumerated()), id: \.offset) { index, tag in
                     Text("#" + tag)
                         .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS)
                 }

@@ -190,6 +190,7 @@ extension SpotEditorFeature {
                     state.hashTags = state.spotDetail.tags
                     state.imageURLs = state.spotDetail.images
                     state.categoryText = state.spotDetail.categoryId.getCategoryCase().title
+                    state.spotLocation = state.spotDetail.spotCoord
                 }
                 
             case .networkType(.createSpot):
@@ -223,10 +224,11 @@ extension SpotEditorFeature {
                 let category = CategoryCase.getCategoryId(text: state.categoryText)
                 let hashTag = state.hashTags
                 let spotId = state.spotDetail.spotId
+                let spotCoord = state.spotLocation
                 
                 return .run { send in
                     do {
-                        let result = try await spotRepository.spotEdit(title: title, spotAddress: address, spotAddressDetail: addressDetail, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotDetail: spotDetail, spotCategory: CategoryCase(rawValue: category) ?? .houseSpot, hashTag: hashTag, spotId: spotId)
+                        let result = try await spotRepository.spotEdit(title: title, spotAddress: address, spotAddressDetail: addressDetail, spotLocation: spotCoord, spotDetail: spotDetail, spotCategory: CategoryCase(rawValue: category) ?? .houseSpot, hashTag: hashTag, spotId: spotId)
                         
                         if result {
                             await send(.delegate(.successSpotEdit))

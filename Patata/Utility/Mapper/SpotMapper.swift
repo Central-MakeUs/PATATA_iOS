@@ -45,7 +45,8 @@ struct SpotMapper: Sendable {
             reviewCount: dto.reviewCount,
             isScraped: dto.isScraped,
             tags: dto.tags,
-            reviews: await dto.reviews.asyncMap { dtoToEntity($0) }
+            reviews: await dto.reviews.asyncMap { dtoToEntity($0) },
+            spotCoord: Coordinate(latitude: dto.latitude, longitude: dto.longitude)
         )
     }
     
