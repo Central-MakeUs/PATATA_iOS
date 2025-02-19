@@ -137,7 +137,7 @@ struct RootCoordinator {
                 }
                 
             case .router(.routeAction(id: _, action: .profileEdit(.delegate(.successChangeNickname)))):
-                state.routes.push(.success(SuccessFeature.State()))
+                state.routes.push(.success(SuccessFeature.State(viewState: .first)))
                 
             case let .router(.routeAction(id: _, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .first {

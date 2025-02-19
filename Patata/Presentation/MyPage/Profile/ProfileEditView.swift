@@ -87,17 +87,17 @@ extension ProfileEditView {
             .aspectRatio(1, contentMode: .fit)
             .frame(width: 100, height: 100)
             .clipShape(Circle())
-            .overlay(alignment: .bottomTrailing) {
-                Image("EditActive")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 24, height: 24)
-                    .background(
-                        Circle()
-                            .foregroundStyle(.white)
-                            .shadow(color: .shadowColor, radius: 8)
-                    )
-            }
+//            .overlay(alignment: .bottomTrailing) {
+//                Image("EditActive")
+//                    .resizable()
+//                    .aspectRatio(contentMode: .fit)
+//                    .frame(width: 24, height: 24)
+//                    .background(
+//                        Circle()
+//                            .foregroundStyle(.white)
+//                            .shadow(color: .shadowColor, radius: 8)
+//                    )
+//            }
         
     }
     

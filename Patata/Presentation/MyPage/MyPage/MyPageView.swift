@@ -184,6 +184,9 @@ extension MyPageView {
             Text("첫 스팟 등록하기")
                 .hashTagStyle(backgroundColor: .navy100, textColor: .white, font: .subtitleM, verticalPadding: 10, horizontalPadding: 60, cornerRadius: 38)
                 .padding(.top, 12)
+                .asButton {
+                    store.send(.viewEvent(.tappedAddSpotButton))
+                }
             
             Spacer()
         }

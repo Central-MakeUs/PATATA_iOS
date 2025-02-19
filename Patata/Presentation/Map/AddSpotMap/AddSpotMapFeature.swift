@@ -12,11 +12,13 @@ import CoreLocation
 // 유저가 보고 있는 화면부터 시작
 @Reducer
 struct AddSpotMapFeature {
+    private let dataSourceActor = DataSourceActor()
     
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
         var mapManager: NaverMapManager = NaverMapManager.addSpotShared
+        var userLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var address: String = ""
         var spotCoord: Coordinate
         var addSpotEntity: [MapSpotEntity] = []
@@ -62,6 +64,8 @@ struct AddSpotMapFeature {
     enum DataTransType {
         case locationText(String, lat: Double, long: Double)
         case checkValidSpot([MapSpotEntity])
+        case fetchRealm
+        case userLocation(Coordinate)
     }
     
     enum MapAction {
@@ -85,6 +89,10 @@ extension AddSpotMapFeature {
             switch action {
             case .viewCycle(.onAppear):
                 return .merge(
+                    
+                    .run(operation: { send in
+                        await send(.dataTransType(.fetchRealm))
+                    }),
                     .merge(registerPublisher(state: &state))
                 )
                 
@@ -134,6 +142,20 @@ extension AddSpotMapFeature {
             case .mapAction(.moveCamera):
                 state.mapManager.clearCurrentMarkers()
                 state.addValid = true
+                
+            case .dataTransType(.fetchRealm):
+                return .run { send in
+                    let coord = await dataSourceActor.fetch()
+                    await send(.dataTransType(.userLocation(coord)))
+                }
+                
+            case let .dataTransType(.userLocation(coord)):
+                state.userLocation = coord
+                if state.spotCoord.latitude == 0 && state.spotCoord.longitude == 0 {
+                    state.spotCoord = coord
+                }
+                
+//                state.mapManager.moveCamera(coord: coord)
                 
             case let .dataTransType(.locationText(location, lat, long)):
                 state.address = location

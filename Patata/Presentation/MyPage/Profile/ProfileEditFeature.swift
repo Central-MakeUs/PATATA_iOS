@@ -14,7 +14,7 @@ struct ProfileEditFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
-        var profileImage: String = "MyPageActive"
+        var profileImage: String = "ProfileImage"
         var nickname: String
         var initialNickname: String
         var isValid: Bool = true

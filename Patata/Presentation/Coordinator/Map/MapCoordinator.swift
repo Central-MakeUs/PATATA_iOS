@@ -131,7 +131,7 @@ extension MapCoordinator {
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotAdd)))):
                 state.isHideTabBar = true
-                state.routes.push(.successView(SuccessFeature.State()))
+                state.routes.push(.successView(SuccessFeature.State(viewState: .spot)))
                 
             case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState))))):
                 if viewState == .edit {

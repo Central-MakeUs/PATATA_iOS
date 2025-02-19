@@ -28,17 +28,31 @@ extension SuccessView {
                 .aspectRatio(contentMode: .fit)
                 .padding(.horizontal, 50)
             
-            Text("스팟이 등록되었어요!")
-                .foregroundStyle(.gray100)
-                .textStyle(.headlineS)
-            
-            VStack {
-                Text("스팟이 정상적으로 등록되었습니다.")
-                Text("다른 스팟들을 둘러보러 가볼까요?")
+            if store.viewState == .spot {
+                Text("스팟이 등록되었어요!")
+                    .foregroundStyle(.gray100)
+                    .textStyle(.headlineS)
+                
+                VStack {
+                    Text("스팟이 정상적으로 등록되었습니다.")
+                    Text("다른 스팟들을 둘러보러 가볼까요?")
+                }
+                .textStyle(.subtitleS)
+                .foregroundStyle(.blue50)
+                .padding(.top, 10)
+            } else if store.viewState == .first {
+                Text("가입이 완료되었어요!")
+                    .foregroundStyle(.gray100)
+                    .textStyle(.headlineS)
+                
+                VStack {
+                    Text("파타타 회원이 되신 것을 환영해요.")
+                    Text("타타와 함께 최고의 스팟을 찾아봐요!")
+                }
+                .textStyle(.subtitleS)
+                .foregroundStyle(.blue50)
+                .padding(.top, 10)
             }
-            .textStyle(.subtitleS)
-            .foregroundStyle(.blue50)
-            .padding(.top, 10)
             
             Spacer()
             

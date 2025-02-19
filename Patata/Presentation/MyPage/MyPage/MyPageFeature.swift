@@ -13,7 +13,7 @@ struct MyPageFeature {
     @ObservableState
     struct State: Equatable {
         var imageCount: Int = 0
-        var profileImage: String = "MyPageActive"
+        var profileImage: String = "ProfileImage"
         var nickname: String = UserDefaultsManager.nickname
         var email: String = "adsafas@gmail.com"
         var spotCount: Int = 0
@@ -32,6 +32,7 @@ struct MyPageFeature {
             case tappedProfileEdit
             case tappedSetting
             case changeNickName
+            case tappedAddSpotButton
         }
     }
     
@@ -43,6 +44,7 @@ struct MyPageFeature {
         case tappedSpot(Int)
         case tappedProfileEdit
         case tappedSetting
+        case tappedAddSpotButton
     }
     
     enum NetworkType {
@@ -78,6 +80,9 @@ extension MyPageFeature {
                 
             case .viewEvent(.tappedSetting):
                 return .send(.delegate(.tappedSetting))
+                
+            case .viewEvent(.tappedAddSpotButton):
+                return .send(.delegate(.tappedAddSpotButton))
                 
             case .networkType(.fetchMySpot):
                 return .run { send in

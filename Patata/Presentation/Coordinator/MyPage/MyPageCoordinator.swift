@@ -71,6 +71,10 @@ extension MyPageCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .edit, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
                 
+            case .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedAddSpotButton)))):
+                state.isHideTabBar = true
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: Coordinate(latitude: 0, longitude: 0))))
+                
             case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedSpot(spotId))))):
                 state.isHideTabBar = true
                 state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
@@ -111,7 +115,8 @@ extension MyPageCoordinator {
                 }
                 
             case .router(.routeAction(id: .profileEdit, action: .profileEdit(.delegate(.successChangeNickname)))):
-                state.routes.push(.success(SuccessFeature.State()))
+                state.isHideTabBar = false
+                state.routes.popToRoot()
                 
             case .router(.routeAction(id: .success, action: .success(.delegate(.tappedConfirmButton)))):
                 state.isHideTabBar = false
@@ -126,17 +131,27 @@ extension MyPageCoordinator {
                     }
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
-                state.routes.pop()
-                
-                return .run { send in
-                    await send(.router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
+                if state.routes.count == 2{
+                    state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: coord, spotAddress: spotAddress)))
+                } else {
+                    state.routes.pop()
+                    
+                    return .run { send in
+                        await send(.router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
+                    }
                 }
                 
             case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
+                if state.routes.count == 2 {
+                    state.isHideTabBar = false
+                }
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):
                 state.routes.pop()
+                
+            case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotAdd)))):
+                state.routes.push(.success(SuccessFeature.State(viewState: .spot)))
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotEdit)))):
                 state.errorMSG = "게시물이 수정되었습니다."
@@ -148,7 +163,11 @@ extension MyPageCoordinator {
                 state.isHideTabBar = false
                 
             case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+                if state.routes.count == 3 {
+                    state.routes.pop()
+                } else {
+                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+                }
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedOpenSource)))):
                 state.routes.push(.openSource(OpenSourceFeature.State()))

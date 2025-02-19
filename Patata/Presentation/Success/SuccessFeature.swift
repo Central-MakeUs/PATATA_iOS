@@ -12,7 +12,12 @@ import ComposableArchitecture
 struct SuccessFeature {
     @ObservableState
     struct State: Equatable {
-        
+        var viewState: ViewState
+    }
+    
+    enum ViewState {
+        case first
+        case spot
     }
     
     enum Action {
