@@ -41,7 +41,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         .ignoresSafeArea()
                         .onTapGesture {
                             if let onDismiss {
-                                print("tap")
                                 onDismiss()
                             }
                             withAnimation {
@@ -55,6 +54,9 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         .ignoresSafeArea()
                         .contentShape(Rectangle())
                         .onTapGesture {
+                            if let onDismiss {
+                                onDismiss()
+                            }
                             withAnimation {
                                 isPresented = false
                             }
@@ -124,33 +126,35 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
         .gesture(
             DragGesture(minimumDistance: isFull ? .infinity : 0)
                 .onChanged { value in
-                    if isFullSheet {
+                    if isFullSheet && !isMap {
                         if abs(value.translation.height) > abs(value.translation.width) {
                             dragOffset = value.translation.height
                         }
-                    } else {
+                    } else if !isMap {
                         if dragOffset + value.translation.height > 0 {
                             dragOffset = value.translation.height
                         }
                     }
                 }
                 .onEnded { value in
-                    if isFullSheet {
-                        if abs(value.translation.height) > abs(value.translation.width) {
-                            if value.translation.height <= -150 {
-                                isFull = true
-                            } else if value.translation.height > 10 {
+                    if !isMap {
+                        if isFullSheet {
+                            if abs(value.translation.height) > abs(value.translation.width) {
+                                if value.translation.height <= -150 {
+                                    isFull = true
+                                } else if value.translation.height > 10 {
+                                    isPresented = false
+                                }
+                            }
+                        } else {
+                            if value.translation.height > 0 {
                                 isPresented = false
+                            } else {
+                                isPresented = true
                             }
                         }
-                    } else {
-                        if value.translation.height > 0 {
-                            isPresented = false
-                        } else {
-                            isPresented = true
-                        }
+                        dragOffset = 0
                     }
-                    dragOffset = 0
                 }
         )
         .animation(.easeInOut(duration: 0.25), value: isPresented)

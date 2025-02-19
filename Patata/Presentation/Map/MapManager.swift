@@ -33,10 +33,9 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
     
     private func setupMapView() {
         view.showZoomControls = false
-        view.mapView.positionMode = .direction
+        view.mapView.positionMode = .normal
         view.mapView.zoomLevel = 17
         view.mapView.addCameraDelegate(delegate: self)
-        view.mapView.positionMode = .normal
     }
     
     func getNaverMapView() -> NMFNaverMapView {
@@ -64,13 +63,16 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
     }
     
     func moveCamera(coord: Coordinate) {
-        let specificLocation = NMGLatLng(lat: coord.latitude, lng: coord.longitude)
-        let cameraUpdate = NMFCameraUpdate(scrollTo: specificLocation)
-        
-        cameraUpdate.animation = .fly
-        cameraUpdate.animationDuration = 0.5
-        
-        view.mapView.moveCamera(cameraUpdate)
+        print("Moving camera to: \(coord)")  // 추가
+            let specificLocation = NMGLatLng(lat: coord.latitude, lng: coord.longitude)
+            let cameraUpdate = NMFCameraUpdate(scrollTo: specificLocation)
+            
+            cameraUpdate.animation = .fly
+            cameraUpdate.animationDuration = 0.5
+            
+            print("MapView exists: \(view.mapView != nil)")  // 추가
+            view.mapView.moveCamera(cameraUpdate)
+            print("Camera move commanded")
     }
     
     func clearCurrentMarkers() {

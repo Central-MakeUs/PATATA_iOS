@@ -17,7 +17,7 @@ struct SearchMapView: View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden()
-                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
+                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
                     AnyView(

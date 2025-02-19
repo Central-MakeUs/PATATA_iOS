@@ -147,6 +147,7 @@ extension SpotMapFeature {
                 return .send(.delegate(.tappedSideButton(mbrLocation)))
                 
             case .viewEvent(.bottomSheetDismiss):
+                print("aaaaaa")
                 return .send(.delegate(.bottomSheetDismiss))
                 
             case .viewEvent(.tappedSearch):

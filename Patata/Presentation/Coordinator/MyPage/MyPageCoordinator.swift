@@ -90,7 +90,7 @@ extension MyPageCoordinator {
                 state.popupIsPresent = true
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress)))
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress)))
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
@@ -163,11 +163,7 @@ extension MyPageCoordinator {
                 state.isHideTabBar = false
                 
             case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
-                if state.routes.count == 3 {
-                    state.routes.pop()
-                } else {
-                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
-                }
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedOpenSource)))):
                 state.routes.push(.openSource(OpenSourceFeature.State()))

@@ -25,6 +25,7 @@ struct SpotEditorFeature {
         var hashTags: [String] = []
         var imageDatas: [Data] = []
         var errorMsg: String = ""
+        var isFirst: Bool = true
         
         // bindingState
         var title: String = ""
@@ -178,11 +179,13 @@ extension SpotEditorFeature {
                 return .send(.delegate(.tappedLocation(coord, viewState)))
                 
             case let .delegate(.changeAddress(spotCoord, address)):
+                state.isFirst = false
                 state.spotLocation = spotCoord
                 state.spotAddress = address
                 
             case .dataTransType(.checkViewState):
-                if state.viewState == .edit {
+                if state.viewState == .edit && state.isFirst {
+                    state.isFirst = false
                     state.title = state.spotDetail.spotName
                     state.spotAddress = state.spotDetail.spotAddress
                     state.location = state.spotDetail.spotAddressDetail

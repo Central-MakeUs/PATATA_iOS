@@ -88,6 +88,11 @@ extension AddSpotMapFeature {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
+                
+                if state.spotCoord.latitude != 0 && state.spotCoord.longitude != 0 {
+                    state.mapManager.moveCamera(coord: state.spotCoord)
+                }
+                
                 return .merge(
                     
                     .run(operation: { send in
@@ -104,8 +109,11 @@ extension AddSpotMapFeature {
                 
             case .viewEvent(.tappedAddConfirmButton):
                 let coord = state.spotCoord
-                return .run { send in
-                    await send(.networkType(.checkValidAddSpot(coord)))
+                
+                if !state.address.isEmpty {
+                    return .run { send in
+                        await send(.networkType(.checkValidAddSpot(coord)))
+                    }
                 }
                 
             case .viewEvent(.dismissPopup):
@@ -124,6 +132,7 @@ extension AddSpotMapFeature {
                 }
                 
             case let .mapAction(.getCameraLocation(coord)):
+                print("getCamera", coord)
                 state.spotCoord = coord
                 
                 return .run { send in
@@ -153,9 +162,9 @@ extension AddSpotMapFeature {
                 state.userLocation = coord
                 if state.spotCoord.latitude == 0 && state.spotCoord.longitude == 0 {
                     state.spotCoord = coord
+                    state.mapManager.moveCamera(coord: coord)
                 }
                 
-//                state.mapManager.moveCamera(coord: coord)
                 
             case let .dataTransType(.locationText(location, lat, long)):
                 state.address = location

@@ -129,7 +129,7 @@ extension HomeCoordinator {
                 }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 37.5666791, longitude: 126.9784147), spotAddress: spotDetail.spotAddress)))
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 state.routes.pop()
@@ -146,8 +146,8 @@ extension HomeCoordinator {
                 state.routes.popToRoot()
                 state.isHideTabBar = false
                 
-            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord))))):
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: Coordinate(latitude: 0, longitude: 0))))
+            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotEdit)))):
                 state.errorMSG = "게시물이 수정되었습니다."

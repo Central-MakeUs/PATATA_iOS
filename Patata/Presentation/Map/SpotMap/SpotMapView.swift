@@ -20,7 +20,7 @@ struct SpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), mapBottomView: {
+                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {
                     AnyView(
