@@ -112,6 +112,9 @@ extension MapCoordinator {
                     state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 }
                 
+            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 
                 if let _ = state.routes.last(where: { $0.id == .mySpotList }) {
@@ -127,7 +130,7 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedXButton)))):
-                state.isHideTabBar = true
+                state.isHideTabBar = false
                 state.routes.popToRoot()
                 
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotAdd)))):
@@ -202,6 +205,10 @@ extension MapCoordinator {
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
                 state.isHideTabBar = true
                 state.routes.pop()
+                
+                if state.routes.count == 3 {
+                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
+                }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
                 state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress)))

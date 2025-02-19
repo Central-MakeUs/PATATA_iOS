@@ -58,6 +58,7 @@ struct SearchMapFeature {
             case tappedSpotDetail(Int)
             case deleteSpot
             case successEdit
+            case detailBack
         }
     }
     
@@ -241,6 +242,10 @@ extension SearchMapFeature {
                 return .run { send in
                     await send(.networkType(.searchSpot(spotName: searchText, userLocation: userLocation)))
                 }
+                
+            case .delegate(.detailBack):
+                state.isFirst = false
+                state.isOtherFirst = false
                 
             case let .networkType(.searchSpot(spotName, userLocation, mbrLocation)):
                 return .run { send in
