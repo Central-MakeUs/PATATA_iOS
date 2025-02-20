@@ -198,10 +198,8 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
                 if viewState == .map || viewState == .searchMap {
-                    print("fuck", viewState)
                     state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress, beforeViewState: .map)))
                 } else {
-                    print("viewState", viewState)
                     state.routes.pop()
                     return .run { send in
                         await send(.router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.changeAddress(spotCoord, spotAddress))))))
@@ -236,6 +234,9 @@ extension MapCoordinator {
                 } else {
                     state.routes.push(.report(ReportFeature.State(viewState: .user, id: id)))
                 }
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.reviewReport(id))))):
+                state.routes.push(.report(ReportFeature.State(viewState: .review, id: id)))
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete(viewState))))):
                 if viewState == .map {

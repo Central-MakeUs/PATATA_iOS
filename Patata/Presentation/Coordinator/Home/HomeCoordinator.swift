@@ -130,6 +130,9 @@ extension HomeCoordinator {
                     state.routes.push(.report(ReportFeature.State(viewState: .user, id: id)))
                 }
                 
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.reviewReport(id))))):
+                state.routes.push(.report(ReportFeature.State(viewState: .review, id: id)))
+                
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
                 state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
                 

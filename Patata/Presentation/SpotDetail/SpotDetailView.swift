@@ -22,25 +22,33 @@ struct SpotDetailView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            contentView
-                .navigationBarHidden(true)
-                .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
-                    store.send(.viewEvent(.tappedDeleteButton))
-                }
-                .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
-                    if !store.spotDetailData.isAuthor {
-                        BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
-                            store.send(.viewEvent(.bottomSheetClose(text)))
+            ZStack {
+                if store.dataState == .loading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .navigationBarBackButtonHidden(true)
+                } else {
+                    contentView
+                        .navigationBarHidden(true)
+                        .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
+                            store.send(.viewEvent(.tappedDeleteButton))
                         }
-                    } else {
-                        BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
-                            store.send(.viewEvent(.bottomSheetClose(text)))
+                        .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
+                            if !store.spotDetailData.isAuthor {
+                                BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
+                                    store.send(.viewEvent(.bottomSheetClose(text)))
+                                }
+                            } else {
+                                BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
+                                    store.send(.viewEvent(.bottomSheetClose(text)))
+                                }
+                            }
                         }
-                    }
                 }
-                .onAppear {
-                    store.send(.viewCycle(.onAppear))
-                }
+            }
+            .onAppear {
+                store.send(.viewCycle(.onAppear))
+            }
         }
     }
 }
@@ -332,6 +340,13 @@ extension SpotDetailView {
                         .foregroundStyle(.textInfo)
                         .asButton {
                             store.send(.viewEvent(.tappedDeleteReview(reviewId: reviewId, index: index)))
+                        }
+                } else {
+                    Text("신고하기")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.red100)
+                        .asButton {
+                            store.send(.viewEvent(.tappedReviewReport(index)))
                         }
                 }
             }

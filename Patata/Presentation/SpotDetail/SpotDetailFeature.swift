@@ -12,6 +12,7 @@ import ComposableArchitecture
 struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
+        var dataState: DataState = .loading
         let viewState: ViewState
         var spotId: Int
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
@@ -23,6 +24,11 @@ struct SpotDetailFeature {
         var commentText: String = ""
         var bottomSheetIsPresent: Bool = false
         var alertIsPresent: Bool = false
+    }
+    
+    enum DataState {
+        case loading
+        case detail
     }
     
     enum ViewState {
@@ -52,6 +58,7 @@ struct SpotDetailFeature {
             case delete(ViewState)
             case editSpotDetail(SpotDetailEntity, ViewState)
             case report(String, id: Int)
+            case reviewReport(id: Int)
         }
     }
     
@@ -67,6 +74,7 @@ struct SpotDetailFeature {
         case tappedDeleteButton
         case tappedOnSubmit
         case tappedDeleteReview(reviewId: Int, index: Int)
+        case tappedReviewReport(Int)
     }
     
     enum NetworkType {
@@ -101,7 +109,9 @@ extension SpotDetailFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
+                state.dataState = .loading
                 return .run { [state = state] send in
+                    print("aaaaa")
                     await send(.networkType(.fetchSpotDetail(state.spotId)))
                 }
                 
@@ -124,6 +134,9 @@ extension SpotDetailFeature {
                 } else {
                     state.alertIsPresent = true
                 }
+                
+            case let .viewEvent(.tappedReviewReport(index)):
+                return .send(.delegate(.reviewReport(id: state.reviewData[index].reviewId)))
                 
             case .viewEvent(.tappedArchiveButton):
                 return .run { send in
@@ -150,7 +163,9 @@ extension SpotDetailFeature {
             case let .networkType(.fetchSpotDetail(spotId)):
                 return .run { send in
                     do {
+                        print("here")
                         let data = try await spotRepository.fetchSpot(spotId: spotId)
+                        print("end", data)
                         
                         await send(.dataTransType(.spotDetail(data)))
                     } catch {
@@ -205,9 +220,10 @@ extension SpotDetailFeature {
                 }
                 
             case let .dataTransType(.spotDetail(data)):
-                print("fetch", data.spotCoord)
                 state.spotDetailData = data
                 state.reviewData = data.reviews
+                
+                state.dataState = .detail
                 
             case let .dataTransType(.archiveState(data)):
                 state.spotDetailData = SpotDetailEntity(

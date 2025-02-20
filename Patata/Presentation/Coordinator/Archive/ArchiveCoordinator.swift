@@ -74,6 +74,9 @@ extension ArchiveCoordinator {
                     state.routes.push(.report(ReportFeature.State(viewState: .user, id: id)))
                 }
                 
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.reviewReport(id))))):
+                state.routes.push(.report(ReportFeature.State(viewState: .review, id: id)))
+                
             case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_, _))))):
                 state.isHideTabBar = false
                 state.routes.pop()
