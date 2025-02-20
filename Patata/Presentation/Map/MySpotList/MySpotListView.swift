@@ -37,13 +37,7 @@ extension MySpotListView {
             .padding(.bottom, 12)
             .background(.white)
             
-            if store.mapSpotEntity.isEmpty {
-                Spacer()
-                
-                noSpotView
-                
-                Spacer()
-            } else {
+             
                 ScrollView(.vertical) {
                     
                     VStack {
@@ -56,12 +50,21 @@ extension MySpotListView {
                                     }
                             }
                         } else {
-                            ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
-                                mapSpotView(spot: item, index: index)
-                                    .background(.white)
-                                    .asButton {
-                                        store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                    }
+                            if store.mapSpotEntity.isEmpty {
+                                Spacer()
+                                
+                                noSpotView
+                                
+                                Spacer()
+                            } else {
+                                
+                                ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
+                                    mapSpotView(spot: item, index: index)
+                                        .background(.white)
+                                        .asButton {
+                                            store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                        }
+                                }
                             }
                         }
                     }
@@ -69,7 +72,7 @@ extension MySpotListView {
                     
                 }
                 .background(.gray20)
-            }
+            
         }
     }
     

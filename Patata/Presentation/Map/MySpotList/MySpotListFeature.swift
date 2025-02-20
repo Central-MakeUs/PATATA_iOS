@@ -230,14 +230,6 @@ extension MySpotListFeature {
             case let .dataTransType(.todaySpotList(spotList)):
                 state.spotListEntity = spotList
                 
-                let mbrLocation = state.isSearch ? nil : state.mbrLocation
-                let userLocation = state.userCoord
-                let searchText = state.searchText
-                
-                return .run { send in
-                    await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
-                }
-                
             case let .dataTransType(.fetchSearchSpot(data)):
                 if let data {
                     state.mapSpotEntity = [data]
@@ -249,8 +241,6 @@ extension MySpotListFeature {
                     return .run { send in
                         await send(.networkType(.fetchSpot(mbrLocation, userLocation, category ?? .all, true)))
                     }
-                } else {
-                    // 데이터 없을때 화면 보여줘야됨
                 }
                 
             case let .dataTransType(.archiveState(data, index)):
