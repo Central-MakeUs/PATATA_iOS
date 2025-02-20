@@ -38,6 +38,7 @@ struct MapCoordinator {
         var isHideTabBar: Bool = false
         var popupIsPresent: Bool = false
         var errorMSG: String = ""
+        var alertIsPresent: Bool = false
     }
     
     enum Action {
@@ -46,10 +47,12 @@ struct MapCoordinator {
         case viewEvent(ViewEventType)
         
         case bindingPopupIsPresent(Bool)
+        case bindingAlertIsPrenset(Bool)
     }
     
     enum ViewEventType {
         case dismissPopup
+        case dismissAlert
     }
     
     var body: some ReducerOf<Self> {
@@ -258,9 +261,8 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
-                state.errorMSG = "정상적으로 신고되었습니다."
                 state.routes.popToRoot()
-                state.popupIsPresent = true
+                state.alertIsPresent = true
                 state.isHideTabBar = false
                 
                 return .run { send in
@@ -270,8 +272,14 @@ extension MapCoordinator {
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
                 
+            case .viewEvent(.dismissAlert):
+                state.alertIsPresent = false
+                
             case let .bindingPopupIsPresent(isPresent):
                 state.popupIsPresent = isPresent
+                
+            case let .bindingAlertIsPrenset(isPresent):
+                state.alertIsPresent = isPresent
                 
             default:
                 break

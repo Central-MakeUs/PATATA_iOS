@@ -31,6 +31,7 @@ struct HomeCoordinator {
         
         var popupIsPresent: Bool = false
         var isHideTabBar: Bool = false
+        var alertIsPresent: Bool = false
         var errorMSG: String = ""
     }
     
@@ -39,10 +40,12 @@ struct HomeCoordinator {
         
         case viewEvent(ViewEventType)
         case bindingPopupIsPresent(Bool)
+        case bindingAlertIsPrenset(Bool)
     }
     
     enum ViewEventType {
         case dismissPopup
+        case dismissAlert
     }
     
     var body: some ReducerOf<Self> {
@@ -167,8 +170,7 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
-                state.errorMSG = "정상적으로 신고되었습니다."
-                state.popupIsPresent = true
+                state.alertIsPresent = true
                 state.routes.popToRoot()
                 
                 if state.routes.count == 1 {
@@ -180,8 +182,14 @@ extension HomeCoordinator {
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
                 
+            case .viewEvent(.dismissAlert):
+                state.alertIsPresent = false
+                
             case let .bindingPopupIsPresent(isPresent):
                 state.popupIsPresent = isPresent
+                
+            case let .bindingAlertIsPrenset(isPresent):
+                state.alertIsPresent = isPresent
                 
             default:
                 break

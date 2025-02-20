@@ -28,6 +28,7 @@ struct ArchiveCoordinator {
         
         var isHideTabBar: Bool = false
         var popupIsPresent: Bool = false
+        var alertIsPresent: Bool = false
         var errorMSG: String = ""
     }
     
@@ -38,6 +39,7 @@ struct ArchiveCoordinator {
         case delegate(Delegate)
         
         case bindingPopupIsPresent(Bool)
+        case bindingAlertIsPrenset(Bool)
         
         enum Delegate {
             case tappedConfirmButton
@@ -46,6 +48,7 @@ struct ArchiveCoordinator {
     
     enum ViewEventType {
         case dismissPopup
+        case dismissAlert
     }
     
     var body: some ReducerOf<Self> {
@@ -112,14 +115,22 @@ extension ArchiveCoordinator {
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
                 
+            case .viewEvent(.dismissAlert):
+                state.alertIsPresent = false
+                
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
-                state.errorMSG = "정상적으로 신고되었습니다."
                 state.routes.popToRoot()
                 state.isHideTabBar = false
-                state.popupIsPresent = true
+                state.alertIsPresent = true
+                
+            case let .bindingPopupIsPresent(isPresent):
+                state.popupIsPresent = isPresent
+                
+            case let .bindingAlertIsPrenset(isPresent):
+                state.alertIsPresent = isPresent
                 
             default:
                 break

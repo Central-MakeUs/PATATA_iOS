@@ -51,6 +51,14 @@ struct HomeCoordinatorView: View {
                         .hideTabBar(store.isHideTabBar)
                 }
             }
+            .customAlert(
+                isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPrenset),
+                title: "신고가 접수되었습니다",
+                message: "24시간 이내에 검토 후 처리될 예정이며,\n신고된 사용자의 댓글 및 스팟 업로드 등의 활동이\n일시적으로 제한되었습니다.",
+                onConfirm: {
+                    store.send(.viewEvent(.dismissAlert))
+                }
+            )
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
                 HStack {
                     Spacer()
