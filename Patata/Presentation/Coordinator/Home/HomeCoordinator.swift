@@ -64,7 +64,7 @@ extension HomeCoordinator {
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot(spotId))))):
                 state.isHideTabBar = true
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .home, spotId: spotId)))
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedMoreButton)))):
                 state.isHideTabBar = true
@@ -80,21 +80,21 @@ extension HomeCoordinator {
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .search, action: .search(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .search, spotId: spotId)))
                 
             case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .category, action: .category(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete(viewState))))):
                 state.routes.pop()
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
-                if state.routes.count == 1{
+                if viewState == .home {
                     state.isHideTabBar = false
                 } else {
                     state.isHideTabBar = true
@@ -109,16 +109,15 @@ extension HomeCoordinator {
                     }
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(archive))))):
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(archive, viewState))))):
                 state.routes.pop()
-                if state.routes.count == 1 {
+                
+                if viewState == .home {
                     state.isHideTabBar = false
                 }
                 
-                return .run { [routes = state.routes] send in
-                    if let _ = routes.last(where: { $0.id == .search }) {
-                        await send(.router(.routeAction(id: .search, action: .search(.delegate(.detailBack(archive))))))
-                    }
+                if viewState == .search {
+                    return .send(.router(.routeAction(id: .search, action: .search(.delegate(.detailBack(archive))))))
                 }
             
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
@@ -136,7 +135,7 @@ extension HomeCoordinator {
                 state.isHideTabBar = false
                 
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):
                 state.routes.pop()

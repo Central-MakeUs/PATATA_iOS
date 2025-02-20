@@ -81,7 +81,7 @@ extension MapCoordinator {
                 state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
                 
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
                 if let _ = state.routes.last(where: { $0.id == .spotMap }) {
@@ -113,7 +113,7 @@ extension MapCoordinator {
                 }
                 
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
                 
@@ -178,7 +178,7 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .mapSearch, spotId: spotId)))
                 
             case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
                 if state.routes.contains(where: { $0.id == .searchMap }) {
@@ -202,11 +202,11 @@ extension MapCoordinator {
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_, viewState))))):
                 state.isHideTabBar = true
                 state.routes.pop()
                 
-                if state.routes.count == 3 {
+                if viewState == .mapSearch {
                     return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
                 }
                 
@@ -220,22 +220,23 @@ extension MapCoordinator {
                     state.routes.push(.report(ReportFeature.State(viewState: .user)))
                 }
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete)))):
-                if state.routes.count == 2 {
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete(viewState))))):
+                if viewState == .map {
                     state.isHideTabBar = false
                 } else {
                     state.isHideTabBar = true
                 }
+                
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
                 state.routes.pop()
                 
-                if state.routes.count == 2 {
+                if viewState == .map {
                     return .run { send in
                         await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
                     }
-                } else {
+                } else if viewState == .mapSearch {
                     return .run { send in
                         await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.deleteSpot)))))
                     }

@@ -59,7 +59,7 @@ extension ArchiveCoordinator {
             switch action {
             case let .router(.routeAction(id: .archive, action: .archive(.delegate(.tappedSpot(spotId))))):
                 state.isHideTabBar = true
-                state.routes.push(.spotDetail(SpotDetailFeature.State(isHomeCoordinator: true, spotId: spotId)))
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
             case .router(.routeAction(id: .archive, action: .archive(.delegate(.tappedConfirmButton)))):
                 return .send(.delegate(.tappedConfirmButton))
@@ -71,7 +71,7 @@ extension ArchiveCoordinator {
                     state.routes.push(.report(ReportFeature.State(viewState: .user)))
                 }
                 
-            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_))))):
+            case .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_, _))))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 

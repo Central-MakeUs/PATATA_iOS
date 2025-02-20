@@ -12,7 +12,7 @@ import ComposableArchitecture
 struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
-        var isHomeCoordinator: Bool
+        let viewState: ViewState
         var spotId: Int
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
         var reviewData: [SpotDetailReviewEntity] = []
@@ -23,6 +23,14 @@ struct SpotDetailFeature {
         var commentText: String = ""
         var bottomSheetIsPresent: Bool = false
         var alertIsPresent: Bool = false
+    }
+    
+    enum ViewState {
+        case map
+        case mapSearch
+        case home
+        case search
+        case other
     }
     
     enum Action {
@@ -40,9 +48,8 @@ struct SpotDetailFeature {
         case bindingAlertIsPresent(Bool)
         
         enum Delegate {
-            case tappedNavBackButton(Bool)
-            case tappedDismissIcon
-            case delete
+            case tappedNavBackButton(Bool, ViewState)
+            case delete(ViewState)
             case editSpotDetail(SpotDetailEntity)
             case report(String)
         }
@@ -56,7 +63,6 @@ struct SpotDetailFeature {
         case bottomSheetOpen
         case bottomSheetClose(String)
         case tappedNavBackButton
-        case tappedDismissIcon
         case tappedArchiveButton
         case tappedDeleteButton
         case tappedOnSubmit
@@ -100,7 +106,7 @@ extension SpotDetailFeature {
                 }
                 
             case .viewEvent(.tappedNavBackButton):
-                return .send(.delegate(.tappedNavBackButton(state.spotDetailData.isScraped)))
+                return .send(.delegate(.tappedNavBackButton(state.spotDetailData.isScraped, state.viewState)))
                 
             case .viewEvent(.bottomSheetOpen):
                 state.bottomSheetIsPresent = true
@@ -118,9 +124,6 @@ extension SpotDetailFeature {
                 } else {
                     state.alertIsPresent = true
                 }
-                
-            case .viewEvent(.tappedDismissIcon):
-                return .send(.delegate(.tappedDismissIcon))
                 
             case .viewEvent(.tappedArchiveButton):
                 return .run { send in
@@ -173,7 +176,7 @@ extension SpotDetailFeature {
                     do {
                         try await spotRepository.deleteSpot(spotId: state.spotDetailData.spotId)
                         
-                        await send(.delegate(.delete))
+                        await send(.delegate(.delete(state.viewState)))
                     } catch {
                         print(errorManager.handleError(error) ?? "")
                     }
