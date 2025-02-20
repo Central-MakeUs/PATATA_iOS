@@ -37,41 +37,43 @@ extension MySpotListView {
             .padding(.bottom, 12)
             .background(.white)
             
-             
-                ScrollView(.vertical) {
+            if store.viewState == .map {
+                if store.mapSpotEntity.isEmpty {
+                    Spacer()
                     
-                    VStack {
-                        if store.viewState == .home {
-                            ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
-                                spotListView(spot: item, index: index)
+                    noSpotView
+                    
+                    Spacer()
+                } else {
+                    ScrollView(.vertical) {
+                        VStack {
+                            ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
+                                mapSpotView(spot: item, index: index)
                                     .background(.white)
                                     .asButton {
                                         store.send(.viewEvent(.tappedSpot(item.spotId)))
                                     }
                             }
-                        } else {
-                            if store.mapSpotEntity.isEmpty {
-                                Spacer()
-                                
-                                noSpotView
-                                
-                                Spacer()
-                            } else {
-                                
-                                ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
-                                    mapSpotView(spot: item, index: index)
-                                        .background(.white)
-                                        .asButton {
-                                            store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                        }
+                        }
+                        
+                    }
+                    .background(.gray20)
+                }
+            } else {
+                ScrollView(.vertical) {
+                    VStack {
+                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
+                            spotListView(spot: item, index: index)
+                                .background(.white)
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
                                 }
-                            }
                         }
                     }
                     .padding(.top, 8)
-                    
                 }
                 .background(.gray20)
+            }
             
         }
     }

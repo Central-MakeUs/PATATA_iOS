@@ -26,6 +26,7 @@ struct SpotEditorFeature {
         var imageDatas: [Data] = []
         var errorMsg: String = ""
         var isFirst: Bool = true
+        let beforeViewState: BeforeViewState
         
         // bindingState
         var title: String = ""
@@ -43,6 +44,12 @@ struct SpotEditorFeature {
         case loading
     }
     
+    enum BeforeViewState {
+        case map
+        case searchMap
+        case other
+    }
+    
     enum Action {
         case textValidation(TextValidation)
         case viewCycle(ViewCycle)
@@ -58,7 +65,7 @@ struct SpotEditorFeature {
             case tappedXButton
             case tappedLocation(Coordinate, ViewState)
             case changeAddress(Coordinate, String)
-            case successSpotEdit
+            case successSpotEdit(BeforeViewState)
         }
         
         // bindingAction
@@ -229,12 +236,14 @@ extension SpotEditorFeature {
                 let spotId = state.spotDetail.spotId
                 let spotCoord = state.spotLocation
                 
+                let before = state.beforeViewState
+                
                 return .run { send in
                     do {
                         let result = try await spotRepository.spotEdit(title: title, spotAddress: address, spotAddressDetail: addressDetail, spotLocation: spotCoord, spotDetail: spotDetail, spotCategory: CategoryCase(rawValue: category) ?? .houseSpot, hashTag: hashTag, spotId: spotId)
                         
                         if result {
-                            await send(.delegate(.successSpotEdit))
+                            await send(.delegate(.successSpotEdit(before)))
                         }
                     } catch {
                         print("fail", errorManager.handleError(error) ?? "")

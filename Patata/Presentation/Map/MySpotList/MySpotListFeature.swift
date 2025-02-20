@@ -44,7 +44,7 @@ struct MySpotListFeature {
         case bindingArchive(Bool)
         
         enum Delegate {
-            case tappedBackButton
+            case tappedBackButton(ViewState)
             case tappedSpot(Int)
             case tappedSearch(ViewState)
         }
@@ -129,7 +129,7 @@ extension MySpotListFeature {
                 }
                 
             case .viewEvent(.tappedBackButton):
-                return .send(.delegate(.tappedBackButton))
+                return .send(.delegate(.tappedBackButton(state.viewState)))
                 
             case let .viewEvent(.tappedArchiveButton(index)):
                 return .run { send in

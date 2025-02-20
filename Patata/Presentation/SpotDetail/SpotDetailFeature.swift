@@ -50,7 +50,7 @@ struct SpotDetailFeature {
         enum Delegate {
             case tappedNavBackButton(Bool, ViewState)
             case delete(ViewState)
-            case editSpotDetail(SpotDetailEntity)
+            case editSpotDetail(SpotDetailEntity, ViewState)
             case report(String)
         }
     }
@@ -120,7 +120,7 @@ extension SpotDetailFeature {
                     return .send(.delegate(.report("User")))
                 } else if text == "게시글 수정하기" {
                     print("editSPot", state.spotDetailData.spotCoord)
-                    return .send(.delegate(.editSpotDetail(state.spotDetailData)))
+                    return .send(.delegate(.editSpotDetail(state.spotDetailData, state.viewState)))
                 } else {
                     state.alertIsPresent = true
                 }

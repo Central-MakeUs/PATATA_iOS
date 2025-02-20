@@ -73,7 +73,6 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 
             case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.bottomSheetDismiss)))):
-                print("a")
                 state.isHideTabBar = false
                 
             case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSearch)))):
@@ -83,8 +82,8 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotDetail(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
                 
-            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
-                if let _ = state.routes.last(where: { $0.id == .spotMap }) {
+            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(viewState))))):
+                if viewState == .map {
                     state.isHideTabBar = false
                 } else {
                     state.isHideTabBar = true
@@ -120,9 +119,9 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
-            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
+            case let .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton(viewState))))):
                 
-                if let _ = state.routes.last(where: { $0.id == .mySpotList }) {
+                if viewState == .mySpotList {
                     state.isHideTabBar = true
                 } else {
                     state.isHideTabBar = false
@@ -149,12 +148,12 @@ extension MapCoordinator {
                     state.routes.pop()
                 }
                 
-            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotEdit)))):
+            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotEdit(viewState))))):
                 state.errorMSG = "게시물이 수정되었습니다."
                 state.routes.pop()
                 state.popupIsPresent = true
                 
-                if state.routes.contains(where: { $0.id == .searchMap }) {
+                if viewState == .searchMap {
                     return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.successEdit)))))
                 } else {
                     return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.successEdit)))))
@@ -177,7 +176,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotCoord: coord)))
                 
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -185,17 +184,18 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotDetail(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .mapSearch, spotId: spotId)))
                 
-            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
-                if state.routes.contains(where: { $0.id == .searchMap }) {
-                    state.isHideTabBar = true
-                } else {
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton(viewState))))):
+                if viewState == .map {
                     state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
                 }
+                
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
-                if viewState == .map {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress)))
+                if viewState == .map && viewState == .searchMap {
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress, beforeViewState: .map)))
                 } else {
                     state.routes.pop()
                     return .run { send in
@@ -215,8 +215,15 @@ extension MapCoordinator {
                     return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
-                state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress)))
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, viewState))))):
+                if viewState == .map {
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .map)))
+                } else if viewState == .mapSearch {
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .searchMap)))
+                } else {
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
+                }
+                
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
                 if type == "Post" {

@@ -75,7 +75,7 @@ extension HomeCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.category(SpotCategoryFeature.State(selectedIndex: category.rawValue)))
                 
-            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton(_))))):
                 state.isHideTabBar = false
                 state.routes.pop()
                 
@@ -127,10 +127,10 @@ extension HomeCoordinator {
                     state.routes.push(.report(ReportFeature.State(viewState: .user)))
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress)))
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
                 
-            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(_))))):
                 state.routes.pop()
                 state.isHideTabBar = false
                 
@@ -160,7 +160,7 @@ extension HomeCoordinator {
                     await send(.router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
                 }
                 
-            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
+            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton(_))))):
                 state.routes.pop()
                 
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):

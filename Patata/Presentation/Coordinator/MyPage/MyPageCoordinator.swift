@@ -89,8 +89,8 @@ extension MyPageCoordinator {
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress)))
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
@@ -130,9 +130,9 @@ extension MyPageCoordinator {
                         }
                     }
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
-                if state.routes.count == 2{
-                    state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: coord, spotAddress: spotAddress)))
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, viewState))))):
+                if viewState == .map {
+                    state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: coord, spotAddress: spotAddress, beforeViewState: .other)))
                 } else {
                     state.routes.pop()
                     
@@ -141,10 +141,11 @@ extension MyPageCoordinator {
                     }
                 }
                 
-            case .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton)))):
-                if state.routes.count == 2 {
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton(viewState))))):
+                if viewState == .map {
                     state.isHideTabBar = false
                 }
+                
                 state.routes.pop()
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):

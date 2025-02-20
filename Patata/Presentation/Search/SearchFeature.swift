@@ -57,7 +57,7 @@ struct SearchFeature {
         case bindingFilterIsValid(Bool)
         
         enum Delegate {
-            case tappedBackButton
+            case tappedBackButton(BeforeViewState)
             case successSearch(String, BeforeViewState)
             case tappedSpotDetail(Int)
             case deletePop
@@ -125,7 +125,7 @@ extension SearchFeature {
                 }
                 
             case .viewEvent(.tappedBackButton):
-                return .send(.delegate(.tappedBackButton))
+                return .send(.delegate(.tappedBackButton(state.beforeViewState)))
                 
             case .viewEvent(.searchOnSubmit):
                 if state.beforeViewState == .home {

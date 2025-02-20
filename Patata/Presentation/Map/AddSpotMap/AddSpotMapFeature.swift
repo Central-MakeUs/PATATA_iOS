@@ -28,6 +28,7 @@ struct AddSpotMapFeature {
     
     enum ViewState {
         case map
+        case searchMap
         case edit
     }
     
@@ -42,7 +43,7 @@ struct AddSpotMapFeature {
         case bindingIsPresent(Bool)
         
         enum Delegate {
-            case tappedBackButton
+            case tappedBackButton(ViewState)
             case tappedAddConfirmButton(Coordinate, String, ViewState)
         }
     }
@@ -104,7 +105,7 @@ extension AddSpotMapFeature {
             case .viewEvent(.tappedBackButton):
                 return .merge(
                     .cancel(id: "location-lookup"),
-                    .send(.delegate(.tappedBackButton))
+                    .send(.delegate(.tappedBackButton(state.viewState)))
                 )
                 
             case .viewEvent(.tappedAddConfirmButton):
