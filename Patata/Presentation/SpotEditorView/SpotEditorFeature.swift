@@ -27,6 +27,8 @@ struct SpotEditorFeature {
         var errorMsg: String = ""
         var isFirst: Bool = true
         let beforeViewState: BeforeViewState
+        var agreeToTerms: Bool = false
+        var alertIsPresent: Bool = false
         
         // bindingState
         var title: String = ""
@@ -76,6 +78,8 @@ struct SpotEditorFeature {
         case bindingPresent(Bool)
         case bindingPermission(Bool)
         case bindingIsPresentPopup(Bool)
+        case bindingAgreeToTerms(Bool)
+        case bindingAlert(Bool)
     }
     
     enum ViewCycle {
@@ -102,6 +106,8 @@ struct SpotEditorFeature {
         case tappedXButton
         case tappedLocation
         case tappedSpotEditButton
+        case openAlert
+        case dismissAlert
     }
     
     enum NetworkType {
@@ -184,6 +190,12 @@ extension SpotEditorFeature {
                 let viewState = state.viewState
                 let coord = state.spotLocation
                 return .send(.delegate(.tappedLocation(coord, viewState)))
+                
+            case .viewEvent(.openAlert):
+                state.alertIsPresent = true
+                
+            case .viewEvent(.dismissAlert):
+                state.alertIsPresent = false
                 
             case let .delegate(.changeAddress(spotCoord, address)):
                 state.isFirst = false
@@ -388,6 +400,12 @@ extension SpotEditorFeature {
             case let .bindingIsPresentPopup(isPresent):
                 state.isPresentPopup = isPresent
                 
+            case let .bindingAgreeToTerms(isAgree):
+                state.agreeToTerms = isAgree
+                
+            case let .bindingAlert(isPresent):
+                state.alertIsPresent = isPresent
+                
             default:
                 break
             }
@@ -397,6 +415,10 @@ extension SpotEditorFeature {
     }
     
     private func validateEditorState(_ state: inout State) {
-        state.spotEditorIsValid = !state.title.isEmpty && !state.detail.isEmpty && !state.location.isEmpty && state.categoryText != "카테고리를 선택해주세요"
+        state.spotEditorIsValid = !state.title.isEmpty &&
+                                     !state.detail.isEmpty &&
+                                     !state.location.isEmpty &&
+                                     state.categoryText != "카테고리를 선택해주세요" &&
+                                     state.agreeToTerms
     }
 }

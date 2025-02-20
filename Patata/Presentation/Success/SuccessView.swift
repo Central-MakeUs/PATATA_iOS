@@ -52,6 +52,16 @@ extension SuccessView {
                 .textStyle(.subtitleS)
                 .foregroundStyle(.blue50)
                 .padding(.top, 10)
+                
+                VStack(spacing: 4) {
+                    Text("스팟생성 및 댓글 작성 시 부적절한 내용이나 악의적인 사용을 삼가해 주세요.")
+                    Text("신고 접수 시 즉시 이용이 제한되며, 24시간 이내 검토 후 게시글 및 댓글이 삭제될 수 있습니다.")
+                }
+                .textStyle(.captionS)
+                .foregroundStyle(.gray60)
+                .multilineTextAlignment(.center)
+                .padding(.top, 24)
+                .padding(.horizontal, 20)
             }
             
             Spacer()

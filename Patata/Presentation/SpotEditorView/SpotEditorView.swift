@@ -78,6 +78,9 @@ struct SpotEditorView: View {
                             store.send(.viewEvent(.closeBottomSheet(false)))
                         }
                     }
+                    .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlert), message: "태그를 제외한 나머지 스팟 정보들을 입력해주세요.\n가장 아래에 위치한 이용약관도 필수적으로 동의를 하였는지 확인해주세요.", onConfirm: {
+                        store.send(.viewEvent(.dismissAlert))
+                    })
                     .customAlert(
                         isPresented: $store.showPermissionAlert.sending(\.bindingPermission),
                         title: AlertMessage.imagePermission.title,
@@ -128,6 +131,8 @@ extension SpotEditorView {
                 hashtagView
                     .padding(.horizontal, 15)
                     .padding(.bottom, 50)
+                
+                termsView
             }
             .background(.gray20)
             
@@ -463,6 +468,26 @@ extension SpotEditorView {
         }
     }
     
+    private var termsView: some View {
+        VStack(spacing: 12) {
+            Divider()
+            
+            Toggle(isOn: $store.agreeToTerms.sending(\.bindingAgreeToTerms)) {
+                Text("이용약관 및 커뮤니티 가이드라인에 동의")
+                    .textStyle(.subtitleS)
+                    .foregroundStyle(.textDefault)
+            }
+            .padding(.horizontal, 15)
+            
+            Text("부적절한 콘텐츠나 악의적인 사용자로 신고될 경우 계정 이용이 제한될 수 있습니다, 24시간 이내에 검토 후 삭제처리가 될 수 있습니다..")
+                .textStyle(.captionS)
+                .foregroundStyle(.textDisabled)
+                .padding(.horizontal, 15)
+                .multilineTextAlignment(.leading)
+        }
+        .padding(.bottom, 28)
+    }
+    
     private var spotEditButton: some View {
         HStack {
             Spacer()
@@ -491,6 +516,8 @@ extension SpotEditorView {
                 } else {
                     store.send(.viewEvent(.tappedSpotEditButton))
                 }
+            } else {
+                store.send(.viewEvent(.openAlert))
             }
         }
     }

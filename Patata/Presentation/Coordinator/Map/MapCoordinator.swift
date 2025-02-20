@@ -197,9 +197,11 @@ extension MapCoordinator {
                 state.routes.pop()
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
-                if viewState == .map && viewState == .searchMap {
+                if viewState == .map || viewState == .searchMap {
+                    print("fuck", viewState)
                     state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress, beforeViewState: .map)))
                 } else {
+                    print("viewState", viewState)
                     state.routes.pop()
                     return .run { send in
                         await send(.router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.changeAddress(spotCoord, spotAddress))))))
