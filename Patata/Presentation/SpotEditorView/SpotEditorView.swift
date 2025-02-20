@@ -17,8 +17,9 @@ struct SpotEditorView: View {
     @State private var selectedImages: [UIImage] = []
     @State private var sizeState: CGSize = .zero
     @FocusState private var focusedField: Field?
-    
-    let imageResizeManager = ImageResizeManager()
+    @State private var resizedImageDatas: [Data] = []
+    @State private var isImageSizeValid: Bool = false
+    @State private var isResizing: Bool = false
     
     enum Field: Hashable {
         case title
@@ -182,7 +183,13 @@ extension SpotEditorView {
     
     private var titleText: some View {
         VStack {
-            titleView("제목을 입력하세요")
+            HStack(spacing: 2) {
+                Text("필수")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.blue100)
+                
+                titleView("제목을 입력하세요")
+            }
             
             textFieldView(
                 bindingText: $store.title.sending(\.bindingTitle),
@@ -241,7 +248,13 @@ extension SpotEditorView {
     
     private var detailView: some View {
         VStack {
-            titleView("간단한 설명을 입력하세요")
+            HStack(spacing: 2) {
+                Text("필수")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.blue100)
+                
+                titleView("간단한 설명을 입력하세요")
+            }
             
             TextEditor(text: $store.detail.sending(\.bindingDetail))
                 .textStyle(.subtitleS)
@@ -279,7 +292,13 @@ extension SpotEditorView {
     
     private var categoryView: some View {
         VStack {
-            titleView("카테고리를 선택해주세요")
+            HStack(spacing: 2) {
+                Text("필수")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.blue100)
+                
+                titleView("카테고리를 선택해주세요")
+            }
             
             HStack {
                 Text(store.categoryText)
@@ -311,87 +330,54 @@ extension SpotEditorView {
     @ViewBuilder
     private var pictureView: some View {
         VStack {
-            titleView("사진을 추가해주세요 (최소 1개)")
-                .padding(.leading, 15)
+            HStack(spacing: 2) {
+                Text("필수")
+                    .textStyle(.captionS)
+                    .foregroundStyle(.blue100)
+                    .padding(.leading, 15)
+                
+                titleView("사진을 추가해주세요 (최소 1개)")
+            }
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    if store.viewState == .add {
-                        PhotoPickerView(
-                            selectedImages: $selectedImages,
-                            showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission)
-                        ) {
-                            VStack(alignment: .center) {
-                                Image("ImageDefault")
-                                    .resizable()
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .frame(width: 36)
-                                
-                                Text("사진 추가하기")
-                                    .textStyle(.captionS)
-                                    .foregroundStyle(.gray60)
-                            }
-                            .padding(.vertical, 20)
-                            .padding(.horizontal, 20)
-                            .sizeState(size: $sizeState)
-                            .background(
-                                RoundedRectangle(cornerRadius: 10)
-                                    .strokeBorder(.gray30, lineWidth: 1)
-                                    .background(.gray20)
-                            )
-                        }
-                        .padding(.leading, 15)
-                        
-                        
-                        ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
-                            ZStack(alignment: .topTrailing) {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: sizeState.width, height: sizeState.height)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                                    .overlay(alignment: .bottom) {
-                                        if index == 0 {
-                                            HStack {
-                                                Spacer()
-                                                
-                                                Text("대표 이미지")
-                                                    .textStyle(.captionS)
-                                                    .foregroundColor(.white)
-                                                    .padding(.vertical, 7)
-                                                    .padding(.horizontal, 8)
-                                                
-                                                Spacer()
-                                            }
-                                            .background(.blue100)
-                                            .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
-                                        }
-                                    }
-                                    .overlay(alignment: .topTrailing) {
-                                        Image("WhiteX")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .frame(width: 34, height: 34)
-                                            .onTapGesture {
-                                                selectedImages.remove(at: index)
-                                            }
-                                    }
-                            }
-                        }
-                    } else {
-                        ScrollView(.horizontal) {
-                            HStack(spacing: 4) {
-                                Spacer()
-                                    .frame(width: 11)
-                                
-                                ForEach(Array(store.imageURLs.enumerated()), id: \.offset) { index, url in
-                                    let imageWidth: CGFloat = UIScreen.main.bounds.width - 30
+            ZStack {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        if store.viewState == .add {
+                            PhotoPickerView(
+                                selectedImages: $selectedImages,
+                                showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission),
+                                isImageSizeValid: $isImageSizeValid,
+                                resizedImageDatas: $resizedImageDatas,
+                                isResizing: $isResizing
+                            ) {
+                                VStack(alignment: .center) {
+                                    Image("ImageDefault")
+                                        .resizable()
+                                        .aspectRatio(1, contentMode: .fit)
+                                        .frame(width: 36)
                                     
-                                    DownImageView(url: url, option: .mid, fallBackImg: "ImageDefault")
-                                        .aspectRatio(1, contentMode: .fill)
-                                        .frame(width: (imageWidth - 8) / 2.5)
-                                        .clipped()
-                                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    Text("사진 추가하기")
+                                        .textStyle(.captionS)
+                                        .foregroundStyle(.gray60)
+                                }
+                                .padding(.vertical, 20)
+                                .padding(.horizontal, 20)
+                                .sizeState(size: $sizeState)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 10)
+                                        .strokeBorder(.gray30, lineWidth: 1)
+                                        .background(.gray20)
+                                )
+                            }
+                            .padding(.leading, 15)
+                            
+                            ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
+                                ZStack(alignment: .topTrailing) {
+                                    Image(uiImage: image)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: sizeState.width, height: sizeState.height)
+                                        .clipShape(RoundedRectangle(cornerRadius: 10))
                                         .overlay(alignment: .bottom) {
                                             if index == 0 {
                                                 HStack {
@@ -409,14 +395,76 @@ extension SpotEditorView {
                                                 .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
                                             }
                                         }
+                                    
+                                    if !isResizing {
+                                        Image("WhiteX")
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fit)
+                                            .frame(width: 34, height: 34)
+                                            .onTapGesture {
+                                                selectedImages.remove(at: index)
+                                                if index < resizedImageDatas.count {
+                                                    resizedImageDatas.remove(at: index)
+                                                }
+                                            }
+                                    }
                                 }
                             }
-                            .padding(.horizontal, 0)
+                        } else {
+                            ScrollView(.horizontal) {
+                                HStack(spacing: 4) {
+                                    Spacer()
+                                        .frame(width: 11)
+                                    
+                                    ForEach(Array(store.imageURLs.enumerated()), id: \.offset) { index, url in
+                                        let imageWidth: CGFloat = UIScreen.main.bounds.width - 30
+                                        
+                                        DownImageView(url: url, option: .mid, fallBackImg: "ImageDefault")
+                                            .aspectRatio(1, contentMode: .fill)
+                                            .frame(width: (imageWidth - 8) / 2.5)
+                                            .clipped()
+                                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .overlay(alignment: .bottom) {
+                                                if index == 0 {
+                                                    HStack {
+                                                        Spacer()
+                                                        
+                                                        Text("대표 이미지")
+                                                            .textStyle(.captionS)
+                                                            .foregroundColor(.white)
+                                                            .padding(.vertical, 7)
+                                                            .padding(.horizontal, 8)
+                                                        
+                                                        Spacer()
+                                                    }
+                                                    .background(.blue100)
+                                                    .cornerRadius(10, corners: [.bottomLeft, .bottomRight])
+                                                }
+                                            }
+                                    }
+                                }
+                                .padding(.horizontal, 0)
+                            }
                         }
                     }
                 }
+                
+                if isResizing {
+                    HStack {
+                        Spacer()
+                        VStack(spacing: 12) {
+                            ProgressView()
+                                .tint(.gray60)
+                            Text("이미지 리사이징 중...")
+                                .textStyle(.captionS)
+                                .foregroundStyle(.gray60)
+                        }
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color.gray20.opacity(0.8))
+                }
             }
-            .scrollDisabled(selectedImages.isEmpty)
         }
     }
     
@@ -504,15 +552,7 @@ extension SpotEditorView {
         .asButton {
             if store.spotEditorIsValid {
                 if store.viewState == .add && !selectedImages.isEmpty {
-                    Task {
-                        do {
-                            let data = try await imageResizeManager.resizeImages(selectedImages)
-                            
-                            store.send(.viewEvent(.tappedSpotAddButton(data)))
-                        } catch {
-                            store.send(.errorHandle(.imageResize(error)))
-                        }
-                    }
+                    store.send(.viewEvent(.tappedSpotAddButton(resizedImageDatas)))
                 } else {
                     store.send(.viewEvent(.tappedSpotEditButton))
                 }
@@ -520,6 +560,8 @@ extension SpotEditorView {
                 store.send(.viewEvent(.openAlert))
             }
         }
+        .disabled(isResizing)
+        .opacity(isResizing ? 0.5 : 1.0)
     }
 }
 

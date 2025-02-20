@@ -377,7 +377,7 @@ extension SpotEditorFeature {
                     options: .regularExpression
                 ).trimmingCharacters(in: .whitespaces)
 
-                state.hashTag = "#" + singleSpaceText
+//                state.hashTag = "#" + singleSpaceText
                 
             case let .bindingTitle(titleText):
                 state.title = titleText
@@ -402,6 +402,7 @@ extension SpotEditorFeature {
                 
             case let .bindingAgreeToTerms(isAgree):
                 state.agreeToTerms = isAgree
+                validateEditorState(&state)
                 
             case let .bindingAlert(isPresent):
                 state.alertIsPresent = isPresent
@@ -415,9 +416,12 @@ extension SpotEditorFeature {
     }
     
     private func validateEditorState(_ state: inout State) {
+        print("check", state.title,
+              state.detail,
+              state.categoryText,
+              state.agreeToTerms)
         state.spotEditorIsValid = !state.title.isEmpty &&
                                      !state.detail.isEmpty &&
-                                     !state.location.isEmpty &&
                                      state.categoryText != "카테고리를 선택해주세요" &&
                                      state.agreeToTerms
     }
