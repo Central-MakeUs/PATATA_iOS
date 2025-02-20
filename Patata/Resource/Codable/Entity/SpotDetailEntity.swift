@@ -22,8 +22,9 @@ struct SpotDetailEntity: Entity {
     let tags: [String]
     let reviews: [SpotDetailReviewEntity]
     let spotCoord: Coordinate
+    let memberId: Int
     
-    init(spotId: Int = 0, isAuthor: Bool = false, spotAddress: String = "", spotAddressDetail: String = "", spotName: String = "", spotDescription: String = "", categoryId: CategoryCase = .all, memberName: String = "", images: [URL?] = [], reviewCount: Int = 0, isScraped: Bool = false, tags: [String] = [], reviews: [SpotDetailReviewEntity] = [], spotCoord: Coordinate = Coordinate(latitude: 0, longitude: 0)) {
+    init(spotId: Int = 0, isAuthor: Bool = false, spotAddress: String = "", spotAddressDetail: String = "", spotName: String = "", spotDescription: String = "", categoryId: CategoryCase = .all, memberName: String = "", images: [URL?] = [], reviewCount: Int = 0, isScraped: Bool = false, tags: [String] = [], reviews: [SpotDetailReviewEntity] = [], spotCoord: Coordinate = Coordinate(latitude: 0, longitude: 0), memberId: Int = 0) {
         self.spotId = spotId
         self.isAuthor = isAuthor
         self.spotAddress = spotAddress
@@ -38,6 +39,7 @@ struct SpotDetailEntity: Entity {
         self.tags = tags
         self.reviews = reviews
         self.spotCoord = spotCoord
+        self.memberId = memberId
     }
 }
 
@@ -45,4 +47,5 @@ struct SpotDetailReviewEntity: Entity {
     let reviewId: Int
     let memberName: String
     let reviewText: String
+    let reviewData: String
 }

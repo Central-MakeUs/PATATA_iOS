@@ -225,11 +225,11 @@ extension MapCoordinator {
                 }
                 
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type))))):
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type, id))))):
                 if type == "Post" {
-                    state.routes.push(.report(ReportFeature.State(viewState: .post)))
+                    state.routes.push(.report(ReportFeature.State(viewState: .post, id: id)))
                 } else {
-                    state.routes.push(.report(ReportFeature.State(viewState: .user)))
+                    state.routes.push(.report(ReportFeature.State(viewState: .user, id: id)))
                 }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete(viewState))))):

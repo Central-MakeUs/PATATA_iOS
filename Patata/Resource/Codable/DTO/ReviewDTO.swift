@@ -17,4 +17,5 @@ struct ReviewDTO: DTO {
 struct ReviewResultDTO: DTO {
     let reviewId: Int
     let reviewText: String
+    let reviewDate: String
 }

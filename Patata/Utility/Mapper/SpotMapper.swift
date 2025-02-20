@@ -46,7 +46,8 @@ struct SpotMapper: Sendable {
             isScraped: dto.isScraped,
             tags: dto.tags,
             reviews: await dto.reviews.asyncMap { dtoToEntity($0) },
-            spotCoord: Coordinate(latitude: dto.latitude, longitude: dto.longitude)
+            spotCoord: Coordinate(latitude: dto.latitude, longitude: dto.longitude),
+            memberId: dto.memberId
         )
     }
     
@@ -121,7 +122,7 @@ extension SpotMapper {
     }
     
     private func dtoToEntity(_ dto: SpotDetailReviewDTO) -> SpotDetailReviewEntity {
-        return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText)
+        return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText, reviewData: DateManager.shared.formatToCustomDate(dto.reviewDate))
     }
     
     private func dtoToEntity(_ dto: TodaySpotListItemDTO) -> TodaySpotListEntity {

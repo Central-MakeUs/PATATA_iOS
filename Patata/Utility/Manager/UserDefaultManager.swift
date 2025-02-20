@@ -15,7 +15,6 @@ final actor UserDefaultsManager {
         case refreshToken
         case nickname
         case appleUser
-        case email
         
         var value: String {
             return self.rawValue
@@ -32,6 +31,4 @@ final actor UserDefaultsManager {
     static var nickname
     @UserDefaultsWrapper(key: Key.appleUser.value, placeValue: false)
     static var appleUser
-    @UserDefaultsWrapper(key: Key.email.value, placeValue: "")
-    static var email
 }

@@ -10,4 +10,5 @@ import Foundation
 struct ReviewEntity: Entity {
     let reviewId: Int
     let reviewText: String
+    let reivewDate: String
 }

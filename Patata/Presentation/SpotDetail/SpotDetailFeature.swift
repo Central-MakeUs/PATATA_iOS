@@ -51,7 +51,7 @@ struct SpotDetailFeature {
             case tappedNavBackButton(Bool, ViewState)
             case delete(ViewState)
             case editSpotDetail(SpotDetailEntity, ViewState)
-            case report(String)
+            case report(String, id: Int)
         }
     }
     
@@ -115,9 +115,9 @@ extension SpotDetailFeature {
                 state.bottomSheetIsPresent = false
                 
                 if text == "게시글 신고하기" {
-                    return .send(.delegate(.report("Post")))
+                    return .send(.delegate(.report("Post", id: state.spotDetailData.spotId)))
                 } else if text == "사용자 신고하기" {
-                    return .send(.delegate(.report("User")))
+                    return .send(.delegate(.report("User", id: state.spotDetailData.memberId)))
                 } else if text == "게시글 수정하기" {
                     print("editSPot", state.spotDetailData.spotCoord)
                     return .send(.delegate(.editSpotDetail(state.spotDetailData, state.viewState)))
@@ -228,7 +228,7 @@ extension SpotDetailFeature {
                 
             case let .dataTransType(.reviewData(review)):
                 state.commentText = ""
-                let reviewData = SpotDetailReviewEntity(reviewId: review.reviewId, memberName: UserDefaultsManager.nickname, reviewText: review.reviewText)
+                let reviewData = SpotDetailReviewEntity(reviewId: review.reviewId, memberName: UserDefaultsManager.nickname, reviewText: review.reviewText, reviewData: review.reivewDate)
                 state.reviewData.append(reviewData)
                 
             case let .dataTransType(.deleteReviewData(index: index)):
