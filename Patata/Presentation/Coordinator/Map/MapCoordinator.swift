@@ -92,20 +92,25 @@ extension MapCoordinator {
                 
                 state.routes.pop()
                 
-            case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSearch)))):
-                state.routes.remove(id: .search)
-                state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
+            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSearch(viewState))))):
+                if viewState == .mapSearch {
+                    state.routes.remove(id: .search)
+                    state.routes.push(.search(SearchFeature.State(beforeViewState: .searchMap)))
+                } else {
+                    state.routes.push(.search(SearchFeature.State(beforeViewState: .mySpotList)))
+                }
                 
-            case let .router(.routeAction(id: .search, action: .search(.delegate(.successSearch(searchText))))):
+                
+            case let .router(.routeAction(id: .search, action: .search(.delegate(.successSearch(searchText, viewState))))):
                 state.isHideTabBar = true
                 
-                if state.routes.count >= 4 {
+                if viewState == .searchMap {
                     state.routes.popTo(id: .searchMap)
                     
                     return .run { send in
                         await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.mySpotListSearch(searchText))))))
                     }
-                } else if state.routes.count == 3 {
+                } else if viewState == .mySpotList {
                     state.routes.remove(id: .mySpotList)
                     state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 } else {

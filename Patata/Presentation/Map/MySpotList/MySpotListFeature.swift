@@ -46,7 +46,7 @@ struct MySpotListFeature {
         enum Delegate {
             case tappedBackButton
             case tappedSpot(Int)
-            case tappedSearch
+            case tappedSearch(ViewState)
         }
     }
     
@@ -140,7 +140,7 @@ extension MySpotListFeature {
                 return .send(.delegate(.tappedSpot(spotId)))
                 
             case .viewEvent(.tappedSearch):
-                return .send(.delegate(.tappedSearch))
+                return .send(.delegate(.tappedSearch(state.viewState)))
                 
             case let .networkType(.fetchSpotList(userCoord)):
                 return .run { send in

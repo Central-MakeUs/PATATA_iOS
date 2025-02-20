@@ -40,6 +40,8 @@ struct SearchFeature {
     enum BeforeViewState {
         case home
         case map
+        case searchMap
+        case mySpotList
     }
     
     enum Action {
@@ -56,7 +58,7 @@ struct SearchFeature {
         
         enum Delegate {
             case tappedBackButton
-            case successSearch(String)
+            case successSearch(String, BeforeViewState)
             case tappedSpotDetail(Int)
             case deletePop
             case detailBack(Bool)
@@ -138,7 +140,7 @@ extension SearchFeature {
                         await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false, userLocation: userLocation)))
                     }
                 } else {
-                    return .send(.delegate(.successSearch(searchText)))
+                    return .send(.delegate(.successSearch(searchText, state.beforeViewState)))
                 }
                 
             case .viewEvent(.searchStart):
