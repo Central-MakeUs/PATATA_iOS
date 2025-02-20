@@ -10,6 +10,8 @@ import ComposableArchitecture
 
 @Reducer
 struct MyPageFeature {
+    private let dataSourceActor = DataSourceActor()
+    
     @ObservableState
     struct State: Equatable {
         var imageCount: Int = 0
@@ -18,6 +20,7 @@ struct MyPageFeature {
         var email: String = "adsafas@gmail.com"
         var spotCount: Int = 0
         var mySpots: [ArchiveListEntity] = []
+        var userLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
     }
     
     enum Action {
@@ -32,7 +35,7 @@ struct MyPageFeature {
             case tappedProfileEdit
             case tappedSetting
             case changeNickName
-            case tappedAddSpotButton
+            case tappedAddSpotButton(Coordinate)
         }
     }
     
@@ -52,10 +55,13 @@ struct MyPageFeature {
     }
     
     enum DataTransType {
+        case fetchRealm
         case fetchMySpot(MySpotsEntity)
+        case userLocation(Coordinate)
     }
     
     @Dependency(\.myPageRepository) var myPageRepository
+    @Dependency(\.locationManager) var locationManager
     @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
@@ -69,7 +75,12 @@ extension MyPageFeature {
             switch action {
             case .viewCycle(.onAppear):
                 return .run { send in
+                    await send(.dataTransType(.fetchRealm))
                     await send(.networkType(.fetchMySpot))
+                    
+                    for await location in locationManager.getLocationUpdates() {
+                        await send(.dataTransType(.userLocation(location)))
+                    }
                 }
                 
             case let .viewEvent(.tappedSpot(spotId)):
@@ -82,7 +93,7 @@ extension MyPageFeature {
                 return .send(.delegate(.tappedSetting))
                 
             case .viewEvent(.tappedAddSpotButton):
-                return .send(.delegate(.tappedAddSpotButton))
+                return .send(.delegate(.tappedAddSpotButton(state.userLocation)))
                 
             case .networkType(.fetchMySpot):
                 return .run { send in
@@ -97,6 +108,15 @@ extension MyPageFeature {
                 
             case .delegate(.changeNickName):
                 state.nickname = UserDefaultsManager.nickname
+                
+            case .dataTransType(.fetchRealm):
+                return .run { send in
+                    let coord = await dataSourceActor.fetch()
+                    await send(.dataTransType(.userLocation(coord)))
+                }
+                
+            case let .dataTransType(.userLocation(coord)):
+                state.userLocation = coord
                 
             case let .dataTransType(.fetchMySpot(data)):
                 state.spotCount = data.spotCount
