@@ -120,7 +120,7 @@ struct RootCoordinator {
                 
                 if trigger {
                     state.routes.push(.onboarding(OnboardPageFeature.State()))
-                } else if UserDefaultsManager.refreshToken.isEmpty {
+                } else if UserDefaultsManager.refreshToken.isEmpty || UserDefaultsManager.nickname.isEmpty {
                     state.routes.push(.login(LoginFeature.State()))
                 } else {
                     state.viewState = .tab
@@ -131,7 +131,17 @@ struct RootCoordinator {
                 
             case .router(.routeAction(id: _, action: .login(.delegate(.loginSuccess)))):
                 if UserDefaultsManager.nickname.isEmpty {
-                    state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .first, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
+                    let newRoutes: IdentifiedArrayOf<Route<RootScreen.State>> = [
+                        .root(.login(LoginFeature.State()), embedInNavigationView: true),
+                        .push(.profileEdit(ProfileEditFeature.State(
+                            viewState: .first,
+                            nickname: UserDefaultsManager.nickname,
+                            initialNickname: UserDefaultsManager.nickname
+                        )))
+                    ]
+                    
+                    state.routes = newRoutes
+                    
                 } else {
                     state.viewState = .tab
                 }
@@ -148,22 +158,32 @@ struct RootCoordinator {
                 state.viewState = .tab
                 
             case .tabCoordinatorAction(.delegate(.tappedLogout)):
+                let newRoutes: IdentifiedArrayOf<Route<RootScreen.State>> = [
+                    .root(.login(LoginFeature.State()), embedInNavigationView: true)
+                ]
+                
+                state.viewState = .start
+                state.routes = newRoutes
+                state.tabCoordinator = TabCoordinator.State.initialState
+                
                 UserDefaultsManager.accessToken = ""
                 UserDefaultsManager.refreshToken = ""
                 UserDefaultsManager.nickname = ""
-                UserDefaultsManager.email = ""
-                
-                state.viewState = .start
-                state.routes.push(.login(LoginFeature.State()))
+                UserDefaultsManager.appleUser = false
                 
             case .tabCoordinatorAction(.delegate(.successRevoke)):
+                let newRoutes: IdentifiedArrayOf<Route<RootScreen.State>> = [
+                    .root(.login(LoginFeature.State()), embedInNavigationView: true)
+                ]
+                
+                state.viewState = .start
+                state.routes = newRoutes
+                state.tabCoordinator = TabCoordinator.State.initialState
+                
                 UserDefaultsManager.accessToken = ""
                 UserDefaultsManager.refreshToken = ""
                 UserDefaultsManager.nickname = ""
-                UserDefaultsManager.email = ""
-                
-                state.viewState = .start
-                state.routes.push(.login(LoginFeature.State()))
+                UserDefaultsManager.appleUser = false
                 
             case .tokenExpired:
                 state.routes.removeAll()

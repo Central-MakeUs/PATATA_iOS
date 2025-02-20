@@ -14,6 +14,9 @@ struct ProfileEditView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .onAppear(perform: {
+                    print("onApeear")
+                })
                 .background(.gray20)
                 .navigationBarBackButtonHidden()
                 .onTapGesture {

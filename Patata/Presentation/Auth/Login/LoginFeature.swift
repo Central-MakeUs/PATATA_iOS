@@ -132,10 +132,10 @@ struct LoginFeature {
                         state.errorMSG = "탈퇴한 회원입니다.\n30일 내에 가입이 불가능합니다."
                         state.isPresent = true
                     default:
-                        print(error, errorManager.handleError(error) ?? "")
+                        print("fail", error, errorManager.handleError(error) ?? "")
                     }
                 } else {
-                    print(error, errorManager.handleError(error) ?? "")
+                    print("fail", error, errorManager.handleError(error) ?? "")
                 }
                 
             case let .bindingCurrentIndex(index):
