@@ -135,8 +135,7 @@ struct RootCoordinator {
                         .root(.login(LoginFeature.State()), embedInNavigationView: true),
                         .push(.profileEdit(ProfileEditFeature.State(
                             viewState: .first,
-                            nickname: UserDefaultsManager.nickname,
-                            initialNickname: UserDefaultsManager.nickname
+                            profileData: MyPageEntity()
                         )))
                     ]
                     print("dfajmsfhadjkshfjkasd")

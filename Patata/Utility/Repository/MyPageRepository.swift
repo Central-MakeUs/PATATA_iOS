@@ -34,6 +34,12 @@ final class MyPageRepository: @unchecked Sendable {
         
         return mapper.dtoToEntity(dto)
     }
+    
+    func uploadImage(image: Data) async throws(PAError) -> Bool {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: AddSpotDTO.self, router: MyPageRouter.changeImage(image)).isSuccess
+        
+        return dto
+    }
 }
 
 extension MyPageRepository: DependencyKey {

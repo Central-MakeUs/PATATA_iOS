@@ -11,17 +11,30 @@ import ComposableArchitecture
 struct ProfileEditView: View {
     @Perception.Bindable var store: StoreOf<ProfileEditFeature>
     
+    @State private var selectedImage: [UIImage] = []
+    @State private var isPermission: Bool = false
+    @State private var isSize: Bool = false
+    @State private var isResizing: Bool = false
+    @State private var exceed: Bool = false
+    @State private var totalExceed: Bool = false
+    
     var body: some View {
         WithPerceptionTracking {
-            contentView
-                .onAppear(perform: {
-                    print("onApeear")
-                })
-                .background(.gray20)
-                .navigationBarBackButtonHidden()
-                .onTapGesture {
-                    hideKeyboard()
-                }
+            if store.dataState == .progress {
+                ProgressView()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .navigationBarBackButtonHidden(true)
+            } else {
+                contentView
+                    .onAppear {
+                        store.send(.viewCycle(.onAppear))
+                    }
+                    .background(.gray20)
+                    .navigationBarBackButtonHidden()
+                    .onTapGesture {
+                        hideKeyboard()
+                    }
+            }
         }
     }
 }
@@ -78,30 +91,75 @@ extension ProfileEditView {
                 Spacer()
             }
             
-            Text("프로필 수정")
+            Text(store.viewState == .first ? "프로필 설정" : "프로필 수정")
                 .textStyle(.subtitleL)
                 .foregroundStyle(.textDefault)
         }
     }
     
     private var myProfileImage: some View {
-        Image(store.profileImage)
-            .resizable()
-            .aspectRatio(1, contentMode: .fit)
-            .frame(width: 100, height: 100)
-            .clipShape(Circle())
-//            .overlay(alignment: .bottomTrailing) {
-//                Image("EditActive")
-//                    .resizable()
-//                    .aspectRatio(contentMode: .fit)
-//                    .frame(width: 24, height: 24)
-//                    .background(
-//                        Circle()
-//                            .foregroundStyle(.white)
-//                            .shadow(color: .shadowColor, radius: 8)
-//                    )
-//            }
-        
+        PhotoPickerView(selectedImages: $selectedImage, showPermissionAlert: $isPermission, isImageSizeValid: $isSize, resizedImageDatas: $store.imageData.sending(\.bindingImageData), isResizing: $isResizing, invalidExceed: $exceed, totalExceed: $totalExceed, maxSelectedCount: 1) {
+            Group {
+                
+                if selectedImage.isEmpty {
+                    if let imageData = store.profileData.profileImage {
+                        DownImageView(url: imageData, option: .mid, fallBackImg: store.profileImage)
+                            .aspectRatio(1, contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                            .overlay(alignment: .bottomTrailing) {
+                                Image("EditActive")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 24, height: 24)
+                                    .background(
+                                        Circle()
+                                            .foregroundStyle(.white)
+                                            .shadow(color: .shadowColor, radius: 8)
+                                    )
+                            }
+                    } else {
+                        Image(store.profileImage)
+                            .resizable()
+                            .aspectRatio(1, contentMode: .fit)
+                            .frame(width: 100, height: 100)
+                            .clipShape(Circle())
+                            .overlay(alignment: .bottomTrailing) {
+                                Image("EditActive")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 24, height: 24)
+                                    .background(
+                                        Circle()
+                                            .foregroundStyle(.white)
+                                            .shadow(color: .shadowColor, radius: 8)
+                                    )
+                            }
+                    }
+                } else {
+                    Image(uiImage: selectedImage[0])
+                        .resizable()
+                        .aspectRatio(1, contentMode: .fit)
+                        .frame(width: 100, height: 100)
+                        .clipShape(Circle())
+                        .overlay(alignment: .bottomTrailing) {
+                            Image("EditActive")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 24, height: 24)
+                                .background(
+                                    Circle()
+                                        .foregroundStyle(.white)
+                                        .shadow(color: .shadowColor, radius: 8)
+                                )
+                                .asButton {
+                                    isPermission = true
+                                }
+                        }
+                }
+                
+            }
+        }
     }
     
     private var nickNameView: some View {

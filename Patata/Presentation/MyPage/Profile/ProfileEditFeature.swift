@@ -14,12 +14,14 @@ struct ProfileEditFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
+        var dataState: DataState = .data
         var profileImage: String = "ProfileImage"
-        var nickname: String
-        var initialNickname: String
+        var nickname: String = ""
+        let profileData: MyPageEntity
         var isValid: Bool = true
         var textValueChange: Bool = false
         var cancleButtonHide: Bool = true
+        var imageData: [Data] = []
     }
     
     enum ViewState {
@@ -27,8 +29,14 @@ struct ProfileEditFeature {
         case edit
     }
     
+    enum DataState {
+        case progress
+        case data
+    }
+    
     enum Action {
         case viewEvent(ViewEvent)
+        case viewCycle(ViewCycle)
         case networkType(NetworkType)
         case dataTransType(DataTransType)
         case validCheckText(String)
@@ -36,6 +44,7 @@ struct ProfileEditFeature {
         
         // bindingAction
         case bindingNickname(String)
+        case bindingImageData([Data])
         
         enum Delegate {
             case tappedBackButton(ViewState)
@@ -43,8 +52,13 @@ struct ProfileEditFeature {
         }
     }
     
+    enum ViewCycle {
+        case onAppear
+    }
+    
     enum NetworkType {
         case changeNickname
+        case changeProfileImage
     }
     
     enum ViewEvent {
@@ -59,6 +73,7 @@ struct ProfileEditFeature {
     
     @Dependency(\.networkManager) var networkManager
     @Dependency(\.myPageRepository) var myPageRepository
+    @Dependency(\.errorManager) var errorManager
     
     var body: some ReducerOf<Self> {
         core()
@@ -69,6 +84,10 @@ extension ProfileEditFeature {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .viewCycle(.onAppear):
+                state.dataState = .data
+                state.nickname = state.profileData.nickName
+                
             case .viewEvent(.tappedClearNickName):
                 state.nickname = ""
                 state.textValueChange = false
@@ -77,8 +96,32 @@ extension ProfileEditFeature {
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
             case .viewEvent(.tappedConfirmButton):
+                state.dataState = .progress
+                
+                if !state.imageData.isEmpty {
+                    return .run { send in
+                        await send(.networkType(.changeProfileImage))
+                    }
+                } else {
+                    return .run { send in
+                        await send(.networkType(.changeNickname))
+                    }
+                }
+                
+            case .networkType(.changeProfileImage):
+                let imageData = state.imageData[0]
+                print(imageData)
+                
                 return .run { send in
-                    await send(.networkType(.changeNickname))
+                    do {
+                        let result = try await myPageRepository.uploadImage(image: imageData)
+                        
+                        if result {
+                            await send(.networkType(.changeNickname))
+                        }
+                    } catch {
+                        print("error", errorManager.handleError(error) ?? "")
+                    }
                 }
                 
             case .networkType(.changeNickname):
@@ -88,7 +131,7 @@ extension ProfileEditFeature {
                         
                         await send(.dataTransType(.nicknameData(result)))
                     } catch {
-                        print(error)
+                        print("error", errorManager.handleError(error) ?? "")
                     }
                 }
                 
@@ -133,7 +176,7 @@ extension ProfileEditFeature {
                 
                 if filteredText.isEmpty {
                     state.textValueChange = false
-                } else if filteredText == state.initialNickname {
+                } else if filteredText == state.profileData.nickName {
                     state.textValueChange = false
                 } else if filteredText.count >= 2 {
                     state.textValueChange = true
@@ -146,6 +189,9 @@ extension ProfileEditFeature {
             case let .bindingNickname(nickname):
                 state.nickname = nickname
                 state.cancleButtonHide = false
+                
+            case let .bindingImageData(imageData):
+                state.imageData = imageData
               
             default:
                 break

@@ -30,7 +30,7 @@ struct MyPageFeature {
         
         enum Delegate {
             case tappedSpot(Int)
-            case tappedProfileEdit
+            case tappedProfileEdit(MyPageEntity)
             case tappedSetting
             case tappedAddSpotButton(Coordinate)
         }
@@ -87,7 +87,7 @@ extension MyPageFeature {
                 return .send(.delegate(.tappedSpot(spotId)))
                 
             case .viewEvent(.tappedProfileEdit):
-                return .send(.delegate(.tappedProfileEdit))
+                return .send(.delegate(.tappedProfileEdit(state.user)))
                 
             case .viewEvent(.tappedSetting):
                 return .send(.delegate(.tappedSetting))

@@ -12,12 +12,13 @@ enum MyPageRouter: Router {
     case changeNickname(NicknameRequestDTO)
     case fetchMySpot
     case fetchMyPage
+    case changeImage(Data)
 }
 
 extension MyPageRouter {
     var method: HTTPMethod {
         switch self {
-        case .changeNickname:
+        case .changeNickname, .changeImage:
             return .patch
         case .fetchMySpot, .fetchMyPage:
             return .get
@@ -32,6 +33,8 @@ extension MyPageRouter {
             return "/spot/my-spots"
         case .fetchMyPage:
             return "/member/profile"
+        case .changeImage:
+            return "/member/profileImage"
         }
     }
     
@@ -41,12 +44,16 @@ extension MyPageRouter {
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
+        case .changeImage:
+            return HTTPHeaders([
+                HTTPHeader(name: "Content-Type", value: "multipart/form-data")
+            ])
         }
     }
     
     var parameters: Parameters? {
         switch self {
-        case .changeNickname, .fetchMySpot, .fetchMyPage:
+        case .changeNickname, .fetchMySpot, .fetchMyPage, .changeImage:
             return nil
         }
     }
@@ -55,7 +62,7 @@ extension MyPageRouter {
         switch self {
         case .changeNickname(let nickName):
             return requestToBody(nickName)
-        case .fetchMySpot, .fetchMyPage:
+        case .fetchMySpot, .fetchMyPage, .changeImage:
             return nil
         }
     }
@@ -66,6 +73,17 @@ extension MyPageRouter {
             return .json
         case .fetchMySpot, .fetchMyPage:
             return .url
+        case let .changeImage(image):
+            let formData = MultipartFormData()
+            
+            formData.append(
+                image,
+                withName: "profileImage",
+                fileName: "profile.jpeg",  // 파일 이름 추가
+                mimeType: "image/jpeg"    // MIME 타입 추가
+            )
+            
+            return .multiPart(formData)
         }
     }
 }

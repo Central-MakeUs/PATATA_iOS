@@ -67,9 +67,9 @@ extension MyPageCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.setting(SettingFeature.State()))
                 
-            case .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedProfileEdit)))):
+            case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedProfileEdit(data))))):
                 state.isHideTabBar = true
-                state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .edit, nickname: UserDefaultsManager.nickname, initialNickname: UserDefaultsManager.nickname)))
+                state.routes.push(.profileEdit(ProfileEditFeature.State(viewState: .edit, profileData: data)))
                 
             case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedAddSpotButton(coord))))):
                 state.isHideTabBar = true

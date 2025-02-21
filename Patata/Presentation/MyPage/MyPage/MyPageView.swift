@@ -104,7 +104,7 @@ extension MyPageView {
     private var myProfileView: some View {
         VStack(alignment: .center, spacing: 0) {
             if let image = store.user.profileImage {
-                DownImageView(url: store.user.profileImage, option: .mid, fallBackImg: "ProfileImage")
+                DownImageView(url: image, option: .mid, fallBackImg: "ProfileImage")
                     .aspectRatio(1, contentMode: .fill)
                     .frame(width: 100, height: 100)
                     .clipShape(Circle())
