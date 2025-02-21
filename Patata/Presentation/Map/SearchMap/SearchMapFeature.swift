@@ -318,12 +318,14 @@ extension SearchMapFeature {
                     
                     if state.isFirst {
                         state.isFirst = false
-                        return .run { send in
-                            let initialMBR = calculateInitialMBR(userLocation: userLocation)
+                        
+                        // 검색에 대한 스팟으로 이동후 mbr로 통신을 해야됨
+                        return .run { [mapManager = state.mapManager] send in
+                            let mbr = await mapManager.moveCamera(coord: data.coordinate)
                             await send(
                                 .networkType(
                                     .otherSpot(
-                                        mbrLocation: initialMBR,
+                                        mbrLocation: mbr,
                                         userLocation: userLocation,
                                         category: CategoryCase(rawValue: menuItem) ?? .all
                                     )
@@ -349,7 +351,7 @@ extension SearchMapFeature {
                 if state.isOtherFirst {
                     state.isOtherFirst = false
                     
-                    state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
+//                    state.mapManager.moveCamera(coord: state.searchSpotItems[0].coordinate)
                     state.isPresented = true
                 }
                 
@@ -425,27 +427,5 @@ extension SearchMapFeature {
         )
         
         return effects
-    }
-}
-
-extension SearchMapFeature {
-    private func calculateInitialMBR(userLocation: Coordinate, zoomLevel: Int = 17) -> MBRCoordinates {
-        // 줌 레벨 17에서의 적절한 오프셋 계산
-        // 줌 레벨이 증가할수록 표시되는 영역이 작아짐
-        // 줌 레벨 17은 대략 도시 블록 수준의 상세도
-        let latOffset = 0.003  // 약 300-400m (위도)
-        let lngOffset = 0.004  // 약 300-400m (경도, 서울 위도 기준)
-        
-        let northEast = Coordinate(
-            latitude: userLocation.latitude + latOffset,
-            longitude: userLocation.longitude + lngOffset
-        )
-        
-        let southWest = Coordinate(
-            latitude: userLocation.latitude - latOffset,
-            longitude: userLocation.longitude - lngOffset
-        )
-        
-        return MBRCoordinates(northEast: northEast, southWest: southWest)
     }
 }

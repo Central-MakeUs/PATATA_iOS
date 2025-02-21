@@ -22,7 +22,7 @@ struct SpotMapFeature {
         var selectIndex: Int = 0
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
-        var isFirst: Bool = false
+        var isFirst: Bool = true
         
         // bindingState
         var isPresented: Bool = false
@@ -52,6 +52,7 @@ struct SpotMapFeature {
             case deleteSpot
             case succesReport
             case successEdit
+            case detailBack
         }
     }
     
@@ -115,7 +116,6 @@ extension SpotMapFeature {
             switch action {
             case .viewCycle(.onAppear):
                 state.spotReloadButton = false
-                state.isFirst = true
                 
                 return .merge(
                     .run { send in
@@ -205,6 +205,9 @@ extension SpotMapFeature {
             case .delegate(.successEdit):
                 state.isPresented = false
                 
+            case .delegate(.detailBack):
+                state.isFirst = false
+                
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
                 return .run { send in
                     do {
@@ -243,15 +246,14 @@ extension SpotMapFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
-                state.mapManager.moveCamera(coord: coord)
-                
                 if state.isFirst {
                     state.isFirst = false
-                    return .run { send in
-                        let initialMBR = calculateInitialMBR(userLocation: coord)
+                    
+                    return .run { [mapManager = state.mapManager] send in
+                        let mbr = await mapManager.moveCamera(coord: coord)
                         await send(.networkType(.fetchMapMarker(
                             userLocation: coord,
-                            mbr: initialMBR,
+                            mbr: mbr,
                             categoryId: .all
                         )))
                     }
@@ -282,29 +284,6 @@ extension SpotMapFeature {
             }
             return .none
         }
-    }
-}
-
-
-extension SpotMapFeature {
-    private func calculateInitialMBR(userLocation: Coordinate, zoomLevel: Int = 17) -> MBRCoordinates {
-        // 줌 레벨 17에서의 적절한 오프셋 계산
-        // 줌 레벨이 증가할수록 표시되는 영역이 작아짐
-        // 줌 레벨 17은 대략 도시 블록 수준의 상세도
-        let latOffset = 0.003  // 약 300-400m (위도)
-        let lngOffset = 0.004  // 약 300-400m (경도, 서울 위도 기준)
-        
-        let northEast = Coordinate(
-            latitude: userLocation.latitude + latOffset,
-            longitude: userLocation.longitude + lngOffset
-        )
-        
-        let southWest = Coordinate(
-            latitude: userLocation.latitude - latOffset,
-            longitude: userLocation.longitude - lngOffset
-        )
-        
-        return MBRCoordinates(northEast: northEast, southWest: southWest)
     }
 }
 

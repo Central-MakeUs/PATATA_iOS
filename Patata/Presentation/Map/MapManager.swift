@@ -15,8 +15,7 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
     let view = NMFNaverMapView(frame: .zero)
     let specificMarker: NMFMarker = NMFMarker()
     
-    @Published var coord: (Double, Double) = (0.0, 0.0)
-    @Published var userLocation: (Double, Double) = (0.0, 0.0)
+    @Published var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))
     @Published var currentMarkers: [NMFMarker] = []
     @Published var markerImages: [String: NMFOverlayImage] = [:]
     
@@ -62,17 +61,61 @@ final class NaverMapManager: NSObject, ObservableObject, NMFMapViewTouchDelegate
         }
     }
     
-    func moveCamera(coord: Coordinate) {
-        print("Moving camera to: \(coord)")  // 추가
+    @MainActor
+    func moveCamera(coord: Coordinate) async -> MBRCoordinates {
+        return await withCheckedContinuation { continuation in
             let specificLocation = NMGLatLng(lat: coord.latitude, lng: coord.longitude)
             let cameraUpdate = NMFCameraUpdate(scrollTo: specificLocation)
             
             cameraUpdate.animation = .fly
             cameraUpdate.animationDuration = 0.5
             
-            print("MapView exists: \(view.mapView != nil)")  // 추가
-            view.mapView.moveCamera(cameraUpdate)
-            print("Camera move commanded")
+            view.mapView.moveCamera(cameraUpdate) { [weak self] _ in
+                guard let self else {
+                    continuation.resume(returning: MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0)))
+                    return
+                }
+                
+                let mbrCoord = MBRCoordinates(
+                    northEast: Coordinate(
+                        latitude: view.mapView.contentBounds.northEastLat,
+                        longitude: view.mapView.contentBounds.northEastLng
+                    ),
+                    southWest: Coordinate(
+                        latitude: view.mapView.contentBounds.southWestLat,
+                        longitude: view.mapView.contentBounds.southWestLng
+                    )
+                )
+                
+                self.mbrLocation = mbrCoord
+                continuation.resume(returning: mbrCoord)
+            }
+        }
+    }
+    
+    func moveCamera(coord: Coordinate) {
+        let specificLocation = NMGLatLng(lat: coord.latitude, lng: coord.longitude)
+        let cameraUpdate = NMFCameraUpdate(scrollTo: specificLocation)
+        
+        cameraUpdate.animation = .fly
+        cameraUpdate.animationDuration = 0.5
+        
+        view.mapView.moveCamera(cameraUpdate) { [weak self] _ in
+            guard let self else { return }
+            
+            let mbrCoord = MBRCoordinates(
+                northEast: Coordinate(
+                    latitude: view.mapView.contentBounds.northEastLat,
+                    longitude: view.mapView.contentBounds.northEastLng
+                ),
+                southWest: Coordinate(
+                    latitude: view.mapView.contentBounds.southWestLat,
+                    longitude: view.mapView.contentBounds.southWestLng
+                )
+            )
+            
+            self.mbrLocation = mbrCoord
+        }
     }
     
     func clearCurrentMarkers() {

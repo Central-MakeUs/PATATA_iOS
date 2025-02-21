@@ -216,6 +216,8 @@ extension MapCoordinator {
                 
                 if viewState == .mapSearch {
                     return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
+                } else if viewState == .map {
+                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.detailBack)))))
                 }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, viewState))))):
