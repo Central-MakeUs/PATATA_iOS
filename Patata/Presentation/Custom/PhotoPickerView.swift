@@ -17,6 +17,8 @@ public struct PhotoPickerView<Content: View>: View {
     @Binding private var isImageSizeValid: Bool
     @Binding private var resizedImageDatas: [Data]
     @Binding private var isResizing: Bool
+    @Binding private var invalidExceed: Bool
+    @Binding private var totalExceed: Bool
     
     private let imageResizeManager = ImageResizeManager()
     private let maxSelectedCount: Int
@@ -39,6 +41,8 @@ public struct PhotoPickerView<Content: View>: View {
         isImageSizeValid: Binding<Bool>,  // 추가: 바인딩 파라미터
         resizedImageDatas: Binding<[Data]>,
         isResizing: Binding<Bool>,
+        invalidExceed: Binding<Bool>,
+        totalExceed: Binding<Bool>,
         maxSelectedCount: Int = 3,
         matching: PHPickerFilter = .images,
         photoLibrary: PHPhotoLibrary = .shared(),
@@ -51,6 +55,8 @@ public struct PhotoPickerView<Content: View>: View {
         self._isImageSizeValid = isImageSizeValid  // 추가: 바인딩 초기화
         self._resizedImageDatas = resizedImageDatas
         self._isResizing = isResizing
+        self._invalidExceed = invalidExceed
+        self._totalExceed = totalExceed
         self.maxSelectedCount = maxSelectedCount
         self.matching = matching
         self.photoLibrary = photoLibrary
@@ -95,7 +101,7 @@ extension PhotoPickerView {
     private func handleSelectedPhotos(_ newPhotos: [PhotosPickerItem]) {
         Task {
             await MainActor.run {
-                isResizing = true  // 리사이징 시작
+                isResizing = true
             }
             
             do {
@@ -123,40 +129,43 @@ extension PhotoPickerView {
                     }
                 }
                 
-                // 기존 이미지와 새로운 이미지를 합침
                 let combinedImages = selectedImages + tempImages
                 
                 do {
-                    let resizedDatas = try await imageResizeManager.resizeImages(combinedImages)
+                    let (resizedDatas, isIndividualExceeded, isTotalExceeded) = try await imageResizeManager.resizeImages(combinedImages)
+                    
+                    if isIndividualExceeded {
+                        await MainActor.run {
+                            isImageSizeValid = false
+                            isPresentedError = true
+                            invalidExceed = true
+                            totalExceed = false
+                            isResizing = false
+                        }
+                        return  // Task 전체를 종료
+                    }
+                    
+                    if isTotalExceeded {
+                        await MainActor.run {
+                            print("Total Exceeded - resizedDatas: \(resizedDatas.count), combined: \(combinedImages.count)")
+                            selectedImages = Array(combinedImages.prefix(combinedImages.count - 1))
+                            resizedImageDatas = resizedDatas
+                            isImageSizeValid = true
+                            invalidExceed = false
+                            totalExceed = true
+                            isResizing = false
+                        }
+                        return  // Task 전체를 종료
+                    }
+                    
+                    // 정상 처리일 경우에만 여기로 진행
                     await MainActor.run {
+                        print("Normal Processing")
                         selectedImages = combinedImages
                         resizedImageDatas = resizedDatas
                         isImageSizeValid = true
-                        isResizing = false
-                    }
-                } catch PAError.imageResizeError(.totalSizeExceeded) {
-                    let updatedImages = !combinedImages.isEmpty ? Array(combinedImages.dropLast()) : []
-                    
-                    // 리사이즈 재시도
-                    do {
-                        let retryResizedDatas = try await imageResizeManager.resizeImages(updatedImages)
-                        
-                        // UI 업데이트는 MainActor에서
-                        await MainActor.run {
-                            selectedImages = updatedImages
-                            resizedImageDatas = retryResizedDatas
-                            isImageSizeValid = true
-                            isResizing = false
-                        }
-                    } catch {
-                        await MainActor.run {
-                            isImageSizeValid = false
-                            isResizing = false
-                        }
-                    }
-                } catch PAError.imageResizeError(.invalidImage) {
-                    await MainActor.run {
-                        isImageSizeValid = false
+                        invalidExceed = false
+                        totalExceed = false
                         isResizing = false
                     }
                 }

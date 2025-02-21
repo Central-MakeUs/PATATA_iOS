@@ -121,14 +121,6 @@ extension MyPageCoordinator {
             case .router(.routeAction(id: .success, action: .success(.delegate(.tappedConfirmButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()
-                return .run { [routes = state.routes] send in
-                        if let archiveIndex = routes.index(id: .myPage) {
-                            await send(.router(.routeAction(
-                                id: routes[archiveIndex].id,
-                                action: .myPage(.delegate(.changeNickName))
-                            )))
-                        }
-                    }
                 
             case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, viewState))))):
                 if viewState == .map {

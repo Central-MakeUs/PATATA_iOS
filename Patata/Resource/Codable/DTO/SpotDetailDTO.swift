@@ -23,7 +23,7 @@ struct SpotDetailItemDTO: DTO {
     let spotDescription: String
     let categoryId: Int
     let memberName: String
-    let memberId: Int
+    let memberId: Int?
     let images: [String]
     let latitude: Double
     let longitude: Double

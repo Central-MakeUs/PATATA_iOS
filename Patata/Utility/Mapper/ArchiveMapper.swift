@@ -23,6 +23,10 @@ struct ArchiveMapper: Sendable {
     func dtoToEntity(_ dto: MySpotCountDTO) async -> MySpotsEntity {
         return await MySpotsEntity(spotCount: dto.totalSpots, mySpots: dto.spots.asyncMap { dtoToEntity($0) })
     }
+    
+    func dtoToEntity(_ dto: MyPageItemDTO) -> MyPageEntity {
+        return MyPageEntity(memberId: dto.memberId, nickName: dto.nickName, email: dto.email, profileImage: URL(string: dto.profileImage ?? ""))
+    }
 }
 
 extension ArchiveMapper {

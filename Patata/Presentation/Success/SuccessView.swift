@@ -13,8 +13,10 @@ struct SuccessView: View {
     @Perception.Bindable var store: StoreOf<SuccessFeature>
     
     var body: some View {
-        contentView
-            .navigationBarBackButtonHidden()
+        WithPerceptionTracking {
+            contentView
+                .navigationBarBackButtonHidden()
+        }
     }
 }
 

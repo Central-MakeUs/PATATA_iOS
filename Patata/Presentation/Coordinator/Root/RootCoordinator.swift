@@ -139,7 +139,7 @@ struct RootCoordinator {
                             initialNickname: UserDefaultsManager.nickname
                         )))
                     ]
-                    
+                    print("dfajmsfhadjkshfjkasd")
                     state.routes = newRoutes
                     
                 } else {

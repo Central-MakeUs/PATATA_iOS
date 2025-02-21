@@ -13,7 +13,7 @@ struct ReportFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
-        var id: Int
+        var id: Int?
         var reportOption: [ReportOption] = ReportOption.allCases
         var selectedIndex: Int = 5
         var textFieldText: String = ""

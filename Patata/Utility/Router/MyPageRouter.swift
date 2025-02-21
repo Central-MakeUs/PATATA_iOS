@@ -11,6 +11,7 @@ import Alamofire
 enum MyPageRouter: Router {
     case changeNickname(NicknameRequestDTO)
     case fetchMySpot
+    case fetchMyPage
 }
 
 extension MyPageRouter {
@@ -18,7 +19,7 @@ extension MyPageRouter {
         switch self {
         case .changeNickname:
             return .patch
-        case .fetchMySpot:
+        case .fetchMySpot, .fetchMyPage:
             return .get
         }
     }
@@ -29,12 +30,14 @@ extension MyPageRouter {
             return "/member/nickname"
         case .fetchMySpot:
             return "/spot/my-spots"
+        case .fetchMyPage:
+            return "/member/profile"
         }
     }
     
     var optionalHeaders: HTTPHeaders? {
         switch self {
-        case .changeNickname, .fetchMySpot:
+        case .changeNickname, .fetchMySpot, .fetchMyPage:
             return HTTPHeaders([
                 HTTPHeader(name: "Content-Type", value: "application/json")
             ])
@@ -43,7 +46,7 @@ extension MyPageRouter {
     
     var parameters: Parameters? {
         switch self {
-        case .changeNickname, .fetchMySpot:
+        case .changeNickname, .fetchMySpot, .fetchMyPage:
             return nil
         }
     }
@@ -52,7 +55,7 @@ extension MyPageRouter {
         switch self {
         case .changeNickname(let nickName):
             return requestToBody(nickName)
-        case .fetchMySpot:
+        case .fetchMySpot, .fetchMyPage:
             return nil
         }
     }
@@ -61,7 +64,7 @@ extension MyPageRouter {
         switch self {
         case .changeNickname:
             return .json
-        case .fetchMySpot:
+        case .fetchMySpot, .fetchMyPage:
             return .url
         }
     }

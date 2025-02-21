@@ -15,12 +15,10 @@ struct MyPageFeature {
     @ObservableState
     struct State: Equatable {
         var imageCount: Int = 0
-        var profileImage: String = "ProfileImage"
-        var nickname: String = UserDefaultsManager.nickname
-        var email: String = "adsafas@gmail.com"
         var spotCount: Int = 0
         var mySpots: [ArchiveListEntity] = []
         var userLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
+        var user: MyPageEntity = MyPageEntity()
     }
     
     enum Action {
@@ -34,7 +32,6 @@ struct MyPageFeature {
             case tappedSpot(Int)
             case tappedProfileEdit
             case tappedSetting
-            case changeNickName
             case tappedAddSpotButton(Coordinate)
         }
     }
@@ -52,12 +49,14 @@ struct MyPageFeature {
     
     enum NetworkType {
         case fetchMySpot
+        case fetchUser
     }
     
     enum DataTransType {
         case fetchRealm
         case fetchMySpot(MySpotsEntity)
         case userLocation(Coordinate)
+        case fetchUser(MyPageEntity)
     }
     
     @Dependency(\.myPageRepository) var myPageRepository
@@ -77,6 +76,7 @@ extension MyPageFeature {
                 return .run { send in
                     await send(.dataTransType(.fetchRealm))
                     await send(.networkType(.fetchMySpot))
+                    await send(.networkType(.fetchUser))
                     
                     for await location in locationManager.getLocationUpdates() {
                         await send(.dataTransType(.userLocation(location)))
@@ -106,8 +106,16 @@ extension MyPageFeature {
                     }
                 }
                 
-            case .delegate(.changeNickName):
-                state.nickname = UserDefaultsManager.nickname
+            case .networkType(.fetchUser):
+                return .run { send in
+                    do {
+                        let data = try await myPageRepository.fetchUser()
+                        
+                        await send(.dataTransType(.fetchUser(data)))
+                    } catch {
+                        print("fail", errorManager.handleError(error) ?? "")
+                    }
+                }
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
@@ -121,6 +129,9 @@ extension MyPageFeature {
             case let .dataTransType(.fetchMySpot(data)):
                 state.spotCount = data.spotCount
                 state.mySpots = data.mySpots
+                
+            case let .dataTransType(.fetchUser(data)):
+                state.user = data
                 
             default:
                 break

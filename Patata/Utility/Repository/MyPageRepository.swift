@@ -28,6 +28,12 @@ final class MyPageRepository: @unchecked Sendable {
         
         return await mapper.dtoToEntity(dto)
     }
+    
+    func fetchUser() async throws(PAError) -> MyPageEntity {
+        let dto = try await networkManager.requestNetworkWithRefresh(dto: MyPageDTO.self, router: MyPageRouter.fetchMyPage).result
+        
+        return mapper.dtoToEntity(dto)
+    }
 }
 
 extension MyPageRepository: DependencyKey {

@@ -20,6 +20,8 @@ struct SpotEditorView: View {
     @State private var resizedImageDatas: [Data] = []
     @State private var isImageSizeValid: Bool = false
     @State private var isResizing: Bool = false
+    @State private var totalExceed: Bool = false
+    @State private var invalidExceed: Bool = false
     
     enum Field: Hashable {
         case title
@@ -348,7 +350,9 @@ extension SpotEditorView {
                                 showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission),
                                 isImageSizeValid: $isImageSizeValid,
                                 resizedImageDatas: $resizedImageDatas,
-                                isResizing: $isResizing
+                                isResizing: $isResizing,
+                                invalidExceed: $invalidExceed,
+                                totalExceed: $totalExceed
                             ) {
                                 VStack(alignment: .center) {
                                     Image("ImageDefault")
@@ -465,6 +469,33 @@ extension SpotEditorView {
                     .background(Color.gray20.opacity(0.8))
                 }
             }
+            
+            if invalidExceed {
+                HStack {
+                    Text("*이미지 장 당 최대 용량은 5mb입니다. 용량을 확인해주세요!")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.red100)
+                    
+                    Spacer()
+                }
+                .padding(.leading, 15)
+                .padding(.top, 4)
+
+            }
+            
+            
+            if totalExceed {
+                HStack {
+                    Text("*이미지 총 용량은 10mb를 넘지 않도록 해주세요.")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.red100)
+                    Spacer()
+                }
+                .padding(.leading, 15)
+                .padding(.top, 4)
+
+            }
+            
         }
     }
     

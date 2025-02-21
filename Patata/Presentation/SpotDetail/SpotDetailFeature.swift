@@ -57,8 +57,8 @@ struct SpotDetailFeature {
             case tappedNavBackButton(Bool, ViewState)
             case delete(ViewState)
             case editSpotDetail(SpotDetailEntity, ViewState)
-            case report(String, id: Int)
-            case reviewReport(id: Int)
+            case report(String, id: Int?)
+            case reviewReport(id: Int?)
         }
     }
     
@@ -220,6 +220,7 @@ extension SpotDetailFeature {
                 }
                 
             case let .dataTransType(.spotDetail(data)):
+                print("fetch", data)
                 state.spotDetailData = data
                 state.reviewData = data.reviews
                 

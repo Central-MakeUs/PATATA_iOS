@@ -103,14 +103,20 @@ extension MyPageView {
     
     private var myProfileView: some View {
         VStack(alignment: .center, spacing: 0) {
-            Image(store.profileImage)
-                .resizable()
-                .aspectRatio(1, contentMode: .fit)
-                .frame(width: 100, height: 100)
-                .clipShape(Circle())
+            if let image = store.user.profileImage {
+                DownImageView(url: store.user.profileImage, option: .mid, fallBackImg: "ProfileImage")
+                    .aspectRatio(1, contentMode: .fill)
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+            } else {
+                Image("ProfileImage")
+                    .aspectRatio(1, contentMode: .fill)
+                    .frame(width: 100, height: 100)
+                    .clipShape(Circle())
+            }
             
             HStack(spacing: 6) {
-                Text(store.nickname)
+                Text(store.user.nickName)
                     .textStyle(.subtitleL)
                     .foregroundStyle(.textDefault)
                 
@@ -123,7 +129,7 @@ extension MyPageView {
             }
             .padding(.top, 16)
             
-            Text(verbatim: store.email)
+            Text(verbatim: store.user.email)
                 .textStyle(.captionM)
                 .foregroundStyle(.textInfo)
         }
