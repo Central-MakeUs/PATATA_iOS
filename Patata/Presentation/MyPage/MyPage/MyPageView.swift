@@ -27,7 +27,11 @@ extension MyPageView {
     private var contentView: some View {
         VStack(spacing: 0) {
             fakeNavgationBar
-                .padding(.bottom, 4)
+                .padding(.bottom, 12)
+            
+            Color.gray20
+                .frame(maxWidth: .infinity)
+                .frame(height: 6)
                 
             if store.spotCount == 0 {
                 noArchiveView
@@ -97,7 +101,7 @@ extension MyPageView {
             .background(.white)
             .padding(.top, 4)
         }
-        .background(.gray20)
+        .background(.white)
        
     }
     
