@@ -53,6 +53,7 @@ struct SpotMapFeature {
             case succesReport
             case successEdit
             case detailBack
+            case moveCamera
         }
     }
     
@@ -179,6 +180,11 @@ extension SpotMapFeature {
                 
             case .mapAction(.moveCamera):
                 state.spotReloadButton = true
+                
+                if state.isPresented {
+                    state.isPresented = false
+                    return .send(.delegate(.moveCamera))
+                }
                 
             case let .mapAction(.getCameraLocation(cameraLocation)):
                 state.cameraLocation = cameraLocation

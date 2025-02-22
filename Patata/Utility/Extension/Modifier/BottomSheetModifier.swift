@@ -50,17 +50,17 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         }
                         .transition(.opacity)
                 } else {
-                    Color.clear
-                        .ignoresSafeArea()
-                        .contentShape(Rectangle())
-                        .onTapGesture {
-                            if let onDismiss {
-                                onDismiss()
-                            }
-                            withAnimation {
-                                isPresented = false
-                            }
-                        }
+//                    Color.clear
+//                        .ignoresSafeArea()
+//                        .contentShape(Rectangle())
+//                        .onTapGesture {
+//                            if let onDismiss {
+//                                onDismiss()
+//                            }
+//                            withAnimation {
+//                                isPresented = false
+//                            }
+//                        }
                 }
             }
             
@@ -106,11 +106,19 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                                 .padding(.bottom, 30)
                         }
                     } else {
-                        sheetContent()
-                            .fixedSize(horizontal: false, vertical: true)
-                            .foregroundStyle(.textDefault)
-                            .padding(.top, 8)
-                            .padding(.bottom, 30)
+                        VStack {
+                            Rectangle()
+                                .frame(width: 50, height: 4)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .padding(.top, 8)
+                                .padding(.bottom, 4)
+                            
+                            sheetContent()
+                                .fixedSize(horizontal: false, vertical: true)
+                                .foregroundStyle(.textDefault)
+                                .padding(.top, 8)
+                                .padding(.bottom, 30)
+                        }
                     }
                 }
                 .background(.white)
@@ -130,31 +138,37 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         if abs(value.translation.height) > abs(value.translation.width) {
                             dragOffset = value.translation.height
                         }
-                    } else if !isMap {
+                    } else {
                         if dragOffset + value.translation.height > 0 {
                             dragOffset = value.translation.height
                         }
                     }
                 }
                 .onEnded { value in
-                    if !isMap {
-                        if isFullSheet {
-                            if abs(value.translation.height) > abs(value.translation.width) {
-                                if value.translation.height <= -150 {
-                                    isFull = true
-                                } else if value.translation.height > 10 {
+                    withAnimation(.easeInOut(duration: 0.25)) {  // 여기에 animation 추가
+                            if isFullSheet {
+                                if abs(value.translation.height) > abs(value.translation.width) {
+                                    if value.translation.height <= -150 {
+                                        isFull = true
+                                    } else if value.translation.height > 10 {
+                                        isPresented = false
+                                    }
+                                }
+                            } else {
+                                if value.translation.height > 0 {
                                     isPresented = false
+                                    
+                                    if isMap {
+                                        if let onDismiss {
+                                            onDismiss()
+                                        }
+                                    }
+                                } else {
+                                    isPresented = true
                                 }
                             }
-                        } else {
-                            if value.translation.height > 0 {
-                                isPresented = false
-                            } else {
-                                isPresented = true
-                            }
+                            dragOffset = 0  // animation block 안에서 실행되도록
                         }
-                        dragOffset = 0
-                    }
                 }
         )
         .animation(.easeInOut(duration: 0.25), value: isPresented)

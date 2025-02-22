@@ -85,6 +85,9 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotDetail(spotId))))):
                 state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
                 
+            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.moveCamera)))):
+                state.isHideTabBar = false
+                
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .map {
                     state.isHideTabBar = false

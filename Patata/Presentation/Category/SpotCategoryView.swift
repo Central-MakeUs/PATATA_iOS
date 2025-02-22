@@ -107,8 +107,10 @@ extension SpotCategoryView {
                             .id(category.rawValue)
                             .asButton {
                                 store.send(.viewEvent(.selectedMenu(category.rawValue)))
+                            }
+                            .onChange(of: store.selectedIndex) { newValue in
                                 withAnimation {
-                                    proxy.scrollTo(category.rawValue, anchor: .center)
+                                    proxy.scrollTo(store.selectedIndex, anchor: .center)
                                 }
                             }
                     }

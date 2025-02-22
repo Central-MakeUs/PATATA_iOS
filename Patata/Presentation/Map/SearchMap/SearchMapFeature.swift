@@ -217,6 +217,10 @@ extension SearchMapFeature {
             case .mapAction(.moveCamera):
                 state.reloadButtonIsHide = false
                 
+                if state.isPresented {
+                    state.isPresented = false
+                }
+                
             case .delegate(.deleteSpot):
                 state.isPresented = false
                 
