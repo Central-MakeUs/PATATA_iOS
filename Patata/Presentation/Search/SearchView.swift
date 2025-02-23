@@ -36,6 +36,9 @@ struct SearchView: View {
                                     hideKeyboard()
                                 }
                         )
+                        .onChange(of: store.searchText) { _ in
+                            store.send(.viewEvent(.reset))
+                        }
                         .onAppear {
                             store.send(.viewCycle(.onAppear))
                         }

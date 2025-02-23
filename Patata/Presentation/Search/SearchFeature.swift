@@ -78,6 +78,7 @@ struct SearchFeature {
         case nextPage
         case dismissFilter(String)
         case openFilter
+        case reset
     }
     
     enum NetworkType {
@@ -147,6 +148,7 @@ extension SearchFeature {
                 state.searchText = ""
                 state.scrollToTop = false
                 state.viewState = .search
+                state.searchResult = true
                 
             case let .viewEvent(.tappedSpotDetail(spotId, index)):
                 state.selectSpotIndex = index
@@ -157,6 +159,9 @@ extension SearchFeature {
                 return .run { send in
                     await send(.networkType(.patchArchiveState(index)))
                 }
+                
+            case .viewEvent(.reset):
+                state.searchResult = true
                 
             case .viewEvent(.nextPage):
                 state.listLoadTrigger = false

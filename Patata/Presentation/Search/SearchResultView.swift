@@ -33,7 +33,6 @@ struct SearchResultView: View {
                 .presentBottomSheet(isPresented: $store.filterIsvalid.sending(\.bindingFilterIsValid)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
                         store.send(.viewEvent(.dismissFilter(item)))
-                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
         }
