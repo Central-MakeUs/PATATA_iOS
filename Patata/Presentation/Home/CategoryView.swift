@@ -23,11 +23,12 @@ extension CategoryView {
     private var contentView: some View {
         Text(categoryItem.getCategoryCase().title)
             .foregroundStyle(isSelected ? .blue100 : .textInfo)
+            .textStyle(.captionM)
             .padding(.vertical, 8)
             .padding(.horizontal, 16)
             .background(
                 RoundedRectangle(cornerRadius: 20)
-                    .strokeBorder(isSelected ? .blue100 : .gray30, lineWidth: 2)
+                    .strokeBorder(isSelected ? .blue100 : .gray30, lineWidth: 1)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 20))
             )

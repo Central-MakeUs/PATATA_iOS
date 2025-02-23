@@ -57,7 +57,7 @@ extension MySpotListView {
                         }
                         
                     }
-                    .background(.gray20)
+                    .background(.gray10)
                 }
             } else {
                 ScrollView(.vertical) {
@@ -65,6 +65,7 @@ extension MySpotListView {
                         ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
                             spotListView(spot: item, index: index)
                                 .background(.white)
+    
                                 .asButton {
                                     store.send(.viewEvent(.tappedSpot(item.spotId)))
                                 }
@@ -213,17 +214,19 @@ extension MySpotListView {
                 }
                 
                 Text(spot.spotName)
-                    .textStyle(.subtitleS)
+                    .textStyle(.subtitleSM)
                     .foregroundStyle(.blue100)
                 
-                Image(spot.categoryId.getCategoryCase().image ?? "SnapIcon")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 12, height: 12)
-                
-                Text(spot.categoryId.getCategoryCase().title)
-                    .foregroundStyle(.gray70)
-                    .textStyle(.captionS)
+                HStack(spacing: 6) {
+                    Image(spot.categoryId.getCategoryCase().image ?? "SnapIcon")
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12, height: 12)
+                    
+                    Text(spot.categoryId.getCategoryCase().title)
+                        .foregroundStyle(.gray70)
+                        .textStyle(.subtitleXS)
+                }
                 
                 Spacer()
 
@@ -235,11 +238,11 @@ extension MySpotListView {
             
             HStack(spacing: 4) {
                 Text(spot.distance)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textSub)
                 
                 Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textInfo)
                 
                 Spacer()

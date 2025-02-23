@@ -277,11 +277,11 @@ extension SpotEditorView {
                     VStack(alignment: .leading, spacing: 16) {
                         if store.detail.isEmpty {
                             Text("장소에 대한 간단한 설명을 남겨하세요 (300자 이하)")
-                                .textStyle(.bodyM)
+                                .textStyle(.bodyS)
                                 .foregroundColor(.textDisabled)
                             
                             Text("부적절한 사진(폭력, 혐오, 선정성 등)은 등록이 금지되며,\n게재 시 경고 또는 이용 제한이 부과될 수 있습니다.")
-                                .textStyle(.bodyS)
+                                .textStyle(.captionM)
                                 .foregroundColor(.textDisabled)
                         }
                     }
@@ -599,7 +599,7 @@ extension SpotEditorView {
 extension SpotEditorView {
     private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String, nextFocus: Field, nowFocus: Field) -> some View {
         TextField("", text: bindingText)
-            .textStyle(.subtitleL)
+            .textStyle(.subtitleS)
             .focused($focusedField, equals: nowFocus)
             .frame(maxWidth: .infinity)
             .frame(height: 44)

@@ -163,6 +163,7 @@ extension MyPageView {
     private var archiveSpotView: some View {
         let columns = [
             GridItem(.flexible(), spacing: 4),
+            GridItem(.flexible(), spacing: 4),
             GridItem(.flexible())
         ]
         

@@ -20,13 +20,22 @@ struct OnboardingPageView: View {
 
 extension OnboardingPageView {
     private var contentView: some View {
-        VStack {
+        VStack(spacing: 0) {
             titleView
             subTitleView
-                .padding(.top, 5)
-            onboardingImageView
-                .padding(.top, 12)
-                .padding(.horizontal, 16)
+                .padding(.top, 8)
+            
+            if imageName == "Onboarding1" {
+                onboardingImageView
+                    .padding(.top, 80)
+                    .padding(.horizontal, 50)
+                    .offset(y: -20)
+            } else {
+                onboardingImageView
+                    .padding(.top, 40)
+                    .padding(.horizontal, 16)
+                    .offset(y: -20)
+            }
         }
     }
     
@@ -46,9 +55,17 @@ extension OnboardingPageView {
     }
     
     private var onboardingImageView: some View {
-        Image(imageName)
-            .resizable()
-            .scaledToFit()
-            .aspectRatio(1, contentMode: .fit)
+        if imageName == "Onboarding1" {
+            Image(imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+//                .frame(width: 280, height: 340)
+        } else {
+            Image(imageName)
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+//                .frame(width: 300, height: 380)
+        }
+//            .frame(width: <#T##CGFloat?#>, height: <#T##CGFloat?#>)
     }
 }

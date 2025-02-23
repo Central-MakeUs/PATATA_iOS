@@ -34,7 +34,7 @@ extension OnboardingView {
                     .padding(.horizontal, 15)
                     .padding(.bottom, 10)
             }
-            .background(.blue20)
+            .background(.blue10)
             .navigationBarBackButtonHidden(true)
         }
         
@@ -63,10 +63,14 @@ extension OnboardingView {
                     }
                 }
         }
-        .tabViewStyle(PageTabViewStyle())
-        .indexViewStyle(.page(backgroundDisplayMode: .interactive))
-        .onAppear {
-            setupAppearance()
+        .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+        .overlay(alignment: .bottom) {
+            CustomPageIndicator(
+                numberOfPages: 3,
+                currentIndex: store.currentIndex,
+                viewState: .onboarding
+            )
+            .padding(.bottom, 30)
         }
     }
     
@@ -83,15 +87,15 @@ extension OnboardingView {
         }
         .frame(height: 56)
         .background(.blue100)
-        .clipShape(RoundedRectangle(cornerRadius: 24))
+        .clipShape(RoundedRectangle(cornerRadius: 30))
         .asButton {
             store.send(.startButtonTapped)
         }
     }
     
     private var lastOnboardingPageView: some View {
-        VStack {
-            VStack{
+        VStack(spacing: 0) {
+            VStack {
                 Text("나만 아는 숨은 스팟을")
                     .textStyle(.headlineS)
                 Text("등록하고 공유해봐요")
@@ -101,8 +105,9 @@ extension OnboardingView {
             Text("놓치기 아까운 스팟, 파타타엔 다 있어요!")
                 .textStyle(.subtitleS)
                 .foregroundColor(.blue50)
-                .padding(.top, 5)
-                .padding(.bottom, 40)
+                .padding(.top, 8)
+                .padding(.bottom, 70)
+            
             
             ZStack {
                 HStack {
@@ -117,13 +122,12 @@ extension OnboardingView {
                 }
                 .padding(.vertical, 20)
                 .padding(.horizontal, 50)
-                .background(.white)
+                .background(Color(hex: "F9FDFF"))
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .offset(y: isShowingToast ? -180 : -100) // 애니메이션 위치 조정
                 
                 Image("Onboarding3")
                     .resizable()
-                    .scaledToFit()
                     .aspectRatio(1, contentMode: .fit)
                     .padding(.top, 12)
                     .padding(.horizontal, 16)

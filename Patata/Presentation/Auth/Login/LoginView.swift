@@ -29,65 +29,66 @@ struct LoginView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 0) {
-                    
                     ZStack {
                         Image("Polaroid")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 200, height: 200)
                             .offset(y: imageOffset)
+                            .zIndex(2)
+                            .opacity(isImageVisible ? 1 : 0)
                         
-                        Color.blue20
-                            .frame(width: 200, height: 200)
-                        
-                        VStack {
-                            Image("PatataMain")
-                                .resizable()
-                                .scaledToFit()
-                                .padding(.horizontal, 100)
-                                .padding(.top, 70)
+                            Color.blue20
+                                .frame(width: 220, height: 220)
+                                .zIndex(3)
+                            
+                        VStack(spacing: 0) {
+                            Color.clear
+                                .frame(width: 235, height: 235)
+                            
+                            Rectangle()
+                                .aspectRatio(10, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
+                                .foregroundStyle(.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .padding(.horizontal, 90)
+                                .sizeState(size: $sizeState)
+                                .scaleEffect(x: scale, y: scale, anchor: .top)
                         }
+                        .zIndex(1)
+                        
+                        VStack(spacing: 0) {
+                            Color.clear
+                                .frame(width: 235, height: 235)
+                            
+                            Rectangle()
+                                .aspectRatio(10, contentMode: .fit)
+                                .frame(maxWidth: .infinity)
+                                .foregroundStyle(.black)
+                                .clipShape(RoundedRectangle(cornerRadius: 4))
+                                .padding(.horizontal, 90)
+                                .sizeState(size: $sizeState)
+                                .opacity(barOpacity)
+                                .scaleEffect(x: scale, y: scale, anchor: .top)
+                        }
+                        .zIndex(3)
+                        
+                        Image("PatataMain")
+                            .resizable()
+                            .scaledToFit()
+                            .padding(.horizontal, 100)
+                            .padding(.top, 70)
+                            .zIndex(6)
                     }
-                    
-                    Rectangle()
-                        .aspectRatio(10, contentMode: .fit)
-                        .frame(maxWidth: .infinity)
-                        .foregroundStyle(.black)
-                        .clipShape(RoundedRectangle(cornerRadius: 4))
-                        .padding(.horizontal, 90)
-                        .sizeState(size: $sizeState)
-                        .opacity(barOpacity)
-                        .scaleEffect(x: scale, y: scale, anchor: .top)
-                        .overlay {
-                            if sideValid {
-                                HStack {
-                                    Rectangle()
-                                        .foregroundStyle(.black)
-                                        .frame(width: 20 , height: sizeState.height)
-                                        .cornerRadius(4, corners: [.topLeft, .bottomLeft])
-                                        .padding(.leading, 90)
-                                        
-                                    Spacer()
-                                    
-                                    Rectangle()
-                                        .foregroundStyle(.black)
-                                        .frame(width: 20, height: sizeState.height)
-                                        .cornerRadius(4, corners: [.topRight, .bottomRight])
-                                        .padding(.trailing, 90)
-                                        
-                                }
-                            }
-                        }
                     
                     Spacer()
                     
                     VStack(spacing: 16) {
                         customAppleLoginButton
+                            .padding(.top, 40)
                             .asButton {
                                 store.send(.viewEvent(.tappedAppleLogin))
                             }
-                            .padding(.top, 40)
-                        
                         
                         customGoogleLoginButton
                             .asButton {
@@ -118,7 +119,7 @@ extension LoginView {
         HStack {
             Spacer()
                 
-            Image("AppleLogo")
+            Image("Apple Logo")
             Text("애플 계정으로 로그인하기")
                 .textStyle(.subtitleM)
                 .foregroundStyle(.white)
@@ -145,16 +146,6 @@ extension LoginView {
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 50))
     }
-    
-//    private var oriAppleLoginButton: some View {
-//        SignInWithAppleButton { _ in
-//
-//        } onCompletion: { result in
-//            store.send(.viewEvent(.tappedAppleLogin(result)))
-//        }
-//        .clipShape(RoundedRectangle(cornerRadius: 50))
-//    }
-
     
     private var oriGoogleLoginButton: some View {
         
@@ -189,13 +180,15 @@ extension LoginView {
         }
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isImageVisible = true
             withAnimation(.spring(response: 0.1, dampingFraction: 0.8)) {
                 scale = 1.0
             }
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                
                 sideValid = true
-                withAnimation(.easeInOut(duration: 0.8)) {
+                withAnimation(.easeInOut(duration: 0.5)) {
                     imageOffset = 200
                     barOpacity = 0.45
                 }
@@ -203,14 +196,14 @@ extension LoginView {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
                     sideValid = false
                     
-                    withAnimation(.spring(response: 0.5)) {
+                    withAnimation(.spring(response: 0.7)) {
                         barOpacity = 1
                         imageOffset = 600
                         
                     }
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
                         isImageVisible = false
-                        imageOffset = 10
+                        imageOffset = 0
                     }
                 }
             }

@@ -189,7 +189,8 @@ extension SpotDetailView {
             .overlay(alignment: .bottom) {
                 CustomPageIndicator(
                     numberOfPages: store.spotDetailData.images.count,
-                    currentIndex: store.currentIndex
+                    currentIndex: store.currentIndex,
+                    viewState: .spotDetail
                 )
                 .padding(.bottom, 40)
             }
