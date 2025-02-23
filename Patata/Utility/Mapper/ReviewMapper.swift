@@ -10,7 +10,7 @@ import ComposableArchitecture
 
 struct ReviewMapper: Sendable {
     func dtoToEntity(_ dto: ReviewResultDTO) -> ReviewEntity {
-        return ReviewEntity(reviewId: dto.reviewId, reviewText: dto.reviewText, reivewDate: DateManager.shared.formatToCustomDate(dto.reviewDate))
+        return ReviewEntity(reviewId: dto.reviewId, reviewText: dto.reviewText, reivewDate: DateManager.shared.toDateString(dto.reviewDate))
     }
 }
 

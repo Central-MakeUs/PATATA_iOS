@@ -122,7 +122,8 @@ extension SpotMapper {
     }
     
     private func dtoToEntity(_ dto: SpotDetailReviewDTO) -> SpotDetailReviewEntity {
-        return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText, reviewData: DateManager.shared.formatToCustomDate(dto.reviewDate))
+        print("dfsafadsfads", dto.reviewDate)
+        return SpotDetailReviewEntity(reviewId: dto.reviewId, memberName: dto.memberName, reviewText: dto.reviewText, reviewData: DateManager.shared.toDateString(dto.reviewDate))
     }
     
     private func dtoToEntity(_ dto: TodaySpotListItemDTO) -> TodaySpotListEntity {

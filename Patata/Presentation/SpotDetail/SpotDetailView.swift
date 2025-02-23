@@ -325,7 +325,7 @@ extension SpotDetailView {
 }
 
 extension SpotDetailView {
-    private func commentView(nick: String, text: String, date: Date, user: Bool, reviewId: Int, index: Int) -> some View {
+    private func commentView(nick: String, text: String, date: String, user: Bool, reviewId: Int, index: Int) -> some View {
         VStack {
             HStack {
                 Text(nick)
@@ -351,6 +351,7 @@ extension SpotDetailView {
                 }
             }
             .padding(.horizontal, 15)
+            .padding(.bottom, 6)
             
             HStack {
                 Text(text)
@@ -362,16 +363,14 @@ extension SpotDetailView {
             .padding(.horizontal, 15)
             
             HStack {
-                Text(date, style: .date)
-                    .textStyle(.captionM)
-                
-                Text(date, style: .time)
+                Text(date)
                     .textStyle(.captionM)
                 
                 Spacer()
             }
             .foregroundStyle(.textInfo)
             .padding(.horizontal, 15)
+            .padding(.top, 2)
         }
     }
 }
@@ -379,7 +378,7 @@ extension SpotDetailView {
 extension SpotDetailView {
     private func reviewView(items: [SpotDetailReviewEntity]) -> some View {
         ForEach(Array(items.enumerated()), id: \.element.reviewId) { index, item in
-            commentView(nick: item.memberName, text: item.reviewText, date: Date(), user: UserDefaultsManager.nickname == item.memberName, reviewId: item.reviewId, index: index)
+            commentView(nick: item.memberName, text: item.reviewText, date: item.reviewData, user: UserDefaultsManager.nickname == item.memberName, reviewId: item.reviewId, index: index)
                 .background(.white)
                 .padding(.vertical, 12)
             

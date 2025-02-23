@@ -8,36 +8,61 @@
 import Foundation
 
 final class DateManager {
+    
+    private init() {}
+    
     static let shared = DateManager()
     
-    private let isoFormatter: ISO8601DateFormatter
-    private let outputFormatter: DateFormatter
+    private let isoDateFormatter = ISO8601DateFormatter()
+    private let dateFormatter = DateFormatter()
+    private let locale = Locale(identifier: "ko_KR")
     
-    private init() {
-        // ISO 날짜 포맷터 설정
-        isoFormatter = ISO8601DateFormatter()
+    // ISO 8601 형식을 처리하는 함수
+    func toDate(_ dateString: String) -> Date? {
+        // isoDateFormatter의 formatOptions 설정을 조정하여 타임존 정보가 없는 경우도 처리
+        isoDateFormatter.formatOptions = [.withFullDate, .withFullTime, .withDashSeparatorInDate, .withColonSeparatorInTime]
         
-        // 출력용 포맷터 설정
-        outputFormatter = DateFormatter()
-        outputFormatter.dateFormat = "yy.MM.dd HH:mm"
-        outputFormatter.timeZone = TimeZone.current
-    }
-    
-    func formatToCustomDate(_ isoString: String) -> String {
-        guard let date = isoFormatter.date(from: isoString) else {
-            return ""  // 또는 에러 처리나 기본값 반환
+        // 타임존 정보가 없으면 "Z"를 추가하는 방법
+        var formattedDateString = dateString
+        if !dateString.contains("T") {
+            return nil
         }
-        return outputFormatter.string(from: date)
+        // 끝에 'Z'를 붙여서 타임존 정보를 추가
+        if !dateString.contains("Z") {
+            formattedDateString += "Z"
+        }
+        
+        // isoDateFormatter로 변환
+        if let isoDate = isoDateFormatter.date(from: formattedDateString) {
+            return isoDate
+        }
+        
+        // 만약 ISO 형식으로 변환되지 않으면 다른 형식을 시도
+        dateFormatter.dateFormat = "yy.MM.dd HH:mm"
+        dateFormatter.locale = locale
+        
+        if let fallbackResult = dateFormatter.date(from: dateString) {
+            return fallbackResult
+        }
+        
+#if DEBUG
+        print("fail")
+#endif
+        return nil
     }
     
-    // 필요한 경우 다른 포맷으로도 변환할 수 있는 메서드 추가
-    func formatWithCustomFormat(_ isoString: String, format: String) -> String {
-        guard let date = isoFormatter.date(from: isoString) else {
+    // Date를 String으로 변환하는 함수
+    func toString(date: Date) -> String {
+        dateFormatter.dateFormat = "yy.MM.dd HH:mm"
+        dateFormatter.locale = locale
+        return dateFormatter.string(from: date)
+    }
+    
+    // String을 Date로 변환 후 다시 String으로 변환하는 함수
+    func toDateString(_ dateString: String) -> String {
+        guard let fallbackResult = toDate(dateString) else {
             return ""
         }
-        outputFormatter.dateFormat = format
-        let result = outputFormatter.string(from: date)
-        outputFormatter.dateFormat = "yy.MM.dd HH:mm"  // 기본 포맷으로 재설정
-        return result
+        return toString(date: fallbackResult)
     }
 }

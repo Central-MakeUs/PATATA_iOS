@@ -70,10 +70,14 @@ struct ArchiveView: View {
 
 extension ArchiveView {
     private var contentView: some View {
-        VStack {
+        VStack(spacing: 0) {
             fakeNavBar
                 .padding(.bottom, 12)
                 .background(.white)
+            
+            Color.gray20
+                .frame(maxWidth: .infinity)
+                .frame(height: 6)
             
             if store.archiveList.isEmpty {
                 Spacer()
@@ -101,7 +105,6 @@ extension ArchiveView {
                         }
                     }
                     .background(.white)
-                    .padding(.top, 4)
                 }
             }
         }
