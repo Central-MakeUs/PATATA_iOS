@@ -55,9 +55,10 @@ struct SpotDetailView: View {
 
 extension SpotDetailView {
     private var contentView: some View {
-        VStack {
+        VStack(spacing: 0) {
             fakeNavBar
                 .background(.white)
+                .padding(.bottom, 14)
             
             ScrollView(.vertical) {
                 ZStack(alignment: .top) {
@@ -78,7 +79,7 @@ extension SpotDetailView {
                             
                             Divider()
                                 .frame(height: 0.35)
-                                .background(.blue100)
+                                .background(.gray10)
                             
                             if store.reviewData.isEmpty {
                                 HStack {
@@ -102,7 +103,7 @@ extension SpotDetailView {
                     }
                 }
             }
-            .background(.gray20)
+            .background(.gray10)
             
             VStack(spacing: 0) {
                 Color.black
@@ -179,7 +180,10 @@ extension SpotDetailView {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
                 ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
                     DownImageView(url: image, option: .custom(CGSize(width: 650, height: 650)), fallBackImg: "ImageDefault")
+                        .frame(maxWidth: UIScreen.main.bounds.width)
+                        .frame(height: UIScreen.main.bounds.height * 0.6)
                         .aspectRatio(contentMode: .fill)
+                        .clipped()
                 }
             }
             .frame(maxWidth: .infinity)
@@ -187,12 +191,16 @@ extension SpotDetailView {
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .sizeState(size: $sizeState)
             .overlay(alignment: .bottom) {
-                CustomPageIndicator(
-                    numberOfPages: store.spotDetailData.images.count,
-                    currentIndex: store.currentIndex,
-                    viewState: .spotDetail
-                )
-                .padding(.bottom, 40)
+                Group {
+                    if store.spotDetailData.images.count != 1 {
+                        CustomPageIndicator(
+                            numberOfPages: store.spotDetailData.images.count,
+                            currentIndex: store.currentIndex,
+                            viewState: .spotDetail
+                        )
+                        .padding(.bottom, 40)
+                    }
+                }
             }
             
             if store.spotDetailData.categoryId == .recommendSpot {
@@ -225,7 +233,7 @@ extension SpotDetailView {
             // 유저
             HStack {
                 Text(store.spotDetailData.memberName)
-                    .textStyle(.subtitleXS)
+                    .textStyle(.subtitleS)
                     .foregroundStyle(.textDefault)
                 
                 Spacer()
@@ -236,11 +244,11 @@ extension SpotDetailView {
             // 주소와 주소 복사
             HStack {
                 Text(store.spotDetailData.spotAddress)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textDisabled)
                 
                 Text("주소복사")
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.blue100)
                     .onTapGesture {
                         hideKeyboard()
@@ -254,7 +262,7 @@ extension SpotDetailView {
             
             HStack {
                 Text(store.spotDetailData.spotDescription)
-                    .textStyle(.captionM)
+                    .textStyle(.bodySM)
                     .foregroundStyle(.textSub)
                 
                 Spacer()
@@ -310,17 +318,24 @@ extension SpotDetailView {
             
             Spacer()
             
-            Image("UploadInActive")
-                .foregroundStyle(.gray70)
-                .asButton {
-                    hideKeyboard()
-                    store.send(.viewEvent(.tappedOnSubmit))
-                }
+            if store.commentText.isEmpty {
+                Image("UploadInActive")
+                    .asButton {
+                        hideKeyboard()
+                    }
+            } else {
+                Image("UploadActive")
+                    .asButton {
+                        hideKeyboard()
+                        store.send(.viewEvent(.tappedOnSubmit))
+                    }
+                    .padding(.trailing, 12)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 12)
         .padding(.vertical, 9)
-        .background(.gray20)
+        .background(.gray10)
         .clipShape(RoundedRectangle(cornerRadius: 25))
     }
 }
@@ -330,7 +345,7 @@ extension SpotDetailView {
         VStack {
             HStack {
                 Text(nick)
-                    .textStyle(.subtitleM)
+                    .textStyle(.subtitleSM)
                     .foregroundStyle(.textSub)
                 
                 Spacer()
@@ -356,7 +371,7 @@ extension SpotDetailView {
             
             HStack {
                 Text(text)
-                    .textStyle(.bodyM)
+                    .textStyle(.bodySM)
                     .foregroundStyle(.textSub)
                 
                 Spacer()
@@ -365,7 +380,7 @@ extension SpotDetailView {
             
             HStack {
                 Text(date)
-                    .textStyle(.captionM)
+                    .textStyle(.captionS)
                 
                 Spacer()
             }
@@ -386,7 +401,7 @@ extension SpotDetailView {
             if index != items.count - 1 {
                 Divider()
                     .frame(height: 0.3)
-                    .background(.blue100)
+                    .background(.gray10)
             }
         }
     }

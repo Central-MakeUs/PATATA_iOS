@@ -16,6 +16,7 @@ struct SpotArchiveButton: View {
     enum ViewState {
         case home
         case other
+        case category
     }
     
     var isSaved: Bool
@@ -38,24 +39,48 @@ struct SpotArchiveButton: View {
     }
     
     var body: some View {
-        Image(isSaved ? "ArchiveActive" : (viewState == .home ? "HomeArchiveIcon": "ArchiveInactive"))
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(width: width, height: height)
-            .foregroundStyle(isSaved ? .black : .white)
-            .asButton {
-                if let otherGesture {
-                    otherGesture()
-                }
-                
-                self.animate = true
-                onToggleScrap()
-                
-                DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                    self.animate = false
-                }
+        Group {
+            if viewState == .category {
+                Image(isSaved ? "ArchiveActiveIcon" : "ArchiveIcon")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: width, height: height)
+                    .foregroundStyle(isSaved ? .black : .white)
+                    .asButton {
+                        if let otherGesture {
+                            otherGesture()
+                        }
+                        
+                        self.animate = true
+                        onToggleScrap()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+                            self.animate = false
+                        }
+                    }
+                    .scaleEffect(animate ? animationScale : 1)
+                    .animation(.easeIn(duration: animationDuration), value: isSaved)
+            } else {
+                Image(isSaved ? "ArchiveActive" : (viewState == .home ? "HomeArchiveIcon": "ArchiveInactive"))
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: width, height: height)
+                    .foregroundStyle(isSaved ? .black : .white)
+                    .asButton {
+                        if let otherGesture {
+                            otherGesture()
+                        }
+                        
+                        self.animate = true
+                        onToggleScrap()
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+                            self.animate = false
+                        }
+                    }
+                    .scaleEffect(animate ? animationScale : 1)
+                    .animation(.easeIn(duration: animationDuration), value: isSaved)
             }
-            .scaleEffect(animate ? animationScale : 1)
-            .animation(.easeIn(duration: animationDuration), value: isSaved)
+        }
     }
 }

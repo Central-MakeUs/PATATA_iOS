@@ -148,11 +148,11 @@ extension SearchResultView {
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(alignment: .topTrailing) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: item.isScraped) {
+                    SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: item.isScraped) {
                         store.send(.viewEvent(.tappedArchiveButton(index)))
                     }
-                    .padding(.trailing, 10)
-                    .padding(.top, 10)
+                    .padding(.trailing, 4)
+                    .padding(.top, 4)
                 }
             
             Text(item.spotName)

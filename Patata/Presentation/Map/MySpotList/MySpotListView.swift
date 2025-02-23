@@ -25,19 +25,19 @@ struct MySpotListView: View {
 extension MySpotListView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            VStack {
+            VStack(spacing: 0) {
                 fakeNavgationBar
                 
                 if store.viewState != .home {
                     scrollMenuView
-                        .padding(.top, 10)
+                        .padding(.top, 12)
                         .padding(.horizontal, 15)
                 }
             }
-            .padding(.bottom, 12)
-            .background(.white)
+//            .background(.white)
+//            .padding(.bottom, 14)
             
-            if store.viewState == .map {
+            if store.viewState != .home {
                 if store.mapSpotEntity.isEmpty {
                     Spacer()
                     
@@ -55,9 +55,11 @@ extension MySpotListView {
                                     }
                             }
                         }
-                        
+                        .padding(.top, 12
+                        )
                     }
                     .background(.gray10)
+                    
                 }
             } else {
                 ScrollView(.vertical) {
@@ -65,7 +67,6 @@ extension MySpotListView {
                         ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
                             spotListView(spot: item, index: index)
                                 .background(.white)
-    
                                 .asButton {
                                     store.send(.viewEvent(.tappedSpot(item.spotId)))
                                 }
@@ -73,7 +74,7 @@ extension MySpotListView {
                     }
                     .padding(.top, 8)
                 }
-                .background(.gray20)
+                .background(.gray10)
             }
             
         }
@@ -103,9 +104,13 @@ extension MySpotListView {
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.horizontal, 20)
-                    .padding(.vertical, 12)
-                    .background(.gray20)
-                    .clipShape(RoundedRectangle(cornerRadius: 30))
+                    .padding(.vertical, 18)
+                    .background(
+                        RoundedRectangle(cornerRadius: 30)
+                            .strokeBorder(.gray20, lineWidth: 1)
+                            .background(.gray10)
+                            .clipShape(RoundedRectangle(cornerRadius: 30))
+                    )
                     .asButton {
                         store.send(.viewEvent(.tappedSearch))
                     }

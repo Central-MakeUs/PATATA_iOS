@@ -42,7 +42,7 @@ extension ReportView {
     private var contentView: some View {
         VStack {
             fakeNavgationBar
-                .padding(.bottom, 12)
+                .padding(.bottom, 14)
                 .background(.white)
             
             ForEach(Array(store.reportOption.enumerated()), id: \.element) { index, option in

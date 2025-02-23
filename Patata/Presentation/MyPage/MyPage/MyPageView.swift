@@ -27,11 +27,11 @@ extension MyPageView {
     private var contentView: some View {
         VStack(spacing: 0) {
             fakeNavgationBar
-                .padding(.bottom, 12)
+                .padding(.bottom, 14)
             
-            Color.gray20
+            Color.gray10
                 .frame(maxWidth: .infinity)
-                .frame(height: 6)
+                .frame(height: 4)
                 
             if store.spotCount == 0 {
                 noArchiveView
@@ -209,7 +209,7 @@ extension MyPageView {
 
 extension MyPageView {
     private func myPageItem(_ item: ArchiveListEntity) -> some View {
-        DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
+        DownImageView(url: item.representativeImageUrl, option: .custom(CGSize(width: 700, height: 700)), fallBackImg: "ImageDefault")
             .aspectRatio(1, contentMode: .fill)
     }
 }

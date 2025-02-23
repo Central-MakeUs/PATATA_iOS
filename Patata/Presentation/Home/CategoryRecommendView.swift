@@ -23,12 +23,24 @@ extension CategoryRecommendView {
                 .aspectRatio(1, contentMode: .fit)
                 .frame(width: 120, height: 120)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay(alignment: .bottomLeading) {
-                    SpotArchiveButton(height: 24, width: 24, isSaved: spotItem.isScraped) {
-                        tappedButton()
+                .overlay {
+                    ZStack(alignment: .bottomLeading) {
+                        LinearGradient(
+                            gradient: Gradient(stops: [
+                             .init(color: Color.clear, location: 0.78),
+                                .init(color: Color.gray50, location: 1.0)
+                            ]),
+                            startPoint: .top,
+                            endPoint: .bottom
+                        )
+                        
+                        SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: spotItem.isScraped) {
+                            tappedButton()
+                        }
+                        .padding(.leading, 4)
+                        .padding(.bottom, 4)
                     }
-                    .padding(.leading, 10)
-                    .padding(.bottom, 10)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .padding(.leading, 10)
                 .padding(.vertical, 10)

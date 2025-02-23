@@ -43,7 +43,7 @@ extension ProfileEditView {
     private var contentView: some View {
         VStack(alignment: .center, spacing: 0) {
             fakeNavgationBar
-                .padding(.bottom, 12)
+                .padding(.bottom, 14)
                 .background(.white)
             
             myProfileImage

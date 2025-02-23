@@ -38,7 +38,7 @@ struct SearchMapView: View {
                         Text("'\(store.searchText)'에 대한 검색 결과가 없어요")
                             .textStyle(.subtitleXS)
                             .foregroundStyle(.blue20)
-                            .padding(.vertical, 10)
+                            .padding(.vertical, 14)
                         
                         Image("NoAddIcon")
                             .resizable()

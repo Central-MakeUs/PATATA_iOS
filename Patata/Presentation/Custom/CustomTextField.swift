@@ -28,10 +28,12 @@ struct CustomTextField: UIViewRepresentable {
             textFontName = "Pretendard-Bold"
         case .headlineM, .headlineS,
                 .subtitleL, .subtitleM, .subtitleS, .subtitleXS, .subtitleSM,
-                .captionS:
+                .captionS, .headlineXS:
             textFontName = "Pretendard-SemiBold"
         case .bodyM, .bodyS, .captionM:
             textFontName = "Pretendard-Regular"
+        case .bodySM:
+            textFontName = "Pretendard-Medium"
         }
         
         // 플레이스홀더 폰트 설정
@@ -41,10 +43,12 @@ struct CustomTextField: UIViewRepresentable {
             placeholderFontName = "Pretendard-Bold"
         case .headlineM, .headlineS,
                 .subtitleL, .subtitleM, .subtitleS, .subtitleXS, .subtitleSM,
-                .captionS:
+                .captionS, .headlineXS:
             placeholderFontName = "Pretendard-SemiBold"
         case .bodyM, .bodyS, .captionM:
             placeholderFontName = "Pretendard-Regular"
+        case .bodySM:
+            placeholderFontName = "Pretendard-Medium"
         }
         
         textField.font = UIFont(name: textFontName, size: textStyle.fontSize)

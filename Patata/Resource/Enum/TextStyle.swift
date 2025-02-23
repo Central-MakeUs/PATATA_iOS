@@ -10,6 +10,7 @@ import SwiftUI
 enum TextStyle {
     case headlineL
     case headlineM
+    case headlineXS
     case headlineS
     case subtitleL
     case subtitleM
@@ -18,6 +19,7 @@ enum TextStyle {
     case subtitleSM
     case bodyM
     case bodyS
+    case bodySM
     case captionM
     case captionS
     
@@ -43,10 +45,14 @@ enum TextStyle {
             return .pretendard(.regular, size: 16)
         case .bodyS:
             return .pretendard(.regular, size: 14)
+        case .bodySM:
+            return .pretendard(.medium, size: 14)
         case .captionM:
             return .pretendard(.regular, size: 12)
         case .captionS:
             return .pretendard(.semibold, size: 10)
+        case .headlineXS:
+            return .pretendard(.semibold, size: 20)
         }
     }
     
@@ -72,10 +78,14 @@ enum TextStyle {
             return 24
         case .bodyS:
             return 20
+        case .bodySM:
+            return 20
         case .captionM:
             return 18
         case .captionS:
             return 12
+        case .headlineXS:
+            return 26
         }
     }
     
@@ -105,6 +115,10 @@ enum TextStyle {
             return 12
         case .captionS:
             return 10
+        case .bodySM:
+            return 14
+        case .headlineXS:
+            return 20
         }
     }
 }

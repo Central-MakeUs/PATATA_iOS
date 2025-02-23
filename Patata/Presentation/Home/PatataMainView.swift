@@ -74,6 +74,7 @@ extension PatataMainView {
                                     contentOffsetX = -(cardWidth + spacing)
                                 }
                             }
+                            .padding(.top, 0)
                         
                         spotCategory
                             .padding(.horizontal, 15)
@@ -99,7 +100,7 @@ extension PatataMainView {
                         moreButton
                             .padding(.top, 8)
                             .padding(.horizontal, 15)
-                            .padding(.bottom, 10)
+                            .padding(.bottom, 60)
                             .asButton {
                                 store.send(.viewEvent(.tappedAddButton))
                             }
@@ -197,7 +198,7 @@ extension PatataMainView {
             
             Text("더보기")
                 .textStyle(.subtitleM)
-                .padding(.vertical, 8)
+                .padding(.vertical, 12)
             
             Image("NextActive")
             

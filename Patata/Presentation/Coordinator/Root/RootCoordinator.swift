@@ -106,7 +106,7 @@ struct RootCoordinator {
                 }
                 
             case let .locationAction(.permissionResponse(hasPermission)):
-                state.isPresent = !hasPermission
+//                state.isPresent = !hasPermission
                 
                 return .run { _ in
                     if hasPermission {

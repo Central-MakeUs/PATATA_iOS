@@ -82,10 +82,10 @@ extension PASearchBar {
         }
         .frame(maxWidth: .infinity)
         .padding(.horizontal, 20)
-        .padding(.vertical, 15)
+        .padding(.vertical, 18)
         .background(
             RoundedRectangle(cornerRadius: 25)
-                .strokeBorder(.gray30, lineWidth: 2)
+                .strokeBorder(.gray20, lineWidth: 1)
                 .background(.white)
                 .clipShape(RoundedRectangle(cornerRadius: 25))
         )

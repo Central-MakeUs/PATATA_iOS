@@ -68,7 +68,7 @@ extension AddSpotMapView {
         VStack(spacing: 0) {
             fakeNavgationBar
                 .padding(.horizontal, 15)
-                .padding(.bottom, 12)
+                .padding(.bottom, 14)
             
             ZStack(alignment: .bottom) {
                 ZStack(alignment: .top) {

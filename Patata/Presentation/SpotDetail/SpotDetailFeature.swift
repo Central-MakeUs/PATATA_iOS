@@ -151,8 +151,10 @@ extension SpotDetailFeature {
             case .viewEvent(.tappedOnSubmit):
                 let comment = state.commentText
                 
-                return .run { send in
-                    await send(.networkType(.createReview(comment)))
+                if !comment.isEmpty {
+                    return .run { send in
+                        await send(.networkType(.createReview(comment)))
+                    }
                 }
                 
             case let .viewEvent(.tappedDeleteReview(reviewId, index)):

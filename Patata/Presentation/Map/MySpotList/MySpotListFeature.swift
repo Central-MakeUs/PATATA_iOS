@@ -96,6 +96,7 @@ extension MySpotListFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
+                print("onAppear", state.mapSpotEntity)
                 return .run { send in
                     await send(.dataTransType(.fetchRealm))
                     
@@ -219,8 +220,6 @@ extension MySpotListFeature {
                     let mbrCoord = state.isSearch ? nil : state.mbrLocation
                     let userLocation = state.userCoord
                     let searchText = state.searchText
-                    
-                    print("searchText", searchText)
                     
                     return .run { send in
                         await send(.networkType(.fetchSearchSpot(mbrCoord, userLocation, searchText)))

@@ -133,7 +133,7 @@ extension PatataMainFeature {
                 }
                 
             case let .networkType(.patchArchiveState(index, isCard)):
-                let spotId = [state.todaySpotItems[index].spotId]
+                let spotId = [state.spotItems[index].spotId]
                 
                 if isCard {
                     return .run { send in
@@ -161,7 +161,7 @@ extension PatataMainFeature {
                 state.todaySpotItems = data
                 
             case let .dataTransType(.categorySpot(data)):
-                state.spotItems = data
+                state.spotItems = Array(data.prefix(3))
                 
             case let .dataTransType(.archiveState(data, index, isCard)):
                 if isCard {

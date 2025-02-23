@@ -72,12 +72,12 @@ extension ArchiveView {
     private var contentView: some View {
         VStack(spacing: 0) {
             fakeNavBar
-                .padding(.bottom, 12)
+                .padding(.bottom, 14)
                 .background(.white)
             
-            Color.gray20
+            Color.gray10
                 .frame(maxWidth: .infinity)
-                .frame(height: 6)
+                .frame(height: 4)
             
             if store.archiveList.isEmpty {
                 Spacer()
@@ -170,8 +170,9 @@ extension ArchiveView {
 
 extension ArchiveView {
     private func archiveItem(_ item: ArchiveListEntity) -> some View {
-        DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
+        DownImageView(url: item.representativeImageUrl, option: .custom(CGSize(width: 800, height: 800)), fallBackImg: "ImageDefault")
             .aspectRatio(1, contentMode: .fit)
+            .clipped()
             .overlay(alignment: .topTrailing) {
                 if store.chooseIsValid {
                     if !store.selectedSpotList.contains(item.spotId) {

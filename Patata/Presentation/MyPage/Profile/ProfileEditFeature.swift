@@ -69,6 +69,7 @@ struct ProfileEditFeature {
     
     enum DataTransType {
         case nicknameData(Bool)
+        case errorHandle(String)
     }
     
     @Dependency(\.networkManager) var networkManager
@@ -96,13 +97,7 @@ extension ProfileEditFeature {
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
             case .viewEvent(.tappedConfirmButton):
-                state.dataState = .progress
-                
-                if !state.imageData.isEmpty {
-                    return .run { send in
-                        await send(.networkType(.changeProfileImage))
-                    }
-                } else {
+                if state.nickname != UserDefaultsManager.nickname && state.nickname.count >= 2 {
                     return .run { send in
                         await send(.networkType(.changeNickname))
                     }
@@ -110,14 +105,13 @@ extension ProfileEditFeature {
                 
             case .networkType(.changeProfileImage):
                 let imageData = state.imageData[0]
-                print(imageData)
                 
                 return .run { send in
                     do {
                         let result = try await myPageRepository.uploadImage(image: imageData)
                         
                         if result {
-                            await send(.networkType(.changeNickname))
+                            await send(.delegate(.successChangeNickname))
                         }
                     } catch {
                         print("error", errorManager.handleError(error) ?? "")
@@ -131,14 +125,28 @@ extension ProfileEditFeature {
                         
                         await send(.dataTransType(.nicknameData(result)))
                     } catch {
-                        print("error", errorManager.handleError(error) ?? "")
+                        let errorMSG = errorManager.handleError(error) ?? ""
+                        print("error", errorMSG)
+                        await send(.dataTransType(.errorHandle(errorMSG)))
                     }
                 }
                 
             case let .dataTransType(.nicknameData(isValid)):
-                if isValid {
-                    UserDefaultsManager.nickname = state.nickname
+                state.isValid = true
+                state.dataState = .progress
+                UserDefaultsManager.nickname = state.nickname
+                
+                if state.imageData.isEmpty {
                     return .send(.delegate(.successChangeNickname))
+                } else {
+                    return .run { send in
+                        await send(.networkType(.changeProfileImage))
+                    }
+                }
+                
+            case let .dataTransType(.errorHandle(isValid)):
+                if isValid == "이미 사용중인 닉네임입니다." {
+                    state.isValid = false
                 }
                 
             case let .validCheckText(nickname):
@@ -185,6 +193,7 @@ extension ProfileEditFeature {
                 }
                 
                 state.nickname = filteredText
+                state.isValid = true
                 
             case let .bindingNickname(nickname):
                 state.nickname = nickname
