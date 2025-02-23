@@ -80,7 +80,6 @@ extension PatataMainView {
                             .padding(.top, 8)
                         
                         categoryRecommendView
-                            .padding(.horizontal, 15)
                             .padding(.top, 35)
                             .padding(.bottom, 15)
                         
@@ -176,6 +175,7 @@ extension PatataMainView {
                 
                 Spacer()
             }
+            .padding(.leading, 15)
             
             ScrollView(.horizontal) {
                 HStack {
@@ -185,6 +185,7 @@ extension PatataMainView {
                         }
                     }
                 }
+                .padding(.horizontal, 15)
             }
             .scrollIndicators(.hidden)
         }
@@ -341,6 +342,6 @@ extension PatataMainView {
                 .textStyle(.captionS)
                 .foregroundStyle(.textDefault)
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 12)
     }
 }

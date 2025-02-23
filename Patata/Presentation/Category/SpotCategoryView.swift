@@ -55,24 +55,23 @@ extension SpotCategoryView {
                     .padding(.top, 12)
                     .padding(.horizontal, 15)
                 
-//                LazyVGrid(columns: [GridItem(.flexible())]) {
-                    ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                        CategoryRecommendView(spotItem: item) {
-                            store.send(.viewEvent(.tappedArchiveButton(index)))
-                        }
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.horizontal, 15)
-                        .onAppear {
-                            if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
-                                store.send(.viewEvent(.nextPage))
-                            }
-                        }
-                        .asButton {
-                            store.send(.viewEvent(.tappedSpot(index)))
+                ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                    CategoryRecommendView(spotItem: item) {
+                        store.send(.viewEvent(.tappedArchiveButton(index)))
+                    }
+                    .background(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal, 15)
+                    .padding(.bottom, 4)
+                    .onAppear {
+                        if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
+                            store.send(.viewEvent(.nextPage))
                         }
                     }
-//                }
+                    .asButton {
+                        store.send(.viewEvent(.tappedSpot(index)))
+                    }
+                }
             }
             .background(.gray10)
 
