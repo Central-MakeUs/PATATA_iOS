@@ -49,18 +49,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                             }
                         }
                         .transition(.opacity)
-                } else {
-//                    Color.clear
-//                        .ignoresSafeArea()
-//                        .contentShape(Rectangle())
-//                        .onTapGesture {
-//                            if let onDismiss {
-//                                onDismiss()
-//                            }
-//                            withAnimation {
-//                                isPresented = false
-//                            }
-//                        }
                 }
             }
             
@@ -111,7 +99,8 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                                 .frame(width: 50, height: 4)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .padding(.top, 8)
-                                .padding(.bottom, 4)
+                                .padding(.bottom, 12)
+                                .contentShape(Rectangle())
                             
                             sheetContent()
                                 .fixedSize(horizontal: false, vertical: true)
