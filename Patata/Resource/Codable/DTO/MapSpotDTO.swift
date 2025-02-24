@@ -25,7 +25,7 @@ struct MapSpotItemDTO: DTO {
     let spotId: Int
     let spotName: String
     let spotAddress: String
-    let spotAddressDetail: String
+    let spotAddressDetail: String?
     let latitude: Double
     let longitude: Double
     let categoryId: Int

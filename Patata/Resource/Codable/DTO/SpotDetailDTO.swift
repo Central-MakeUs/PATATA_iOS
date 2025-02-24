@@ -18,7 +18,7 @@ struct SpotDetailItemDTO: DTO {
     let spotId: Int
     let isAuthor: Bool
     let spotAddress: String
-    let spotAddressDetail: String
+    let spotAddressDetail: String?
     let spotName: String
     let spotDescription: String
     let categoryId: Int

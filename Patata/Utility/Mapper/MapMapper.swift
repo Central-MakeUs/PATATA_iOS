@@ -22,7 +22,7 @@ struct MapMapper: Sendable {
             spotId: dto.spotId,
             spotName: dto.spotName,
             spotAddress: dto.spotAddress,
-            spotAddressDetail: dto.spotAddressDetail,
+            spotAddressDetail: dto.spotAddressDetail ?? "",
             coordinate: Coordinate(latitude: dto.latitude, longitude: dto.longitude),
             category: CategoryCase(rawValue: dto.categoryId) ?? .houseSpot,
             tags: dto.tags,

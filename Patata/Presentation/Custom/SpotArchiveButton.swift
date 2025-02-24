@@ -51,15 +51,15 @@ struct SpotArchiveButton: View {
                             otherGesture()
                         }
                         
-                        self.animate = true
+//                        self.animate = true
                         onToggleScrap()
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                            self.animate = false
-                        }
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+//                            self.animate = false
+//                        }
                     }
-                    .scaleEffect(animate ? animationScale : 1)
-                    .animation(.easeIn(duration: animationDuration), value: isSaved)
+//                    .scaleEffect(animate ? animationScale : 1)
+//                    .animation(.easeIn(duration: animationDuration), value: isSaved)
             } else {
                 Image(isSaved ? "ArchiveActive" : (viewState == .home ? "HomeArchiveIcon": "ArchiveInactive"))
                     .resizable()
@@ -71,15 +71,15 @@ struct SpotArchiveButton: View {
                             otherGesture()
                         }
                         
-                        self.animate = true
+//                        self.animate = true
                         onToggleScrap()
                         
-                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
-                            self.animate = false
-                        }
+//                        DispatchQueue.main.asyncAfter(deadline: .now() + animationDuration) {
+//                            self.animate = false
+//                        }
                     }
-                    .scaleEffect(animate ? animationScale : 1)
-                    .animation(.easeIn(duration: animationDuration), value: isSaved)
+//                    .scaleEffect(animate ? animationScale : 1)
+//                    .animation(.easeIn(duration: animationDuration), value: isSaved)
             }
         }
     }

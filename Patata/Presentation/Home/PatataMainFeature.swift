@@ -133,9 +133,9 @@ extension PatataMainFeature {
                 }
                 
             case let .networkType(.patchArchiveState(index, isCard)):
-                let spotId = [state.spotItems[index].spotId]
-                
                 if isCard {
+                    let spotId = [state.todaySpotItems[index].spotId]
+                    
                     return .run { send in
                         do {
                             let data = try await archiveRepository.toggleArchive(spotId: spotId)
@@ -146,6 +146,8 @@ extension PatataMainFeature {
                         }
                     }
                 } else {
+                    let spotId = [state.spotItems[index].spotId]
+                    
                     return .run { send in
                         do {
                             let data = try await archiveRepository.toggleArchive(spotId: spotId)

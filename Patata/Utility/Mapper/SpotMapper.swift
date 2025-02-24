@@ -36,7 +36,7 @@ struct SpotMapper: Sendable {
             spotId: dto.spotId,
             isAuthor: dto.isAuthor,
             spotAddress: dto.spotAddress,
-            spotAddressDetail: dto.spotAddressDetail,
+            spotAddressDetail: dto.spotAddressDetail ?? "",
             spotName: dto.spotName,
             spotDescription: dto.spotDescription,
             categoryId: CategoryCase(rawValue: dto.categoryId) ?? .houseSpot,
@@ -130,7 +130,7 @@ extension SpotMapper {
         return TodaySpotListEntity(
             spotId: dto.spotId,
             spotAddress: dto.spotAddress,
-            spotAddressDetail: dto.spotAddressDetail,
+            spotAddressDetail: dto.spotAddressDetail ?? "",
             spotName: dto.spotName,
             categoryId: CategoryCase
                 .getCategory(

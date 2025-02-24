@@ -17,7 +17,7 @@ struct TodaySpotListDTO: DTO {
 struct TodaySpotListItemDTO: DTO {
     let spotId: Int
     let spotAddress: String
-    let spotAddressDetail: String
+    let spotAddressDetail: String?
     let spotName: String
     let categoryId: Int
     let images: [String]
