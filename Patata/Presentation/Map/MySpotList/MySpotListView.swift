@@ -25,17 +25,20 @@ struct MySpotListView: View {
 extension MySpotListView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 0) {
-                fakeNavgationBar
-                
-                if store.viewState != .home {
-                    scrollMenuView
-                        .padding(.top, 12)
-                        .padding(.horizontal, 15)
+            if store.viewState != .home {
+                VStack(spacing: 0) {
+                    fakeNavgationBar
+                    
+                    if store.viewState != .home {
+                        scrollMenuView
+                            .padding(.top, 12)
+                            .padding(.horizontal, 15)
+                    }
                 }
+            } else {
+                fakeNavgationBar
+                    .padding(.bottom, 14)
             }
-//            .background(.white)
-//            .padding(.bottom, 14)
             
             if store.viewState != .home {
                 if store.mapSpotEntity.isEmpty {
@@ -247,6 +250,7 @@ extension MySpotListView {
                     .foregroundStyle(.textSub)
                 
                 Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
+                    .lineLimit(1)
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textInfo)
                 
@@ -312,6 +316,7 @@ extension MySpotListView {
                     .foregroundStyle(.textSub)
                 
                 Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
+                    .lineLimit(1)
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 
@@ -342,7 +347,7 @@ extension MySpotListView {
                     .padding(.horizontal, 15)
             } else if spotImage.count == 2 {
                 HStack(spacing: 8) {
-                    ForEach(spotImage, id: \.self) { image in
+                    ForEach(Array(zip(spotImage.indices, spotImage.compactMap { $0 })), id: \.0) { index, image in
                         DownImageView(url: image, option: .max, fallBackImg: imageDefault)
                             .aspectRatio(1, contentMode: .fill)
                             .frame(width: (imageWidth - 8) / 2)
@@ -354,7 +359,7 @@ extension MySpotListView {
             } else {
                 ScrollView(.horizontal) {
                     HStack(spacing: 8) {
-                        ForEach(spotImage, id: \.self) { image in
+                        ForEach(Array(zip(spotImage.indices, spotImage.compactMap { $0 })), id: \.0) { index, image in
                             DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
                                 .aspectRatio(1, contentMode: .fill)
                                 .frame(width: (imageWidth - 8) / 2.5)
