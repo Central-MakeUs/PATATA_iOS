@@ -55,6 +55,7 @@ extension PatataMainView {
                 WithPerceptionTracking {
                     ScrollView(.vertical) {
                         PASearchBar(placeHolder: "검색어를 입력하세요")
+                            .frame(height: 48)
                             .padding(.horizontal, 15)
                             .asButton {
                                 store.send(.viewEvent(.tappedSearch))

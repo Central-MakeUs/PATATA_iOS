@@ -121,4 +121,37 @@ enum TextStyle {
             return 20
         }
     }
+    
+    var uiFont: UIFont {
+        switch self {
+        case .headlineL:
+            return UIFont(name: "Pretendard-Bold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .bold)
+        case .headlineM:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .headlineS:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .headlineXS:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .subtitleL:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .subtitleM:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .subtitleS:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .subtitleXS:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .subtitleSM:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        case .bodyM:
+            return UIFont(name: "Pretendard-Regular", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .regular)
+        case .bodyS:
+            return UIFont(name: "Pretendard-Regular", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .regular)
+        case .bodySM:
+            return UIFont(name: "Pretendard-Medium", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .medium)
+        case .captionM:
+            return UIFont(name: "Pretendard-Regular", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .regular)
+        case .captionS:
+            return UIFont(name: "Pretendard-SemiBold", size: fontSize) ?? UIFont.systemFont(ofSize: fontSize, weight: .semibold)
+        }
+    }
 }

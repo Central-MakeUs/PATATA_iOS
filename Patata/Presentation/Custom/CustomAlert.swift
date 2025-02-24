@@ -101,14 +101,14 @@ extension CustomAlert {
                 Text(confirmText)
                     .foregroundStyle(confirmText == "설정으로 이동" || confirmText == "확인" ? .textDefault : .red100)
                     .textStyle(.subtitleS)
-                    .asButton {
-                        onConfirm()
-                        isPresented = false
-                    }
                 
                 Spacer()
             }
             .padding(.vertical, 14)
+            .asButton {
+                onConfirm()
+                isPresented = false
+            }
         }
     }
 }

@@ -304,32 +304,47 @@ extension SpotDetailView {
     
     private var commentTextField: some View {
         HStack {
-            TextField(
-                "comment",
+//            TextField(
+//                "comment",
+//                text: $store.commentText.sending(\.bindingCommentText),
+//                prompt: Text("댓글을 입력하세요")
+//                    .foregroundColor(.textDisabled)
+//            )
+//            .onSubmit {
+//                hideKeyboard()
+//                store.send(.viewEvent(.tappedOnSubmit))
+//            }
+//            .textStyle(.bodyS)
+            
+            DisablePasteTextField(
                 text: $store.commentText.sending(\.bindingCommentText),
-                prompt: Text("댓글을 입력하세요")
-                    .foregroundColor(.textDisabled)
+                isFocused: nil, // nil로 설정하여 내부 포커스 관리를 비활성화
+                placeholder: "댓글을 입력하세요",  // 비워두기 - 오버레이에서 처리
+                placeholderColor: .textDisabled,
+                edge: UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0),
+                keyboardType: .default,
+                onCommit: {
+                    hideKeyboard()
+                    store.send(.viewEvent(.tappedOnSubmit))
+                }
             )
-            .onSubmit {
-                hideKeyboard()
-                store.send(.viewEvent(.tappedOnSubmit))
-            }
-            .textStyle(.bodyS)
+            .frame(height: 34)
             
             Spacer()
             
             if store.commentText.isEmpty {
                 Image("UploadInActive")
+                    .padding(.trailing, 8)
                     .asButton {
                         hideKeyboard()
                     }
             } else {
                 Image("UploadActive")
+                    .padding(.trailing, 8)
                     .asButton {
                         hideKeyboard()
                         store.send(.viewEvent(.tappedOnSubmit))
                     }
-                    .padding(.trailing, 12)
             }
         }
         .frame(maxWidth: .infinity)

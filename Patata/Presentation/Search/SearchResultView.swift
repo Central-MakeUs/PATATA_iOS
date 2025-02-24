@@ -82,6 +82,7 @@ extension SearchResultView {
             
             PASearchBar(placeHolder: store.searchText, placeHolderColor: .textDefault)
                 .padding(.horizontal, 15)
+                .frame(height: 48)
                 .onTapGesture {
                     store.send(.viewEvent(.searchStart))
                 }
@@ -165,7 +166,7 @@ extension SearchResultView {
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 
-                SaveCommentCountView(archiveCount: item.spotScraps, commentCount: item.reviews, imageSize: 12)
+                SaveCommentCountView(archiveCount: item.spotScraps, commentCount: item.reviews, imageSize: 6)
             }
             .padding(.top, 4)
         }

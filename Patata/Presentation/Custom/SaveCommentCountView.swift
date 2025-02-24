@@ -20,8 +20,8 @@ struct SaveCommentCountView: View {
 extension SaveCommentCountView {
     private var saveCommentView: some View {
         HStack(spacing: 5) {
-            HStack(spacing: 1) {
-                Image("ArchiveInactive")
+            HStack(spacing: 4) {
+                Image("ScrapCount")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: imageSize)
@@ -29,8 +29,8 @@ extension SaveCommentCountView {
                 Text(String(archiveCount))
             }
             
-            HStack(spacing: 1) {
-                Image("CommentInactive")
+            HStack(spacing: 4) {
+                Image("CommentCount")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: imageSize)

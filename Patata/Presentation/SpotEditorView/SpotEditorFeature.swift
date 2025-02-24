@@ -421,7 +421,7 @@ extension SpotEditorFeature {
               state.categoryText,
               state.agreeToTerms)
         state.spotEditorIsValid = !state.title.isEmpty &&
-                                     !state.detail.isEmpty &&
+        !state.detail.isEmpty && state.detail.count <= 300 &&
                                      state.categoryText != "카테고리를 선택해주세요" &&
                                      state.agreeToTerms
     }

@@ -79,7 +79,7 @@ extension SearchView {
                 hideKeyboard()
                 store.send(.viewEvent(.searchOnSubmit))
             }
-
+            .frame(height: 48)
         }
     }
     

@@ -199,17 +199,18 @@ extension MySpotListView {
     }
     
     private func spotListView(spot: TodaySpotListEntity, index: Int) -> some View {
-        VStack {
+        VStack(spacing: 0) {
             spotItemListView(spot: spot, index: index)
                 .padding(.horizontal, 15)
             
             spotImageView(spotImage: spot.images)
+                .padding(.top, 10)
                 .padding(.bottom, 15)
         }
     }
     
     private func spotItemListView(spot: TodaySpotListEntity, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 if spot.categoryId == .recommendSpot {
                     Text("작가추천")
@@ -256,6 +257,7 @@ extension MySpotListView {
                 
                 Spacer()
             }
+            .padding(.top, 2)
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
@@ -263,21 +265,23 @@ extension MySpotListView {
                         .hashTagStyle()
                 }
             }
+            .padding(.top, 12)
         }
     }
     
     private func mapSpotView(spot: MapSpotEntity, index: Int) -> some View {
-        VStack {
+        VStack(spacing: 0) {
             mapSpotItemView(spot: spot, index: index)
                 .padding(.horizontal, 15)
             
             spotImageView(spotImage: spot.images)
+                .padding(.top, 10)
                 .padding(.bottom, 15)
         }
     }
     
     private func mapSpotItemView(spot: MapSpotEntity, index: Int) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 if spot.category == .recommendSpot {
                     Text("작가추천")
@@ -322,6 +326,7 @@ extension MySpotListView {
                 
                 Spacer()
             }
+            .padding(.top, 2)
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
@@ -329,6 +334,7 @@ extension MySpotListView {
                         .hashTagStyle()
                 }
             }
+            .padding(.top, 12)
         }
     }
     
