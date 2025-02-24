@@ -71,6 +71,9 @@ extension ProfileEditView {
                 .padding(.horizontal, 15)
                 .padding(.bottom, 20)
                 .padding(.top, 10)
+                .onChange(of: store.imageData) { newValue in
+                    store.send(.viewEvent(.imageChange))
+                }
                 .asButton {
                     store.send(.viewEvent(.tappedConfirmButton))
                 }
@@ -100,7 +103,6 @@ extension ProfileEditView {
     private var myProfileImage: some View {
         PhotoPickerView(selectedImages: $selectedImage, showPermissionAlert: $isPermission, isImageSizeValid: $isSize, resizedImageDatas: $store.imageData.sending(\.bindingImageData), isResizing: $isResizing, invalidExceed: $exceed, totalExceed: $totalExceed, maxSelectedCount: 1) {
             Group {
-                
                 if selectedImage.isEmpty {
                     if let imageData = store.profileData.profileImage {
                         DownImageView(url: imageData, option: .mid, fallBackImg: store.profileImage)
@@ -152,9 +154,9 @@ extension ProfileEditView {
                                         .foregroundStyle(.white)
                                         .shadow(color: .shadowColor, radius: 8)
                                 )
-                                .asButton {
-                                    isPermission = true
-                                }
+//                                .asButton {
+//                                    isPermission = true
+//                                }
                         }
                 }
                 

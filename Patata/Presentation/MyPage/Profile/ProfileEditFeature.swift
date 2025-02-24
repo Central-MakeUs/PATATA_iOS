@@ -65,6 +65,7 @@ struct ProfileEditFeature {
         case tappedClearNickName
         case tappedBackButton
         case tappedConfirmButton
+        case imageChange
     }
     
     enum DataTransType {
@@ -96,23 +97,31 @@ extension ProfileEditFeature {
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
+            case .viewEvent(.imageChange):
+                if !state.nickname.isEmpty && state.nickname.count >= 2 {
+                    state.textValueChange = true
+                }
+                
             case .viewEvent(.tappedConfirmButton):
                 if state.nickname != UserDefaultsManager.nickname && state.nickname.count >= 2 {
                     return .run { send in
                         await send(.networkType(.changeNickname))
                     }
+                } else if !state.imageData.isEmpty && state.nickname == UserDefaultsManager.nickname {
+                    return .run { send in
+                        await send(.networkType(.changeProfileImage))
+                    }
                 }
                 
             case .networkType(.changeProfileImage):
                 let imageData = state.imageData[0]
+                state.dataState = .progress
                 
                 return .run { send in
                     do {
                         let result = try await myPageRepository.uploadImage(image: imageData)
                         
-                        if result {
-                            await send(.delegate(.successChangeNickname))
-                        }
+                        await send(.delegate(.successChangeNickname))
                     } catch {
                         print("error", errorManager.handleError(error) ?? "")
                     }
@@ -133,7 +142,6 @@ extension ProfileEditFeature {
                 
             case let .dataTransType(.nicknameData(isValid)):
                 state.isValid = true
-                state.dataState = .progress
                 UserDefaultsManager.nickname = state.nickname
                 
                 if state.imageData.isEmpty {
