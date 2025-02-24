@@ -23,6 +23,7 @@ struct PatataMainView: View {
     @State private var cardWidth: CGFloat = 0
     @State private var contentHeight: CGFloat = 0
     @State private var dragOffset: CGFloat = 0
+    @State private var isScrollDisabled = false
     
     @State private var currentIndex = 0 {
         didSet {
@@ -105,6 +106,7 @@ extension PatataMainView {
                                 store.send(.viewEvent(.tappedAddButton))
                             }
                     }
+                    .scrollDisabled(isScrollDisabled)
                 }
             }
         }
@@ -283,23 +285,19 @@ extension PatataMainView {
                 .padding(.horizontal, sideCardWidth)
                 .frame(height: contentHeight * scaleEffect + 50)
                 .simultaneousGesture(
-                    DragGesture(minimumDistance: 1)
+                    DragGesture(minimumDistance: 20)
                         .onChanged { value in
                             let verticalDrag = abs(value.translation.height)
                             let horizontalDrag = abs(value.translation.width)
                             
                             if verticalDrag > horizontalDrag {
+                                isScrollDisabled = false
                                 return
                             }
                             
-                            let velocityThreshold: CGFloat = 800
-                            let velocity = abs(value.predictedEndTranslation.width - value.translation.width)
+                            isScrollDisabled = true
                             
-                            if velocity < velocityThreshold {
-                                withAnimation(.linear(duration: 0.1)) {
-                                    dragOffset = value.translation.width
-                                }
-                            } else {
+                            withAnimation(.linear(duration: 0.1)) {
                                 dragOffset = value.translation.width
                             }
                         }
@@ -311,6 +309,7 @@ extension PatataMainView {
                                 withAnimation(.smooth(duration: 0.3)) {
                                     dragOffset = 0
                                 }
+                                isScrollDisabled = false
                                 return
                             }
                             
@@ -322,6 +321,7 @@ extension PatataMainView {
                                     currentIndex -= 1
                                 }
                             }
+                            isScrollDisabled = false
                         }
                 )
             }
