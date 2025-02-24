@@ -35,7 +35,7 @@ struct SearchMapView: View {
                     HStack {
                         Spacer()
                         
-                        Text("'\(store.searchText)'에 대한 검색 결과가 없어요")
+                        Text(store.errorMSG)
                             .textStyle(.subtitleXS)
                             .foregroundStyle(.blue20)
                             .padding(.vertical, 14)

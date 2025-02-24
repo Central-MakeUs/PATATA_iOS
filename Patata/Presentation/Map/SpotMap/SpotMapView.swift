@@ -7,6 +7,7 @@
 
 import SwiftUI
 import ComposableArchitecture
+import PopupView
 
 // 지도 뷰를 그리기 전에 먼저 통신을 해서 기억하고 있는 좌표가 있는지 체크
 // 없다면 그냥 지도 그리고
@@ -20,6 +21,43 @@ struct SpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .popup(isPresented: $store.alertPresent.sending(\.bindingAlertPresent), view: {
+                    HStack {
+                        Spacer()
+                        
+                        Text("해당 지역에 아직 스팟이 등록되어있지 않아요")
+                            .textStyle(.subtitleXS)
+                            .foregroundStyle(.blue20)
+                            .padding(.vertical, 14)
+                        
+                        Image("NoAddIcon")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 12, height: 12)
+                        
+                        Spacer()
+                    }
+                    .background(.gray100)
+                    .clipShape(RoundedRectangle(cornerRadius: 4))
+                    .padding(.horizontal, 15)
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                            store.send(.viewEvent(.dismiss))
+                        }
+                    }
+                }, customize: {
+                    $0
+                        .type(.floater())
+                        .position(.bottom)
+                        .animation(.spring())
+                        .closeOnTap(true)
+                        .closeOnTapOutside(true)
+                        .backgroundColor(.gray.opacity(0.2))
+                        .dismissCallback {
+                            store.send(.viewEvent(.dismiss))
+                        }
+                    
+                })
                 .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
                     AnyView(mapBottomView)
                 }, content: {

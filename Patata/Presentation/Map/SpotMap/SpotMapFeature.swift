@@ -27,6 +27,7 @@ struct SpotMapFeature {
         // bindingState
         var isPresented: Bool = false
         var archive: Bool = false
+        var alertPresent: Bool = false
     }
     
     enum Action {
@@ -41,6 +42,7 @@ struct SpotMapFeature {
         // bindingAction
         case bindingIsPresented(Bool)
         case bindingArchive(Bool)
+        case bindingAlertPresent(Bool)
         
         enum Delegate {
             case tappedSideButton(MBRCoordinates)
@@ -71,6 +73,7 @@ struct SpotMapFeature {
         case tappedReloadButton
         case tappedArchiveButton
         case tappedSpotDetail(Int)
+        case dismiss
     }
     
     enum LocationAction {
@@ -175,6 +178,9 @@ extension SpotMapFeature {
             case let .viewEvent(.tappedSpotDetail(spotId)):
                 return .send(.delegate(.tappedSpotDetail(spotId)))
                 
+            case .viewEvent(.dismiss):
+                state.alertPresent = false
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -243,6 +249,8 @@ extension SpotMapFeature {
                 
                 state.mapManager.updateMarkers(markers: markers)
                 
+                state.alertPresent = markers.isEmpty
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -284,6 +292,9 @@ extension SpotMapFeature {
                 
             case let .bindingArchive(isArchive):
                 state.archive = isArchive
+                
+            case let .bindingAlertPresent(isPresent):
+                state.alertPresent = isPresent
                 
             default:
                 break

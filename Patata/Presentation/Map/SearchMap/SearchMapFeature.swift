@@ -27,6 +27,7 @@ struct SearchMapFeature {
         var isOtherFirst: Bool = false
         var reloadButtonIsHide: Bool = true
         var isTappedReload: Bool = false
+        var errorMSG: String = ""
         
         // bindingState
         var isPresented: Bool = false
@@ -83,13 +84,13 @@ struct SearchMapFeature {
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
-        case searchSpotDatas(MapSpotEntity?)
+        case searchSpotDatas(MapSpotEntity?, Bool)
         case otherSpotDatas([MapSpotEntity])
         case archiveState(ArchiveEntity)
     }
     
     enum NetworkType {
-        case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil)
+        case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil, reload: Bool = false)
         case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase)
         case patchArchiveState
     }
@@ -149,7 +150,7 @@ extension SearchMapFeature {
                     state.mapManager.clearCurrentMarkers()
                     
                     return .run { send in
-                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbrLocation)))
+                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbrLocation, reload: true)))
                     }
                 }
                 
@@ -193,7 +194,7 @@ extension SearchMapFeature {
                 state.mapManager.clearCurrentMarkers()
                 
                 return .run { send in
-                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbr)))
+                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: userLocation, mbrLocation: mbr, reload: true)))
                 }
                 
             case .viewEvent(.dismissPopup):
@@ -251,12 +252,12 @@ extension SearchMapFeature {
                 state.isFirst = false
                 state.isOtherFirst = false
                 
-            case let .networkType(.searchSpot(spotName, userLocation, mbrLocation)):
+            case let .networkType(.searchSpot(spotName, userLocation, mbrLocation, reload)):
                 return .run { send in
                     do {
                         let data = try await mapRepository.fetchSearchSpot(userLocation: userLocation, mbrLocation: mbrLocation, spotName: spotName)
                         
-                        await send(.dataTransType(.searchSpotDatas(data)))
+                        await send(.dataTransType(.searchSpotDatas(data, reload)))
                         
                     } catch {
                         print("error", errorManager.handleError(error) ?? "")
@@ -273,7 +274,7 @@ extension SearchMapFeature {
                         if let paError = error as? PAError {
                             switch paError {
                             case .errorMessage(.search(.noData)):
-                                await send(.dataTransType(.searchSpotDatas(nil)))
+                                await send(.dataTransType(.searchSpotDatas(nil, false)))
                             default:
                                 print("error", errorManager.handleError(error) ?? "")
                             }
@@ -316,7 +317,7 @@ extension SearchMapFeature {
                     state.errorIsPresented = true
                 }
                 
-            case let .dataTransType(.searchSpotDatas(data)):
+            case let .dataTransType(.searchSpotDatas(data, reload)):
                 if let data {
                     state.errorIsPresented = false
                     state.searchSpotItems = [data]
@@ -347,9 +348,12 @@ extension SearchMapFeature {
                         await send(.networkType(.otherSpot(mbrLocation: mbrLocation, userLocation: userLocation, category: CategoryCase(rawValue: menuItem) ?? .all)))
                     }
                 } else {
-                    print("here")
+                    state.errorMSG = reload ? "해당 위치에는 '\(state.searchText)'관련된 결과가 없어요" : "'\(state.searchText)'에 대한 검색 결과가 없어요"
                     state.errorIsPresented = true
-                    state.mapManager.moveCamera(coord: state.userLocation)
+                    
+                    if !reload {
+                        state.mapManager.moveCamera(coord: state.userLocation)
+                    }
                 }
                 
             case let .dataTransType(.otherSpotDatas(data)):
