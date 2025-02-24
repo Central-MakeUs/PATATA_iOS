@@ -130,15 +130,21 @@ extension SearchFeature {
                 
             case .viewEvent(.searchOnSubmit):
                 if state.beforeViewState == .home {
-                    state.viewState = .loading
+                    if !state.searchText.isEmpty {
+                        state.viewState = .loading
+                    }
                 }
                 
                 let searchText = state.searchText
                 let userLocation = state.userLocation
                 
                 if state.beforeViewState == .home {
-                    return .run { [state = state] send in
-                        await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false, userLocation: userLocation)))
+                    if !state.searchText.isEmpty {
+                        return .run { [state = state] send in
+                            await send(.networkType(.searchSpot(page: 0, filter: state.filter, scroll: false, userLocation: userLocation)))
+                        }
+                    } else {
+                        state.searchResult = false
                     }
                 } else {
                     return .send(.delegate(.successSearch(searchText, state.beforeViewState)))

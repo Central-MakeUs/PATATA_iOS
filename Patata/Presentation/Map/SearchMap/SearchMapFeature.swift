@@ -307,8 +307,13 @@ extension SearchMapFeature {
                 
                 let spotName = state.searchText
                 
-                return .run { send in
-                    await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
+                if !state.searchText.isEmpty {
+                    return .run { send in
+                        await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
+                    }
+                } else {
+                    state.mapManager.moveCamera(coord: coord)
+                    state.errorIsPresented = true
                 }
                 
             case let .dataTransType(.searchSpotDatas(data)):
