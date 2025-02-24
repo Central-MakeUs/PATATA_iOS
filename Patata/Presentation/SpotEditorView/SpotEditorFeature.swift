@@ -367,8 +367,10 @@ extension SpotEditorFeature {
 
                 let withoutHash = processedText.dropFirst()
 
+                let withoutExtraHash = withoutHash.replacingOccurrences(of: "#", with: "")
+
                 let specialCharPattern = "[^a-zA-Z0-9가-힣\\s]"
-                let filteredText = withoutHash.components(separatedBy: CharacterSet(charactersIn: specialCharPattern))
+                let filteredText = withoutExtraHash.components(separatedBy: CharacterSet(charactersIn: specialCharPattern))
                     .joined()
 
                 let singleSpaceText = filteredText.replacingOccurrences(
@@ -377,7 +379,10 @@ extension SpotEditorFeature {
                     options: .regularExpression
                 ).trimmingCharacters(in: .whitespaces)
 
-//                state.hashTag = "#" + singleSpaceText
+                let limitedText = String(singleSpaceText.prefix(5))
+
+                state.hashTag = text.isEmpty ? "" : "#" + limitedText
+
                 
             case let .bindingTitle(titleText):
                 state.title = titleText

@@ -143,6 +143,7 @@ extension SpotEditorView {
             VStack {
                 spotEditButton
                     .padding(.horizontal, 20)
+                    .padding(.top, 8)
                     .padding(.bottom, 10)
             }
         }
@@ -508,14 +509,14 @@ extension SpotEditorView {
                 bindingText: $store.hashTag.sending(\.bindingHashTag),
                 placeHolder: "#해쉬태그를 입력해주세요", key: "hashTag",
                 nextFocus: .hashTag,
-                nowFocus: .hashTag
+                nowFocus: .hashTag,
+                customOnSubmit: {
+                    store.send(.viewEvent(.hashTagOnSubmit))
+                }
             )
             .disabled(store.hashTags.count == 2)
             .onChange(of: store.hashTag) { newValue in
                 store.send(.textValidation(.hashTagValidation(newValue)))
-            }
-            .onSubmit {
-                store.send(.viewEvent(.hashTagOnSubmit))
             }
             
             HStack {
@@ -598,61 +599,28 @@ extension SpotEditorView {
 }
 
 extension SpotEditorView {
-    private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String, nextFocus: Field, nowFocus: Field) -> some View {
-//        TextField("", text: bindingText)
-//            .textStyle(.subtitleS)
-//            .focused($focusedField, equals: nowFocus)
-//            .frame(maxWidth: .infinity)
-//            .frame(height: 44)
-//            .padding(.horizontal, 16)
-//            .background(.white)
-//            .clipShape(RoundedRectangle(cornerRadius: 8))
-//            .onSubmit {
-//                focusedField = nextFocus
-//            }
-//            .overlay(
-//                ZStack(alignment: .leading) {
-//                    if bindingText.wrappedValue.isEmpty {
-//                        HStack {
-//                            Text(placeHolder)
-//                                .textStyle(.bodyS)
-//                                .foregroundColor(.textDisabled)
-//                                .padding(.horizontal, 16)
-//                            Spacer()
-//                        }
-//                    }
-//                }
-//            )
-        ZStack {
-                DisablePasteTextField(
-                    text: bindingText,
-                    isFocused: nil, // nil로 설정하여 내부 포커스 관리를 비활성화
-                    placeholder: "",  // 비워두기 - 오버레이에서 처리
-                    placeholderColor: .clear,
-                    edge: UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0),
-                    keyboardType: .default,
-                    onCommit: {
-                        focusedField = nextFocus
-                    }
-                )
-                .textStyle(.subtitleS)
-                .focused($focusedField, equals: nowFocus)  // SwiftUI의 기본 focus 시스템 사용
-                
-                // 기존 오버레이 유지
-                if bindingText.wrappedValue.isEmpty {
-                    HStack {
-                        Text(placeHolder)
-                            .textStyle(.bodyS)
-                            .foregroundColor(.textDisabled)
-                            .padding(.horizontal, 16)
-                        Spacer()
-                    }
+    private func textFieldView(bindingText: Binding<String>, placeHolder: String, key: String, nextFocus: Field, nowFocus: Field, customOnSubmit: (() -> Void)? = nil) -> some View {
+        DisablePasteTextField(
+            text: bindingText,
+            isFocused: nil,
+            placeholder: placeHolder,
+            placeholderColor: .textDisabled,
+            edge: UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 0),
+            keyboardType: .default,
+            onCommit: {
+                if let customOnSubmit = customOnSubmit {
+                    customOnSubmit()
+                } else {
+                    focusedField = nextFocus
                 }
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 44)
-            .background(.white)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        )
+        .textStyle(.subtitleS)
+        .focused($focusedField, equals: nowFocus)
+        .frame(maxWidth: .infinity)
+        .frame(height: 44)
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     
     private func titleView(_ text: String) -> some View {
