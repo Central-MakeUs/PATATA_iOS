@@ -187,7 +187,7 @@ extension SpotEditorView {
     
     private var titleText: some View {
         VStack {
-            HStack(spacing: 2) {
+            HStack(spacing: 4) {
                 Text("필수")
                     .textStyle(.captionS)
                     .foregroundStyle(.blue100)
@@ -296,7 +296,7 @@ extension SpotEditorView {
     
     private var categoryView: some View {
         VStack {
-            HStack(spacing: 2) {
+            HStack(spacing: 4) {
                 Text("필수")
                     .textStyle(.captionS)
                     .foregroundStyle(.blue100)
@@ -334,13 +334,30 @@ extension SpotEditorView {
     @ViewBuilder
     private var pictureView: some View {
         VStack {
-            HStack(spacing: 2) {
-                Text("필수")
-                    .textStyle(.captionS)
-                    .foregroundStyle(.blue100)
-                    .padding(.leading, 15)
+            VStack(spacing: 2) {
+                HStack(spacing: 4) {
+                    Text("필수")
+                        .textStyle(.captionS)
+                        .foregroundStyle(store.viewState == .add ? .blue100 : .textInfo)
+                        .padding(.leading, 15)
+                    
+                    HStack {
+                        Text("사진을 추가해주세요")
+                            .textStyle(.subtitleM)
+                            .foregroundStyle(store.viewState == .add ? .textDefault : .textDisabled)
+                        
+                        Spacer()
+                    }
+                }
                 
-                titleView("사진을 추가해주세요 (최소 1개)")
+                HStack {
+                    Text("이미지는 최대 3장까지 업로드 가능하며, 스팟 등록 이후 수정이 불가합니다.")
+                        .textStyle(.captionS)
+                        .foregroundStyle(.textDisabled)
+                        .padding(.leading, 15)
+                    
+                    Spacer()
+                }
             }
             
             ZStack {
@@ -554,9 +571,15 @@ extension SpotEditorView {
             Divider()
             
             Toggle(isOn: $store.agreeToTerms.sending(\.bindingAgreeToTerms)) {
-                Text("이용약관 및 커뮤니티 가이드라인에 동의")
-                    .textStyle(.subtitleS)
-                    .foregroundStyle(.textDefault)
+                HStack(spacing: 4) {
+                    Text("필수")
+                        .textStyle(.captionS)
+                        .foregroundStyle(store.viewState == .add ? .blue100 : .textInfo)
+                    
+                    Text("이용약관 및 커뮤니티 가이드라인에 동의")
+                        .textStyle(.subtitleS)
+                        .foregroundStyle(.textDefault)
+                }
             }
             .padding(.horizontal, 15)
             
