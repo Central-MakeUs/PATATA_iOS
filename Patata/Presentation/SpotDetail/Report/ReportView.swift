@@ -40,64 +40,68 @@ struct ReportView: View {
 
 extension ReportView {
     private var contentView: some View {
-        VStack {
+        VStack(spacing: 0) {
             fakeNavgationBar
                 .padding(.bottom, 14)
                 .background(.white)
             
-            ForEach(Array(store.reportOption.enumerated()), id: \.element) { index, option in
-                reportOptionRow(title: option.description(for: store.viewState), index: index)
-                if option == .other {
-                    TextEditor(text: $store.textFieldText.sending(\.bindingTextFieldText))
-                        .textStyle(.subtitleS)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 200)
-                        .background(.white)
-                        .padding(.vertical, 8)
-                        .padding(.horizontal, 16)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .overlay(
+            ScrollView(.vertical) {
+                ForEach(Array(store.reportOption.enumerated()), id: \.element) { index, option in
+                    reportOptionRow(title: option.description(for: store.viewState), index: index)
+                    if option == .other {
+                        ZStack {
                             RoundedRectangle(cornerRadius: 8)
                                 .stroke(isFocused ? Color.blue : Color.gray, lineWidth: 1)
+                                .background(Color.white)
+                                .frame(height: 210)
                                 .padding(.horizontal, 15)
-                        )
-                        .onChange(of: store.textFieldText) { newValue in
-                            store.send(.viewEvent(.textValidation(newValue)))
-                        }
-                        .onChange(of: isFocused) { isFocused in
-                            if isFocused == true {  // 옵셔널 비교
-                                store.send(.viewEvent(.tappedCheckButton(3)))
-                            }
-                        }
-                        .overlay(
-                            HStack {
-                                if store.textFieldText.isEmpty {
-                                    Text("신고내용을 입력해주세요. (최대 300자)")
-                                        .textStyle(.bodyS)
-                                        .foregroundColor(.textDisabled)
-                                        .padding(.leading, 15)
-                                    
-                                    Spacer()
-                                }
-                            }
+
+                            TextEditor(text: $store.textFieldText.sending(\.bindingTextFieldText))
+                                .textStyle(.subtitleS)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 200)
+                                .padding(.vertical, 8)
                                 .padding(.horizontal, 16)
-                                .padding(.top, 12)
+                                .background(Color.clear)
+                                .onChange(of: store.textFieldText) { newValue in
+                                    store.send(.viewEvent(.textValidation(newValue)))
+                                }
+                                .onChange(of: isFocused) { isFocused in
+                                    if isFocused {
+                                        store.send(.viewEvent(.tappedCheckButton(3)))
+                                    }
+                                }
+                                .overlay(
+                                    HStack {
+                                        if store.textFieldText.isEmpty {
+                                            Text("신고내용을 입력해주세요. (최대 300자)")
+                                                .textStyle(.bodyS)
+                                                .foregroundColor(.textDisabled)
+                                                .padding(.leading, 15)
+                                            
+                                            Spacer()
+                                        }
+                                    }
+                                        .padding(.horizontal, 12)
+                                        .padding(.top, 14)
+                                    
+                                    
+                                ,  alignment: .topLeading)
+                        }
+                        
+                        HStack {
+                            Spacer()
                             
-                            
-                        ,  alignment: .topLeading)
-                    
-                    HStack {
-                        Spacer()
-                        Text("\(store.textFieldText.count)/300")
-                            .textStyle(.captionS)
-                            .foregroundColor(.textDisabled)
-                            .padding(.trailing, 15)
+                            Text("\(store.textFieldText.count)/300")
+                                .textStyle(.captionS)
+                                .foregroundColor(.textDisabled)
+                                .padding(.trailing, 15)
+                        }
                     }
+                    
                 }
-                
             }
-            
-            Spacer()
+//            Spacer()
             
             VStack {
                 HStack {
@@ -136,7 +140,7 @@ extension ReportView {
                 Spacer()
             }
             
-            Text(store.viewState == .user ? "사용자 신고하기" : "게시글 신고하기")
+            Text(store.viewState == .post ? "게시글 신고하기" : "사용자 신고하기" )
                 .textStyle(.subtitleL)
                 .foregroundStyle(.textDefault)
         }

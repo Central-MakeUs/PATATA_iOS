@@ -111,7 +111,6 @@ extension SpotDetailFeature {
             case .viewCycle(.onAppear):
                 state.dataState = .loading
                 return .run { [state = state] send in
-                    print("aaaaa")
                     await send(.networkType(.fetchSpotDetail(state.spotId)))
                 }
                 
@@ -165,9 +164,7 @@ extension SpotDetailFeature {
             case let .networkType(.fetchSpotDetail(spotId)):
                 return .run { send in
                     do {
-                        print("here")
                         let data = try await spotRepository.fetchSpot(spotId: spotId)
-                        print("end", data)
                         
                         await send(.dataTransType(.spotDetail(data)))
                     } catch {
@@ -222,7 +219,6 @@ extension SpotDetailFeature {
                 }
                 
             case let .dataTransType(.spotDetail(data)):
-                print("fetch", data)
                 state.spotDetailData = data
                 state.reviewData = data.reviews
                 
