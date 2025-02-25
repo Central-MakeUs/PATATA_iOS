@@ -47,7 +47,6 @@ extension SpotCategoryView {
                 
                 scrollMenuView
                     .padding(.top, 10)
-                    .padding(.horizontal, 15)
             }
             
             ScrollView(.vertical) {
@@ -125,6 +124,7 @@ extension SpotCategoryView {
                             }
                     }
                 }
+                .padding(.horizontal, 15)
             }
             .scrollIndicators(.hidden)
         }

@@ -20,7 +20,8 @@ struct SpotCategoryFeature {
         var totalPages: Int = 0
         var totalCount: Int = 0
         var filter: FilterCase = .distance
-        var selectedIndex: Int
+        var selectedIndex: Int = 0
+        var initialIndex: Int
         var listLoadTrigger: Bool = true
         var isPresent: Bool = false
         var filterText: String = "거리순"
@@ -90,6 +91,7 @@ extension SpotCategoryFeature {
             case .viewCycle(.onAppear):
                 state.currentPage = 0
                 state.totalPages = 0
+                state.selectedIndex = state.initialIndex
                 
                 state.listLoadTrigger = false
                 

@@ -18,7 +18,7 @@ struct MySpotListFeature {
         var spotListEntity: [TodaySpotListEntity] = []
         var mapSpotEntity: [MapSpotEntity] = []
         var initialMapSpot: [MapSpotEntity] = []
-        let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운"]
+        let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운 자연"]
         var userCoord: Coordinate =  Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var mbrLocation: MBRCoordinates
         var selectedIndex: Int = 0

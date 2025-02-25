@@ -63,7 +63,7 @@ extension HomeCoordinator {
                 
             case .router(.routeAction(id: .home, action: .home(.delegate(.tappedAddButton)))):
                 state.isHideTabBar = true
-                state.routes.push(.category(SpotCategoryFeature.State(selectedIndex: 0)))
+                state.routes.push(.category(SpotCategoryFeature.State(initialIndex: 0)))
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedSpot(spotId))))):
                 state.isHideTabBar = true
@@ -76,7 +76,7 @@ extension HomeCoordinator {
                 
             case let .router(.routeAction(id: .home, action: .home(.delegate(.tappedCategoryButton(category))))):
                 state.isHideTabBar = true
-                state.routes.push(.category(SpotCategoryFeature.State(selectedIndex: category.rawValue)))
+                state.routes.push(.category(SpotCategoryFeature.State(initialIndex: category.rawValue)))
                 
             case .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton(_))))):
                 state.isHideTabBar = false
