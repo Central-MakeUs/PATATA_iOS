@@ -83,8 +83,9 @@ extension AddSpotMapView {
                     
                     Color.black
                         .opacity(0.1)
-                        .frame(height: 4)
+                        .frame(height: 2)
                         .blur(radius: 3)
+                        .offset(y: -1)
                 }
                 
                 VStack {

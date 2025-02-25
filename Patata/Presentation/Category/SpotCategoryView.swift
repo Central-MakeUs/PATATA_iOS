@@ -22,12 +22,14 @@ struct SpotCategoryView: View {
     
     @Perception.Bindable var store: StoreOf<SpotCategoryFeature>
     
+    @State var selectedIndex: Int = 0
+    
     var body: some View {
         WithPerceptionTracking {
             contentView
                 .navigationBarBackButtonHidden(true)
                 .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
-                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
+                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"], selectedIndex: $selectedIndex) { item in
                         store.send(.viewEvent(.tappedBottomSheetItem(item)))
                         // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
@@ -42,13 +44,6 @@ struct SpotCategoryView: View {
 extension SpotCategoryView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            VStack {
-                fakeNavBar
-                
-                scrollMenuView
-                    .padding(.top, 10)
-            }
-            
             ScrollView(.vertical) {
                 filterView
                     .padding(.top, 12)
@@ -85,6 +80,24 @@ extension SpotCategoryView {
             }
             .background(.gray10)
             .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
+            .safeAreaInset(edge: .top) {
+                VStack {
+                    fakeNavBar
+                    
+                    scrollMenuView
+                        .padding(.top, 10)
+                }
+                .background(
+                    Color.white
+                        .opacity(0.85)
+                        .ignoresSafeArea(.all)
+                )
+                .background(
+                    BlurView(style: .systemMaterial)
+                        .opacity(0.85)
+                        .ignoresSafeArea(.all)
+                )
+            }
         }
     }
     

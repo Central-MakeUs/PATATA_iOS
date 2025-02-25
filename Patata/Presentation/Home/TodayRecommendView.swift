@@ -48,7 +48,7 @@ extension TodayRecommendView {
                                LinearGradient(
                                 gradient: Gradient(stops: [
                                     .init(color: Color.clear, location: 0.78),
-                                    .init(color: Color.gray50, location: 1.0)
+                                    .init(color: Color.black.opacity(0.3), location: 1.0)
                                 ]),
                                 startPoint: .top,
                                 endPoint: .bottom
@@ -93,7 +93,7 @@ extension TodayRecommendView {
                HStack {
                    ForEach(item.tags, id: \.self) { tag in
                        Text("#\(tag)")
-                           .hashTagStyle(backgroundColor: .gray20, textColor: .gray80)
+                           .hashTagStyle(backgroundColor: .gray20, textColor: .gray80, verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
                    }
                    
                    Spacer()

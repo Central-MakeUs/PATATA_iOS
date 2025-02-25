@@ -41,7 +41,7 @@ extension SplashView {
         HStack(spacing: 0) {
             Text("사진 스팟")
                 .foregroundStyle(.white)
-                .textStyle(.subtitleL)
+                .textStyle(.subtitleM)
             Text("의 모든 것")
                 .foregroundStyle(.white)
                 .textStyle(.subtitleM)

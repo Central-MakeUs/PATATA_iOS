@@ -50,13 +50,9 @@ extension PatataMainView {
             let sideCardWidth = screenWidth * sideCardVisibleRatio
             
             VStack(spacing: 0) {
-                fakeNavgationBar
-                    .padding(.bottom, 12)
-                
                 WithPerceptionTracking {
                     ScrollView(.vertical) {
-                        PASearchBar(placeHolder: "검색어를 입력하세요")
-                            .frame(height: 48)
+                        PASearchBar(placeHolder: "검색어를 입력하세요", backgroundColor: .white)
                             .padding(.horizontal, 15)
                             .asButton {
                                 store.send(.viewEvent(.tappedSearch))
@@ -91,7 +87,7 @@ extension PatataMainView {
                             .padding(.bottom, 15)
                             .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                         
-                        VStack(spacing: 12) {
+                        VStack(spacing: 8) {
                             ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
                                 CategoryRecommendView(spotItem: item) {
                                     store.send(.viewEvent(.tappedArchiveButton(index, card: false)))
@@ -107,13 +103,27 @@ extension PatataMainView {
                         .padding(.horizontal, 15)
                         
                         moreButton
-                            .padding(.top, 4)
+                            .padding(.top, 8)
                             .padding(.horizontal, 15)
                             .padding(.bottom, 60)
                             .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                             .asButton {
                                 store.send(.viewEvent(.tappedAddButton))
                             }
+                    }
+                    .safeAreaInset(edge: .top) {
+                        fakeNavgationBar
+                            .padding(.bottom, 12)
+                            .background(
+                                Color.gray10
+                                    .opacity(0.85)
+                                    .ignoresSafeArea(.all)
+                            )
+                            .background(
+                                BlurView(style: .systemThinMaterial)
+                                    .opacity(0.85)
+                                    .ignoresSafeArea(.all)
+                            )
                     }
                     .scrollDisabled(isScrollDisabled)
                 }
@@ -171,7 +181,7 @@ extension PatataMainView {
                         .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .shadow(color: .shadowColor, radius: 6)
+                        .shadow(color: .shadowColor.opacity(0.24), radius: 4)
                         .asButton {
                             store.send(.viewEvent(.tappedCategoryButton(item)))
                         }

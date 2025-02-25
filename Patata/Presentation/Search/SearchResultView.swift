@@ -18,6 +18,7 @@ struct SearchResultView: View {
     
     @Perception.Bindable var store: StoreOf<SearchFeature>
     @State var isPresent: Bool = false
+    @State var selectedIndex: Int = 0
     var isSaved: Bool = false
     private let scrollViewTopID = "ScrollTop"
     
@@ -31,7 +32,7 @@ struct SearchResultView: View {
             contentView
                 .navigationBarHidden(true)
                 .presentBottomSheet(isPresented: $store.filterIsvalid.sending(\.bindingFilterIsValid)) {
-                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"]) { item in
+                    BottomSheetItem(title: "정렬", items: ["거리순", "추천순"], selectedIndex: $selectedIndex) { item in
                         store.send(.viewEvent(.dismissFilter(item)))
                     }
                 }
@@ -41,9 +42,7 @@ struct SearchResultView: View {
 
 extension SearchResultView {
     private var contentView: some View {
-        VStack {
-            fakeNavBar
-            
+        VStack(spacing: 0) {
             ScrollViewReader { proxy in
                 ScrollView {
                     filterView
@@ -59,6 +58,20 @@ extension SearchResultView {
                     withAnimation {
                         proxy.scrollTo(scrollViewTopID)
                     }
+                }
+                .safeAreaInset(edge: .top) {
+                    fakeNavBar
+                        .padding(.bottom, 14)
+                        .background(
+                            Color.white
+                                .opacity(0.85)
+                                .ignoresSafeArea(.all)
+                        )
+                        .background(
+                            BlurView(style: .systemMaterial)
+                                .opacity(0.85)
+                                .ignoresSafeArea(.all)
+                        )
                 }
             }
         }
@@ -81,9 +94,8 @@ extension SearchResultView {
                     .foregroundStyle(.textDefault)
             }
             
-            PASearchBar(placeHolder: store.searchText, placeHolderColor: .textDefault)
+            PASearchBar(placeHolder: store.searchText, placeHolderColor: .textDefault, backgroundColor: .gray10)
                 .padding(.horizontal, 15)
-                .frame(height: 48)
                 .onTapGesture {
                     store.send(.viewEvent(.searchStart))
                 }

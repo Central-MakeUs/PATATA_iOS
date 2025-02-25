@@ -12,15 +12,16 @@ struct BottomSheetItem: View {
     let delete: Bool
     let items: [String]
     let tapChange: Bool
+    @Binding var selectedIndex: Int
+    
     let tappedItem: (String) -> Void
     
-    @State private var selectedIndex: Int = 0
-    
-    init(title: String? = nil, delete: Bool = false, items: [String], tapChange: Bool = true, tappedItem: @escaping (String) -> Void) {
+    init(title: String? = nil, delete: Bool = false, items: [String], tapChange: Bool = true, selectedIndex: Binding<Int>, tappedItem: @escaping (String) -> Void) {
         self.title = title
         self.delete = delete
         self.items = items
         self.tapChange = tapChange
+        self._selectedIndex = selectedIndex
         self.tappedItem = tappedItem
     }
     

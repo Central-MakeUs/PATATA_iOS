@@ -22,6 +22,7 @@ struct SpotEditorView: View {
     @State private var isResizing: Bool = false
     @State private var totalExceed: Bool = false
     @State private var invalidExceed: Bool = false
+    @State private var selectedIndex: Int = 6
     
     enum Field: Hashable {
         case title
@@ -76,7 +77,7 @@ struct SpotEditorView: View {
                         
                     })
                     .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
-                        BottomSheetItem(title: "카테고리 선택", items: ["스냅스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"]) { category in
+                        BottomSheetItem(title: "카테고리 선택", items: ["스냅스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"], selectedIndex: $selectedIndex) { category in
                             store.send(.viewEvent(.tappedBottomSheet(category)))
                             store.send(.viewEvent(.closeBottomSheet(false)))
                         }
@@ -109,7 +110,6 @@ struct SpotEditorView: View {
 extension SpotEditorView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            
             
             fakeNav
                 .padding(.bottom, 14)
@@ -146,13 +146,7 @@ extension SpotEditorView {
                     .opacity(0.1)
                     .frame(height: 2)
                     .blur(radius: 3)
-                    .offset(y: 2)
-                
-                Color.white
-                    .opacity(0.1)
-                    .frame(height: 4)
-                    .offset(y: -2)
-                
+                    .offset(y: -1)
                 
             }
             
@@ -245,7 +239,7 @@ extension SpotEditorView {
             .frame(height: 44)
             .background(
                 RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(.gray30, lineWidth: 2)
+                    .strokeBorder(.gray30, lineWidth: 1)
                     .background(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
             )
@@ -350,7 +344,7 @@ extension SpotEditorView {
     @ViewBuilder
     private var pictureView: some View {
         VStack {
-            VStack(spacing: 2) {
+            VStack(spacing: 0) {
                 HStack(spacing: 4) {
                     Text("필수")
                         .textStyle(.captionS)
@@ -374,7 +368,9 @@ extension SpotEditorView {
                     
                     Spacer()
                 }
+                .padding(.top, 4)
             }
+            .padding(.bottom, 4)
             
             ZStack {
                 ScrollView(.horizontal, showsIndicators: false) {

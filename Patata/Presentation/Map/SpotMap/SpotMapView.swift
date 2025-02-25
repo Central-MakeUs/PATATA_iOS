@@ -98,8 +98,9 @@ extension SpotMapView {
                 
                 Color.black
                     .opacity(0.1)
-                    .frame(height: 4)
+                    .frame(height: 2)
                     .blur(radius: 3)
+                    .offset(y: -1)
                 
                 VStack {
                     mapMenuView
@@ -270,7 +271,7 @@ extension SpotMapView {
             HStack(spacing: 8) {
                 if spot.category == .recommendSpot {
                     Text("작가추천")
-                        .textStyle(.captionS)
+                        .textStyle(.subtitleXS)
                         .foregroundStyle(.blue50)
                         .padding(.horizontal, 12)
                         .padding(.vertical, 4)
@@ -279,7 +280,7 @@ extension SpotMapView {
                 }
                 
                 Text(spot.spotName)
-                    .textStyle(.subtitleS)
+                    .textStyle(.subtitleM)
                     .foregroundStyle(.blue100)
                 
                 Image(spot.category.getCategoryCase().image ?? "SnapIcon")
@@ -289,7 +290,7 @@ extension SpotMapView {
                 
                 Text(spot.category.getCategoryCase().title)
                     .foregroundStyle(.gray70)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                 
                 Spacer()
                 
@@ -300,11 +301,11 @@ extension SpotMapView {
             
             HStack(spacing: 4) {
                 Text(spot.distance)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textSub)
                 
                 Text(spot.spotAddress + spot.spotAddressDetail)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textInfo)
                 
                 Spacer()
@@ -314,7 +315,7 @@ extension SpotMapView {
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
                     Text("#\(tag)")
-                        .hashTagStyle()
+                        .hashTagStyle(font: .subtitleXS)
                 }
             }
             .padding(.top, 10)

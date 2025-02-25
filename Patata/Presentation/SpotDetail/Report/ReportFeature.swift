@@ -37,7 +37,7 @@ struct ReportFeature {
             case (.harmful, .user), (.harmful, .review):
                 return "게시글을 반복적으로 올려요"
             case (.harmful, .post):
-                return "욕설 및 험오 표현"
+                return "욕설 및 혐오 표현"
                 
             case (.privacy, .user), (.privacy, .review):
                 return "적절하지 않은 게시글을 반복적으로 올려요"

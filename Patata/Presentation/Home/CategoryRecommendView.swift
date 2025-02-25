@@ -37,8 +37,8 @@ extension CategoryRecommendView {
                         ZStack(alignment: .bottomLeading) {
                             LinearGradient(
                                 gradient: Gradient(stops: [
-                                    .init(color: Color.clear, location: 0.78),
-                                    .init(color: Color.gray50, location: 1.0)
+                                    .init(color: Color.clear, location: 0.66),
+                                    .init(color: Color.black.opacity(0.3), location: 1.0)
                                 ]),
                                 startPoint: .top,
                                 endPoint: .bottom

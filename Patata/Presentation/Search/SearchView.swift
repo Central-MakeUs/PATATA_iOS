@@ -69,14 +69,13 @@ extension SearchView {
                 store.send(.viewEvent(.tappedBackButton))
             }
 
-            PASearchBar(placeHolder: "검색어를 입력하세요", bindingText: $store.searchText.sending(\.bindingSearchText)) {
+            PASearchBar(placeHolder: "검색어를 입력하세요", bindingText: $store.searchText.sending(\.bindingSearchText), onSubmit: {
                 hideKeyboard()
                 store.send(.viewEvent(.searchOnSubmit))
-            } imageSubmit: {
+            }, imageSubmit: {
                 hideKeyboard()
                 store.send(.viewEvent(.searchOnSubmit))
-            }
-            .frame(height: 48)
+            }, backgroundColor: .white)
         }
     }
     
@@ -91,7 +90,7 @@ extension SearchView {
                 Text("'\(store.searchText)'에 대한")
                 Text("검색 결과가 없습니다.")
             }
-            .textStyle(.subtitleL)
+            .textStyle(.subtitleM)
             .foregroundStyle(.textDisabled)
         }
     }

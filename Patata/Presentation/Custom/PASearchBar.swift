@@ -14,13 +14,15 @@ struct PASearchBar: View {
     let onSubmit: (() -> Void)?
     let imageSubmit: (() -> Void)?
     let placeHolderColor: Color
+    let backgroundColor: Color
         
     init(
         placeHolder: String,
         bindingText: Binding<String>,
         onSubmit: @escaping () -> Void,
         imageSubmit: @escaping () -> Void,
-        placeHolderColor: Color = .textDisabled
+        placeHolderColor: Color = .textDisabled,
+        backgroundColor: Color
     ) {
         self.placeHolder = placeHolder
         self.realSearch = true
@@ -28,15 +30,17 @@ struct PASearchBar: View {
         self.onSubmit = onSubmit
         self.imageSubmit = imageSubmit
         self.placeHolderColor = placeHolderColor
+        self.backgroundColor = backgroundColor
     }
     
-    init(placeHolder: String, placeHolderColor: Color = .textDisabled) {
+    init(placeHolder: String, placeHolderColor: Color = .textDisabled, backgroundColor: Color) {
         self.placeHolder = placeHolder
         self.realSearch = false
         self.bindingText = nil
         self.onSubmit = nil
         self.imageSubmit = nil
         self.placeHolderColor = placeHolderColor
+        self.backgroundColor = backgroundColor
     }
     
     var body: some View {
@@ -48,23 +52,10 @@ extension PASearchBar {
     private var paSearchBar: some View {
         HStack {
             if realSearch, let bindingText, let onSubmit, let imageSubmit {
-//                TextField(
-//                    "search",
-//                    text: bindingText,
-//                    prompt: Text(
-//                        placeHolder
-//                    ).foregroundColor(
-//                        placeHolderColor
-//                    )
-//                )
-//                .onSubmit {
-//                    onSubmit()
-//                }
-                
                 DisablePasteTextField(
                     text: bindingText,
-                    isFocused: nil, // nil로 설정하여 내부 포커스 관리를 비활성화
-                    placeholder: placeHolder,  // 비워두기 - 오버레이에서 처리
+                    isFocused: nil,
+                    placeholder: placeHolder,
                     placeholderColor: .textDisabled,
                     edge: UIEdgeInsets(top: 0, left: 4, bottom: 0, right: 0),
                     keyboardType: .default,
@@ -93,13 +84,13 @@ extension PASearchBar {
             }
         }
         .frame(maxWidth: .infinity)
+        .frame(height: 48)
         .padding(.horizontal, 20)
-        .padding(.vertical, 18)
         .background(
             RoundedRectangle(cornerRadius: 24)
                 .strokeBorder(.gray20, lineWidth: 1)
-                .background(.white)
-                .clipShape(RoundedRectangle(cornerRadius: 25))
+                .background(backgroundColor)
+                .clipShape(RoundedRectangle(cornerRadius: 24))
         )
     }
 }

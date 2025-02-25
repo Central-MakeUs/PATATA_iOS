@@ -186,7 +186,7 @@ extension MySpotListView {
                 Text("이런! 주변에 스팟이 없어요")
                 Text("파타타와 함께 스팟을 채워가요!")
             }
-            .textStyle(.subtitleL)
+            .textStyle(.subtitleM)
             .foregroundStyle(.textDisabled)
         }
     }

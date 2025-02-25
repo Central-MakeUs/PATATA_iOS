@@ -26,17 +26,27 @@ struct MyPageView: View {
 extension MyPageView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            fakeNavgationBar
-                .padding(.bottom, 14)
-            
-            Color.gray10
-                .frame(maxWidth: .infinity)
-                .frame(height: 4)
-                
             if store.spotCount == 0 {
+                fakeNavgationBar
+                    .padding(.bottom, 14)
+                
                 noArchiveView
             } else {
                 ArchiveView
+                    .safeAreaInset(edge: .top) {
+                        fakeNavgationBar
+                            .padding(.bottom, 14)
+                            .background(
+                                Color.white
+                                    .opacity(0.85)
+                                    .ignoresSafeArea(.all)
+                            )
+                            .background(
+                                BlurView(style: .systemMaterial)
+                                    .opacity(0.85)
+                                    .ignoresSafeArea(.all)
+                            )
+                    }
             }
         }
     }
@@ -44,7 +54,7 @@ extension MyPageView {
     private var fakeNavgationBar: some View {
         ZStack {
             Text("내 정보")
-                .textStyle(.subtitleL)
+                .textStyle(.subtitleM)
                 .foregroundStyle(.textDefault)
             
             HStack {
@@ -89,6 +99,10 @@ extension MyPageView {
  
         ScrollView {
             VStack(spacing: 0) {
+//                Color.gray10
+//                    .frame(maxWidth: .infinity)
+//                    .frame(height: 4)
+                
                 myProfileView
                     .padding(.top, 40)
                 
@@ -188,7 +202,7 @@ extension MyPageView {
                 .frame(width: UIScreen.main.bounds.width * 0.4)
             
             Text("아직 등록한 스팟이 없어요!")
-                .textStyle(.subtitleL)
+                .textStyle(.subtitleM)
                 .foregroundStyle(.textDisabled)
                 .padding(.top, 12)
             

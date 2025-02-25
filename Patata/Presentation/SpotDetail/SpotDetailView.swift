@@ -19,6 +19,8 @@ struct SpotDetailView: View {
     @Perception.Bindable var store: StoreOf<SpotDetailFeature>
     
     @State private var sizeState: CGSize = .zero
+    @State var selectedIndex: Int = 0
+    @State var otherIndex: Int = 0
     
     var body: some View {
         WithPerceptionTracking {
@@ -30,11 +32,11 @@ struct SpotDetailView: View {
                     }
                     .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
                         if !store.spotDetailData.isAuthor {
-                            BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"], tapChange: false) { text in
+                            BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"], tapChange: false, selectedIndex: $selectedIndex) { text in
                                 store.send(.viewEvent(.bottomSheetClose(text)))
                             }
                         } else {
-                            BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"], tapChange: false) { text in
+                            BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"], tapChange: false, selectedIndex: $otherIndex) { text in
                                 store.send(.viewEvent(.bottomSheetClose(text)))
                             }
                         }
@@ -50,13 +52,10 @@ struct SpotDetailView: View {
 extension SpotDetailView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            fakeNavBar
-                .background(.white)
-                .padding(.bottom, 14)
-            
             ScrollView(.vertical) {
                 ZStack(alignment: .top) {
                     spotDetailImage
+                        .offset(y: -8)
                     
                     VStack {
                         Color.clear
@@ -71,8 +70,9 @@ extension SpotDetailView {
                                 .padding(.top, 10)
                                 .padding(.horizontal, 15)
                             
+                            // 수정
                             Divider()
-                                .frame(height: 0.35)
+                                .frame(height: 0.8)
                                 .background(.gray10)
                                 .foregroundStyle(.gray10)
                             
@@ -81,7 +81,7 @@ extension SpotDetailView {
                                     Spacer()
                                     
                                     Text("첫 후기를 남겨보세요!")
-                                        .textStyle(.subtitleL)
+                                        .textStyle(.subtitleM)
                                         .foregroundStyle(.textDisabled)
                                     
                                     Spacer()
@@ -97,6 +97,20 @@ extension SpotDetailView {
                         .padding(.top, 0)
                     }
                 }
+            }
+            .safeAreaInset(edge: .top) {
+                fakeNavBar
+                    .padding(.bottom, 14)
+                    .background(
+                        Color.white
+                            .opacity(0.85)
+                            .ignoresSafeArea(.all)
+                    )
+                    .background(
+                        BlurView(style: .systemThinMaterial)
+                            .opacity(0.8)
+                            .ignoresSafeArea(.all)
+                    )
             }
             .redacted(reason: store.spotDetailData.spotName.isEmpty ? .placeholder : [])
             .background(.gray10)
@@ -139,7 +153,7 @@ extension SpotDetailView {
                     .frame(width: 18, height: 18)
                 
                 Text(store.spotDetailData.categoryId.getCategoryCase().title)
-                    .textStyle(.subtitleL)
+                    .textStyle(.subtitleM)
                     .foregroundStyle(.textDefault)
             }
             
@@ -410,7 +424,7 @@ extension SpotDetailView {
             
             if index != items.count - 1 {
                 Divider()
-                    .frame(height: 0.3)
+                    .frame(height: 0.8)
                     .background(.gray10)
             }
         }

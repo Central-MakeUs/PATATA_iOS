@@ -72,17 +72,23 @@ struct ArchiveView: View {
 extension ArchiveView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            fakeNavBar
-                .padding(.bottom, 14)
-                .background(.white)
             
             if store.archiveList.isEmpty {
+                fakeNavBar
+                    .padding(.top, 4)
+                    .padding(.bottom, 14)
+                
                 Spacer()
                 
                 searchFailView
                 
                 Spacer()
             } else {
+                
+                fakeNavBar
+                    .padding(.top, 4)
+                    .padding(.bottom, 14)
+                
                 ScrollView(.vertical) {
                     LazyVGrid(columns: columns, spacing: 4) {
                         ForEach(Array(store.archiveList.enumerated()), id: \.element.spotId) { index, item in
@@ -112,10 +118,11 @@ extension ArchiveView {
 
 extension ArchiveView {
     private var fakeNavBar: some View {
+        // 아래로 위치 변경
         ZStack {
             if !store.archiveList.isEmpty {
                 Text("아카이브")
-                    .textStyle(.subtitleL)
+                    .textStyle(.subtitleM)
                     .foregroundStyle(.textDefault)
                 
                 HStack {
@@ -153,7 +160,7 @@ extension ArchiveView {
             VStack(alignment: .center) {
                 Text("아직 아카이빙한 스팟이 없어요!")
             }
-            .textStyle(.subtitleL)
+            .textStyle(.subtitleM)
             .foregroundStyle(.textDisabled)
             
             HStack {
