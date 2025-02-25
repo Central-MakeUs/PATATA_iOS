@@ -83,14 +83,14 @@ struct SpotMapFeature {
     }
     
     enum NetworkType {
-        case fetchMapMarker(userLocation: Coordinate, mbr: MBRCoordinates, categoryId: CategoryCase)
+        case fetchMapMarker(userLocation: Coordinate, mbr: MBRCoordinates, categoryId: CategoryCase, Bool)
         case patchArchiveState
     }
     
     enum DataTransType {
         case fetchRealm
         case userLocation(Coordinate)
-        case fetchMarkers([MapSpotEntity])
+        case fetchMarkers([MapSpotEntity], Bool)
         case archiveState(ArchiveEntity)
     }
     
@@ -139,7 +139,7 @@ extension SpotMapFeature {
                 let mbrLocation = state.mbrLocation
                 
                 return .run { send in
-                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbrLocation, categoryId: CategoryCase(rawValue: index) ?? .all)))
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbrLocation, categoryId: CategoryCase(rawValue: index) ?? .all, true)))
                 }
                 
             case .viewEvent(.tappedSpotAddButton):
@@ -167,7 +167,7 @@ extension SpotMapFeature {
                 let mbr = state.mbrLocation
                 
                 return .run { send in
-                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: .all)))
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: .all, true)))
                 }
                 
             case .viewEvent(.tappedArchiveButton):
@@ -208,7 +208,7 @@ extension SpotMapFeature {
                 let category = CategoryCase(rawValue: state.selectedMenuIndex) ?? .all
                 
                 return .run { send in
-                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: category)))
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: category, false)))
                 }
                 
             case .delegate(.succesReport):
@@ -220,12 +220,12 @@ extension SpotMapFeature {
             case .delegate(.detailBack):
                 state.isFirst = false
                 
-            case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId)):
+            case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId, isReload)):
                 return .run { send in
                     do {
                         let data = try await mapRepository.fetchMap(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: categoryId.rawValue, isSearch: false)
                         
-                        await send(.dataTransType(.fetchMarkers(data)))
+                        await send(.dataTransType(.fetchMarkers(data, isReload)))
                     } catch {
                         print("error", errorManager.handleError(error) ?? "")
                     }
@@ -244,13 +244,14 @@ extension SpotMapFeature {
                     }
                 }
                 
-            case let .dataTransType(.fetchMarkers(markers)):
+            case let .dataTransType(.fetchMarkers(markers, isReload)):
                 state.mapSpotEntity = markers
                 
                 state.mapManager.updateMarkers(markers: markers)
                 
-                state.alertPresent = markers.isEmpty
-                
+                if isReload {
+                    state.alertPresent = markers.isEmpty
+                }
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -268,7 +269,7 @@ extension SpotMapFeature {
                         await send(.networkType(.fetchMapMarker(
                             userLocation: coord,
                             mbr: mbr,
-                            categoryId: .all
+                            categoryId: .all, false
                         )))
                     }
                 }

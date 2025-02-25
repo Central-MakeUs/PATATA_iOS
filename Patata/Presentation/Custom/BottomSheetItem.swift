@@ -11,12 +11,16 @@ struct BottomSheetItem: View {
     let title: String?
     let delete: Bool
     let items: [String]
+    let tapChange: Bool
     let tappedItem: (String) -> Void
     
-    init(title: String? = nil, delete: Bool = false, items: [String], tappedItem: @escaping (String) -> Void) {
+    @State private var selectedIndex: Int = 0
+    
+    init(title: String? = nil, delete: Bool = false, items: [String], tapChange: Bool = true, tappedItem: @escaping (String) -> Void) {
         self.title = title
         self.delete = delete
         self.items = items
+        self.tapChange = tapChange
         self.tappedItem = tappedItem
     }
     
@@ -43,7 +47,8 @@ extension BottomSheetItem {
                     .padding(.horizontal, 15)
             }
             
-            ForEach(items, id: \.self) { item in
+            ForEach(Array(items.enumerated()), id: \.element) { index, item in
+                
                 HStack {
                     Spacer()
                     
@@ -53,9 +58,10 @@ extension BottomSheetItem {
                     Spacer()
                 }
                 .frame(height: 35)
-                .foregroundStyle(delete && item == "게시글 삭제하기" ? .red100 : .black)
+                .foregroundStyle(delete ? (item == "게시글 삭제하기" ? .red100 : Color.textDefault) : tapChange ? (selectedIndex == index ? Color.textDefault : Color.textDisabled) : Color.textDefault)
                 .asButton {
                     tappedItem(item)
+                    selectedIndex = index
                 }
                 
                 if item != items.last {

@@ -30,11 +30,11 @@ struct SpotDetailView: View {
                     }
                     .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
                         if !store.spotDetailData.isAuthor {
-                            BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
+                            BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"], tapChange: false) { text in
                                 store.send(.viewEvent(.bottomSheetClose(text)))
                             }
                         } else {
-                            BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
+                            BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"], tapChange: false) { text in
                                 store.send(.viewEvent(.bottomSheetClose(text)))
                             }
                         }
