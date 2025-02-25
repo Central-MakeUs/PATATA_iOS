@@ -63,7 +63,7 @@ struct TabCoordinatorView: View {
                             bounds: CGRect( x: 0, y: 0, width: UIScreen.main.scale, height: 8),
                             colors: [
                                 UIColor.clear.cgColor,
-                                UIColor.black.withAlphaComponent(0.05).cgColor
+                                UIColor.black.withAlphaComponent(0.012).cgColor
                             ]
                         )
                         

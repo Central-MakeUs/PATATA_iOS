@@ -109,6 +109,8 @@ struct SpotEditorView: View {
 extension SpotEditorView {
     private var contentView: some View {
         VStack(spacing: 0) {
+            
+            
             fakeNav
                 .padding(.bottom, 14)
             
@@ -139,6 +141,20 @@ extension SpotEditorView {
                 termsView
             }
             .background(.gray20)
+            .overlay(alignment: .top) {
+                Color.black
+                    .opacity(0.1)
+                    .frame(height: 2)
+                    .blur(radius: 3)
+                    .offset(y: 2)
+                
+                Color.white
+                    .opacity(0.1)
+                    .frame(height: 4)
+                    .offset(y: -2)
+                
+                
+            }
             
             VStack {
                 spotEditButton
