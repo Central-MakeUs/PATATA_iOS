@@ -17,6 +17,7 @@ struct MySpotListFeature {
         let viewState: ViewState
         var spotListEntity: [TodaySpotListEntity] = []
         var mapSpotEntity: [MapSpotEntity] = []
+        var initialMapSpot: [MapSpotEntity] = []
         let titles = ["전체", "작가추천", "스냅스팟", "시크한 아경", "일상 속 공감", "싱그러운"]
         var userCoord: Coordinate =  Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var mbrLocation: MBRCoordinates
@@ -68,6 +69,7 @@ struct MySpotListFeature {
         case archiveState(ArchiveEntity, Int)
         case fetchSpot([MapSpotEntity])
         case fetchSearchSpot(MapSpotEntity?)
+        case changeMenuItem(CategoryCase)
     }
     
     enum ViewEvent {
@@ -96,7 +98,8 @@ extension MySpotListFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
-                print("onAppear", state.mapSpotEntity)
+                state.selectedIndex = 0
+                
                 return .run { send in
                     await send(.dataTransType(.fetchRealm))
                     
@@ -108,26 +111,7 @@ extension MySpotListFeature {
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
                 
-                if !state.mapSpotEntity.isEmpty {
-                    let mbrLocation = state.mbrLocation
-                    let userLocation = state.userCoord
-                    let category = CategoryCase.getCategory(id: index)
-                    let isSearch = state.viewState == .mapSearch ? true : false
-                    
-                    if state.viewState == .mapSearch {
-                        let mbrLocation = state.mbrLocation
-                        let userLocation = state.userCoord
-                        let searchText = state.searchText
-                        
-                        return .run { send in
-                            await send(.networkType(.fetchSearchSpot(mbrLocation, userLocation, searchText)))
-                        }
-                    } else {
-                        return .run { send in
-                            await send(.networkType(.fetchSpot(mbrLocation, userLocation, category, isSearch)))
-                        }
-                    }
-                }
+                return .send(.dataTransType(.changeMenuItem(CategoryCase(rawValue: index) ?? .all)))
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton(state.viewState)))
@@ -198,8 +182,17 @@ extension MySpotListFeature {
             case let .dataTransType(.fetchSpot(data)):
                 if state.viewState == .map {
                     state.mapSpotEntity = data
+                    state.initialMapSpot = state.mapSpotEntity
                 } else {
                     state.mapSpotEntity.append(contentsOf: data)
+                    state.initialMapSpot = state.mapSpotEntity
+                }
+                
+            case let .dataTransType(.changeMenuItem(category)):
+                if category == .all {
+                    state.mapSpotEntity = state.initialMapSpot
+                } else {
+                    state.mapSpotEntity = state.initialMapSpot.filter { $0.category == category }
                 }
                 
             case let .dataTransType(.userLocation(coord)):

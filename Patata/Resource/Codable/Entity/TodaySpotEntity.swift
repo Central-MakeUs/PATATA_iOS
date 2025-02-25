@@ -15,4 +15,14 @@ struct TodaySpotEntity: Entity {
     let imageUrl: String?
     let isScraped: Bool
     let tags: [String]
+    
+    init(spotId: Int = 0, spotAddress: String = "", spotName: String = "", category: CategoryCase = .all, imageUrl: String? = nil, isScraped: Bool = false, tags: [String] = []) {
+        self.spotId = spotId
+        self.spotAddress = spotAddress
+        self.spotName = spotName
+        self.category = category
+        self.imageUrl = imageUrl
+        self.isScraped = isScraped
+        self.tags = tags
+    }
 }

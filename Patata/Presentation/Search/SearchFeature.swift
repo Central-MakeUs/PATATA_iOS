@@ -32,7 +32,6 @@ struct SearchFeature {
     }
     
     enum ViewState {
-        case loading
         case search
         case searchResult
     }
@@ -49,7 +48,6 @@ struct SearchFeature {
         case viewEvent(ViewEvent)
         case networkType(NetworkType)
         case dataTransType(DataTransType)
-        case switchViewState
         case delegate(Delegate)
         
         // bindingAction
@@ -129,12 +127,6 @@ extension SearchFeature {
                 return .send(.delegate(.tappedBackButton(state.beforeViewState)))
                 
             case .viewEvent(.searchOnSubmit):
-                if state.beforeViewState == .home {
-                    if !state.searchText.isEmpty {
-                        state.viewState = .loading
-                    }
-                }
-                
                 let searchText = state.searchText
                 let userLocation = state.userLocation
                 
@@ -275,6 +267,8 @@ extension SearchFeature {
                         state.searchSpotItems.append(contentsOf: data.spots)
                         state.listLoadTrigger = true
                     } else {
+                        state.viewState = .searchResult
+                        
                         state.searchResult = true
                         state.itemTotalCount = data.totalCount
                         state.pageTotalCount = data.totalPages
@@ -282,10 +276,6 @@ extension SearchFeature {
                         state.searchSpotItems = data.spots
                         state.listLoadTrigger = true
                     }
-                    if state.beforeViewState == .home && state.viewState == .loading {
-                        return .send(.switchViewState)
-                    }
-                        
                 } else {
                     state.viewState = .search
                     state.searchResult = false
@@ -304,9 +294,6 @@ extension SearchFeature {
                 
             case .dataTransType(.error):
                 state.viewState = .search
-                
-            case .switchViewState:
-                state.viewState = .searchResult
                 
             case let .bindingSearchText(text):
                 state.searchText = text

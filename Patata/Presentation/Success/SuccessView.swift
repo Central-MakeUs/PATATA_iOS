@@ -44,7 +44,7 @@ extension SuccessView {
                     .foregroundStyle(.gray100)
                     .textStyle(.headlineS)
                 
-                VStack(spacing: 0) {
+                VStack(spacing: 4) {
                     Text("스팟이 정상적으로 등록되었습니다.")
                     Text("다른 스팟들을 둘러보러 가볼까요?")
                 }

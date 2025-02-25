@@ -49,35 +49,48 @@ extension MySpotListView {
                     Spacer()
                 } else {
                     ScrollView(.vertical) {
-                        VStack {
-                            ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
-                                mapSpotView(spot: item, index: index)
+                        VStack(spacing: 4) {
+                            if store.mapSpotEntity.isEmpty {
+                                ForEach(0..<10) { index in
+                                    mapSpotView(spot: MapSpotEntity(), index: index)
+                                        .background(.white)
+                                }
+                            } else {
+                                ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
+                                    mapSpotView(spot: item, index: index)
+                                        .background(.white)
+                                        .asButton {
+                                            store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                        }
+                                }
+                            }
+                        }
+                    }
+                    .background(.gray10)
+                    .redacted(reason: store.mapSpotEntity.isEmpty ? .placeholder : [])
+                }
+            } else {
+                ScrollView(.vertical) {
+                    VStack(spacing: 0) {
+                        if store.spotListEntity.isEmpty {
+                            ForEach(0..<10) { index in
+                                spotListView(spot: TodaySpotListEntity(), index: index)
+                                    .background(.white)
+                            }
+                        } else {
+                            ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
+                                spotListView(spot: item, index: index)
                                     .background(.white)
                                     .asButton {
                                         store.send(.viewEvent(.tappedSpot(item.spotId)))
                                     }
                             }
                         }
-                        .padding(.top, 12
-                        )
-                    }
-                    .background(.gray10)
-                    
-                }
-            } else {
-                ScrollView(.vertical) {
-                    VStack {
-                        ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
-                            spotListView(spot: item, index: index)
-                                .background(.white)
-                                .asButton {
-                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
-                                }
-                        }
                     }
                     .padding(.top, 8)
                 }
                 .background(.gray10)
+                .redacted(reason: store.spotListEntity.isEmpty ? .placeholder : [])
             }
             
         }
@@ -149,8 +162,10 @@ extension MySpotListView {
                             .id(index)
                             .asButton {
                                 store.send(.viewEvent(.selectedMenu(index)))
+                            }
+                            .onChange(of: store.selectedIndex) { newValue in
                                 withAnimation {
-                                    proxy.scrollTo(index, anchor: .center)
+                                    proxy.scrollTo(store.selectedIndex, anchor: .center)
                                 }
                             }
                     }
@@ -167,7 +182,7 @@ extension MySpotListView {
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 130, height: 150)
             
-            VStack(alignment: .center) {
+            VStack(alignment: .center, spacing: 4) {
                 Text("이런! 주변에 스팟이 없어요")
                 Text("파타타와 함께 스팟을 채워가요!")
             }
@@ -222,17 +237,17 @@ extension MySpotListView {
                         .clipShape(RoundedRectangle(cornerRadius: 22))
                 }
                 
-                Text(spot.spotName)
+                Text(spot.spotName.isEmpty ? "spotName" : spot.spotName)
                     .textStyle(.subtitleSM)
                     .foregroundStyle(.blue100)
                 
                 HStack(spacing: 6) {
-                    Image(spot.categoryId.getCategoryCase().image ?? "SnapIcon")
+                    Image(spot.categoryId.getCategoryCase().image ?? "")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12, height: 12)
                     
-                    Text(spot.categoryId.getCategoryCase().title)
+                    Text(spot.spotName.isEmpty ? "spotName" : spot.categoryId.getCategoryCase().title)
                         .foregroundStyle(.gray70)
                         .textStyle(.subtitleXS)
                 }
@@ -246,11 +261,11 @@ extension MySpotListView {
             .padding(.top, 16)
             
             HStack(spacing: 4) {
-                Text(spot.distance)
+                Text(spot.spotName.isEmpty ? "spotName" : spot.distance)
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textSub)
                 
-                Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
+                Text(spot.spotName.isEmpty ? "spotName" : "\(spot.spotAddress) \(spot.spotAddressDetail)")
                     .lineLimit(1)
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textInfo)
@@ -261,7 +276,7 @@ extension MySpotListView {
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
-                    Text("#\(tag)")
+                    Text(spot.spotName.isEmpty ? "spotName" : "#\(tag)")
                         .hashTagStyle()
                 }
             }
@@ -293,16 +308,16 @@ extension MySpotListView {
                         .clipShape(RoundedRectangle(cornerRadius: 22))
                 }
                 
-                Text(spot.spotName)
+                Text(spot.spotName.isEmpty ? "spotName" :spot.spotName)
                     .textStyle(.subtitleS)
                     .foregroundStyle(.blue100)
                 
-                Image(spot.category.getCategoryCase().image ?? "SnapIcon")
+                Image(spot.category.getCategoryCase().image ?? "")
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 12, height: 12)
                 
-                Text(spot.category.getCategoryCase().title)
+                Text(spot.spotName.isEmpty ? "spotName" : spot.category.getCategoryCase().title)
                     .foregroundStyle(.gray70)
                     .textStyle(.captionS)
                 
@@ -315,11 +330,11 @@ extension MySpotListView {
             .padding(.top, 16)
             
             HStack(spacing: 4) {
-                Text(spot.distance)
+                Text(spot.spotName.isEmpty ? "spotName" : spot.distance)
                     .textStyle(.captionS)
                     .foregroundStyle(.textSub)
                 
-                Text("\(spot.spotAddress) \(spot.spotAddressDetail)")
+                Text(spot.spotName.isEmpty ? "spotName" : "\(spot.spotAddress) \(spot.spotAddressDetail)")
                     .lineLimit(1)
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
@@ -330,7 +345,7 @@ extension MySpotListView {
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
-                    Text("#\(tag)")
+                    Text(spot.spotName.isEmpty ? "spotName" : "#\(tag)")
                         .hashTagStyle()
                 }
             }
@@ -343,18 +358,11 @@ extension MySpotListView {
         let imageDefault = "ImageDefault"
         
         return Group {
-            if spotImage.count == 1{
-                DownImageView(url: spotImage[0], option: .custom(CGSize(width: 600, height: 600)), fallBackImg: imageDefault)
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: imageWidth * 0.5)
-                    .clipped()
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .padding(.horizontal, 15)
-            } else if spotImage.count == 2 {
+            if spotImage.isEmpty {
                 HStack(spacing: 8) {
-                    ForEach(Array(zip(spotImage.indices, spotImage.compactMap { $0 })), id: \.0) { index, image in
-                        DownImageView(url: image, option: .max, fallBackImg: imageDefault)
+                    ForEach(0..<2) { index in
+                        Rectangle()
+                            .foregroundStyle(.gray30)
                             .aspectRatio(1, contentMode: .fill)
                             .frame(width: (imageWidth - 8) / 2)
                             .clipped()
@@ -363,19 +371,40 @@ extension MySpotListView {
                 }
                 .padding(.horizontal, 15)
             } else {
-                ScrollView(.horizontal) {
+                if spotImage.count == 1{
+                    DownImageView(url: spotImage[0], option: .custom(CGSize(width: 600, height: 600)), fallBackImg: imageDefault)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: imageWidth * 0.5)
+                        .clipped()
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .padding(.horizontal, 15)
+                } else if spotImage.count == 2 {
                     HStack(spacing: 8) {
                         ForEach(Array(zip(spotImage.indices, spotImage.compactMap { $0 })), id: \.0) { index, image in
-                            DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
+                            DownImageView(url: image, option: .max, fallBackImg: imageDefault)
                                 .aspectRatio(1, contentMode: .fill)
-                                .frame(width: (imageWidth - 8) / 2.5)
+                                .frame(width: (imageWidth - 8) / 2)
                                 .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                         }
                     }
                     .padding(.horizontal, 15)
+                } else {
+                    ScrollView(.horizontal) {
+                        HStack(spacing: 8) {
+                            ForEach(Array(zip(spotImage.indices, spotImage.compactMap { $0 })), id: \.0) { index, image in
+                                DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
+                                    .aspectRatio(1, contentMode: .fill)
+                                    .frame(width: (imageWidth - 8) / 2.5)
+                                    .clipped()
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                            }
+                        }
+                        .padding(.horizontal, 15)
+                    }
+                    .scrollIndicators(.hidden)
                 }
-                .scrollIndicators(.hidden)
             }
         }
     }

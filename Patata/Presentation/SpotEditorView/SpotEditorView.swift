@@ -252,7 +252,7 @@ extension SpotEditorView {
     
     private var detailView: some View {
         VStack {
-            HStack(spacing: 2) {
+            HStack(spacing: 4) {
                 Text("필수")
                     .textStyle(.captionS)
                     .foregroundStyle(.blue100)
@@ -278,7 +278,7 @@ extension SpotEditorView {
                 .overlay(
                     VStack(alignment: .leading, spacing: 16) {
                         if store.detail.isEmpty {
-                            Text("장소에 대한 간단한 설명을 남겨하세요 (300자 이하)")
+                            Text("장소에 대한 간단한 설명을 남겨주세요 (300자 이하)")
                                 .textStyle(.bodyS)
                                 .foregroundColor(.textDisabled)
                             

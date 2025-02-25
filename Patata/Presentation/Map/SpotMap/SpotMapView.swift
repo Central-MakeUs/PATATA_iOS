@@ -136,9 +136,9 @@ extension SpotMapView {
                     .foregroundStyle(.gray70)
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 15)
-            .padding(.vertical, 15)
-            .background(.gray20)
+            .frame(height: 48)
+            .padding(.horizontal, 20)
+            .background(.gray10)
             .clipShape(RoundedRectangle(cornerRadius: 30))
             .onTapGesture {
                 store.send(.viewEvent(.tappedSearch))
@@ -266,7 +266,7 @@ extension SpotMapView {
     }
     
     private func spotDetailSheet(spot: MapSpotEntity) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 if spot.category == .recommendSpot {
                     Text("작가추천")
@@ -309,6 +309,7 @@ extension SpotMapView {
                 
                 Spacer()
             }
+            .padding(.top, 2)
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
@@ -316,6 +317,7 @@ extension SpotMapView {
                         .hashTagStyle()
                 }
             }
+            .padding(.top, 10)
             
             DownImageView(url: spot.images[safe: 0] ?? nil, option: .custom(CGSize(width: 600, height: 600)), fallBackImg: "ImageDefault")
                 .aspectRatio(contentMode: .fill)
@@ -323,6 +325,7 @@ extension SpotMapView {
                 .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.top, 10)
         }
         .padding(.horizontal, 15)
         .padding(.vertical, 12)

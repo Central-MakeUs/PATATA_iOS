@@ -22,10 +22,6 @@ struct SearchView: View {
                     .ignoresSafeArea()
                 
                 switch store.viewState {
-                case .loading:
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .navigationBarBackButtonHidden(true)
                 case .search:
                     contentView
                         .navigationBarBackButtonHidden(true)
@@ -54,6 +50,7 @@ extension SearchView {
     private var contentView: some View {
         VStack(alignment: .center) {
             fakeNavgationBar
+                .padding(.bottom, 14)
                 .padding(.horizontal, 15)
             
             Spacer()

@@ -154,7 +154,7 @@ extension ReportView {
                 Text(title)
                     .textStyle(.subtitleL)
                     .foregroundColor(.black)
-                    .padding(.vertical, 24)
+                    .padding(.vertical, 20 )
                 
                 if title == "기타" {
                     Text("(직접 작성)")

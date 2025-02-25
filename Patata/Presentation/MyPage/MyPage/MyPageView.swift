@@ -162,12 +162,12 @@ extension MyPageView {
     
     private var archiveSpotView: some View {
         let columns = [
-            GridItem(.flexible(), spacing: 4),
-            GridItem(.flexible(), spacing: 4),
+            GridItem(.flexible(), spacing: 3),
+            GridItem(.flexible(), spacing: 3),
             GridItem(.flexible())
         ]
         
-        return LazyVGrid(columns: columns, spacing: 4) {
+        return LazyVGrid(columns: columns, spacing: 3) {
             
             ForEach(store.mySpots, id: \.spotId) { item in
                 myPageItem(item)

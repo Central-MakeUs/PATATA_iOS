@@ -44,6 +44,8 @@ struct DownImageView: View {
             )
             .placeholder {
                 ProgressView()
+                    .background(.gray30)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
 //                Group {
 //                    if let fallBackImg {
 //                        Image(fallBackImg)

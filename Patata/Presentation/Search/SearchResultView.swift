@@ -54,6 +54,7 @@ extension SearchResultView {
                     spotGridView
                 }
                 .background(.gray10)
+                .redacted(reason: store.searchSpotItems.isEmpty ? .placeholder : [])
                 .onChange(of: store.scrollToTop) { newValue in
                     withAnimation {
                         proxy.scrollTo(scrollViewTopID)
@@ -124,16 +125,22 @@ extension SearchResultView {
     
     private var spotGridView: some View {
         LazyVGrid(columns: columns, spacing: 12) {
-            ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.id) { index, item in
-                spotView(item: item, index: index)
-                    .asButton {
-                        store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[index].spotId, index: index)))
-                    }
-                    .onAppear {
-                        if store.pageTotalCount != store.currentPage && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
-                            store.send(.viewEvent(.nextPage))
+            if store.searchSpotItems.isEmpty {
+                ForEach(0..<10, id: \.self) { index in
+                    spotView(item: SearchSpotEntity(), index: index)
+                }
+            } else {
+                ForEach(Array(store.searchSpotItems.enumerated()), id: \.element.id) { index, item in
+                    spotView(item: item, index: index)
+                        .asButton {
+                            store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[index].spotId, index: index)))
                         }
-                    }
+                        .onAppear {
+                            if store.pageTotalCount != store.currentPage && index >= store.searchSpotItems.count - 6 && store.listLoadTrigger {
+                                store.send(.viewEvent(.nextPage))
+                            }
+                        }
+                }
             }
         }
         .padding(16)
@@ -143,26 +150,34 @@ extension SearchResultView {
 extension SearchResultView {
     private func spotView(item: SearchSpotEntity, index: Int) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            DownImageView(url: item.imageUrl, option: .max, fallBackImg: "ImageDefault")
-                .aspectRatio(1, contentMode: .fit)
-                .frame(maxWidth: .infinity)
-                .clipped()
-                .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(alignment: .topTrailing) {
-                    SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: item.isScraped) {
-                        store.send(.viewEvent(.tappedArchiveButton(index)))
+            if !item.spotName.isEmpty {
+                DownImageView(url: item.imageUrl, option: .max, fallBackImg: "ImageDefault")
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .overlay(alignment: .topTrailing) {
+                        SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: item.isScraped) {
+                            store.send(.viewEvent(.tappedArchiveButton(index)))
+                        }
+                        .padding(.trailing, 4)
+                        .padding(.top, 4)
                     }
-                    .padding(.trailing, 4)
-                    .padding(.top, 4)
-                }
+            } else {
+                Rectangle()
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(maxWidth: .infinity)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .foregroundStyle(.gray30)
+            }
             
-            Text(item.spotName)
+            Text(item.spotName.isEmpty ? "spotName" : item.spotName)
                 .textStyle(.subtitleS)
                 .foregroundStyle(.textDefault)
                 .padding(.top, 12)
             
             HStack(spacing: 8) {
-                Text("\(item.distance)")
+                Text(item.spotName.isEmpty ? "Distance" : "\(item.distance)")
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 

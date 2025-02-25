@@ -15,7 +15,7 @@ struct PatataMainView: View {
     
     @State var categoryRatio: CGFloat = .zero
     
-    private let spacing: CGFloat = 30
+    private let spacing: CGFloat = 40
     private let sideCardVisibleRatio: CGFloat = 0.18
     private let scaleEffect: CGFloat = 1.1
     
@@ -49,8 +49,9 @@ extension PatataMainView {
             let screenWidth = geometry.size.width
             let sideCardWidth = screenWidth * sideCardVisibleRatio
             
-            VStack {
+            VStack(spacing: 0) {
                 fakeNavgationBar
+                    .padding(.bottom, 12)
                 
                 WithPerceptionTracking {
                     ScrollView(.vertical) {
@@ -64,9 +65,11 @@ extension PatataMainView {
                         bestSpotBar
                             .padding(.top, 18)
                             .padding(.horizontal, 15)
+                            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                         
                         setSizeRecommendSpots(sideCardWidth: sideCardWidth)
                             .padding(.vertical, 16)
+                            .redacted(reason: store.todaySpotItems.isEmpty ? .placeholder : [])
                             .onAppear {
                                 if cardWidth == 0 {
                                     
@@ -81,28 +84,33 @@ extension PatataMainView {
                         spotCategory
                             .padding(.horizontal, 15)
                             .padding(.top, 8)
+                            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                         
                         categoryRecommendView
                             .padding(.top, 35)
                             .padding(.bottom, 15)
+                            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                         
-                        ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                            CategoryRecommendView(spotItem: item) {
-                                store.send(.viewEvent(.tappedArchiveButton(index, card: false)))
+                        VStack(spacing: 12) {
+                            ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                                CategoryRecommendView(spotItem: item) {
+                                    store.send(.viewEvent(.tappedArchiveButton(index, card: false)))
+                                }
+                                .background(.white)
+                                .clipShape(RoundedRectangle(cornerRadius: 10))
+                                .asButton {
+                                    store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                }
                             }
-                            .background(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding(.horizontal, 15)
-                            .padding(.bottom, 4)
-                            .asButton {
-                                store.send(.viewEvent(.tappedSpot(item.spotId)))
-                            }
+                            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                         }
+                        .padding(.horizontal, 15)
                         
                         moreButton
-                            .padding(.top, 8)
+                            .padding(.top, 4)
                             .padding(.horizontal, 15)
                             .padding(.bottom, 60)
+                            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
                             .asButton {
                                 store.send(.viewEvent(.tappedAddButton))
                             }
@@ -115,10 +123,12 @@ extension PatataMainView {
     
     private var fakeNavgationBar: some View {
         HStack {
-            Text("patata")
-                .foregroundStyle(.blue100)
-                .textStyle(.headlineM)
+            Image("PatataMain")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 80, height: 24)
                 .padding(.leading, 15)
+            
             Spacer()
         }
     }
@@ -145,7 +155,7 @@ extension PatataMainView {
     }
     
     private var spotCategory: some View {
-        VStack {
+        VStack(spacing: 0) {
             HStack {
                 Text("스팟 카테고리")
                     .textStyle(.subtitleL)
@@ -161,12 +171,13 @@ extension PatataMainView {
                         .aspectRatio(1.22, contentMode: .fit)
                         .background(.white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
-                        .shadow(color: .shadowColor, radius: 8)
+                        .shadow(color: .shadowColor, radius: 6)
                         .asButton {
                             store.send(.viewEvent(.tappedCategoryButton(item)))
                         }
                 }
             }
+            .padding(.top, 16)
         }
     }
     
@@ -201,12 +212,12 @@ extension PatataMainView {
             
             Text("더보기")
                 .textStyle(.subtitleM)
-                .padding(.vertical, 12)
             
             Image("NextActive")
             
             Spacer()
         }
+        .frame(height: 48)
         .foregroundStyle(.textDefault)
         .background(.white)
         .clipShape(RoundedRectangle(cornerRadius: 10))
@@ -270,6 +281,40 @@ extension PatataMainView {
                             }()
                             
                             TodayRecommendView(item: store.todaySpotItems[adjustedIndex]) {
+                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
+                            }
+                            .frame(width: cardWidth, height: contentHeight)
+                            .shadow(color: .shadowColor, radius: 8)
+                            .scaleEffect(scale)
+                            .animation(.smooth, value: dragOffset)
+                            .onTapGesture {
+                                store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
+                            }
+                        }
+                    } else {
+                        ForEach(-1..<3 + 1, id: \.self) { i in
+                            let adjustedIndex = i < 0 ? 3 - 1 : (i >= 3 ? 0 : i)
+                            
+                            let progress = -dragOffset / (cardWidth + spacing)
+                            
+                            let scale: CGFloat = {
+                                let totalCount = 3
+                                let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
+                                let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                                
+                                let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
+                                let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
+                                let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                                
+                                if isCurrentCard {
+                                    return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
+                                } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
+                                    return 1.0 + (abs(progress) * (scaleEffect - 1.0))
+                                }
+                                return 1.0
+                            }()
+                            
+                            TodayRecommendView(item: TodaySpotEntity()) {
                                 store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
                             }
                             .frame(width: cardWidth, height: contentHeight)

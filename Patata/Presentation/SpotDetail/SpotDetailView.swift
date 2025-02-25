@@ -23,28 +23,22 @@ struct SpotDetailView: View {
     var body: some View {
         WithPerceptionTracking {
             ZStack {
-                if store.dataState == .loading {
-                    ProgressView()
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .navigationBarBackButtonHidden(true)
-                } else {
-                    contentView
-                        .navigationBarHidden(true)
-                        .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
-                            store.send(.viewEvent(.tappedDeleteButton))
-                        }
-                        .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
-                            if !store.spotDetailData.isAuthor {
-                                BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
-                                    store.send(.viewEvent(.bottomSheetClose(text)))
-                                }
-                            } else {
-                                BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
-                                    store.send(.viewEvent(.bottomSheetClose(text)))
-                                }
+                contentView
+                    .navigationBarHidden(true)
+                    .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
+                        store.send(.viewEvent(.tappedDeleteButton))
+                    }
+                    .presentBottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
+                        if !store.spotDetailData.isAuthor {
+                            BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"]) { text in
+                                store.send(.viewEvent(.bottomSheetClose(text)))
+                            }
+                        } else {
+                            BottomSheetItem(delete: true, items: ["게시글 수정하기", "게시글 삭제하기"]) { text in
+                                store.send(.viewEvent(.bottomSheetClose(text)))
                             }
                         }
-                }
+                    }
             }
             .onAppear {
                 store.send(.viewCycle(.onAppear))
@@ -80,6 +74,7 @@ extension SpotDetailView {
                             Divider()
                                 .frame(height: 0.35)
                                 .background(.gray10)
+                                .foregroundStyle(.gray10)
                             
                             if store.reviewData.isEmpty {
                                 HStack {
@@ -103,6 +98,7 @@ extension SpotDetailView {
                     }
                 }
             }
+            .redacted(reason: store.spotDetailData.spotName.isEmpty ? .placeholder : [])
             .background(.gray10)
             
             VStack(spacing: 0) {
@@ -180,9 +176,9 @@ extension SpotDetailView {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
                 ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
                     DownImageView(url: image, option: .custom(CGSize(width: 650, height: 650)), fallBackImg: "ImageDefault")
+                        .aspectRatio(131/140, contentMode: .fill)
                         .frame(maxWidth: UIScreen.main.bounds.width)
                         .frame(height: UIScreen.main.bounds.height * 0.6)
-                        .aspectRatio(contentMode: .fill)
                         .clipped()
                 }
             }
@@ -208,14 +204,13 @@ extension SpotDetailView {
                     .offset(x: -20, y: -5)
             }
         }
-        
     }
     
     private var detailView: some View {
         VStack(spacing: 0) {
             HStack {
                 // spotTitleView
-                Text(store.spotDetailData.spotName)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : store.spotDetailData.spotName)
                     .textStyle(.headlineS)
                     .foregroundStyle(.textDefault)
                 
@@ -232,7 +227,7 @@ extension SpotDetailView {
             
             // 유저
             HStack {
-                Text(store.spotDetailData.memberName)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : store.spotDetailData.memberName)
                     .textStyle(.subtitleS)
                     .foregroundStyle(.textDefault)
                 
@@ -243,7 +238,7 @@ extension SpotDetailView {
             
             // 주소와 주소 복사
             HStack {
-                Text(store.spotDetailData.spotAddress)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : store.spotDetailData.spotAddress)
                     .textStyle(.subtitleXS)
                     .foregroundStyle(.textDisabled)
                 
@@ -261,7 +256,7 @@ extension SpotDetailView {
             .padding(.horizontal, 30)
             
             HStack {
-                Text(store.spotDetailData.spotDescription)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : store.spotDetailData.spotDescription)
                     .textStyle(.bodySM)
                     .foregroundStyle(.textSub)
                 
@@ -385,7 +380,7 @@ extension SpotDetailView {
             .padding(.bottom, 6)
             
             HStack {
-                Text(text)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : text)
                     .textStyle(.bodySM)
                     .foregroundStyle(.textSub)
                 
@@ -394,7 +389,7 @@ extension SpotDetailView {
             .padding(.horizontal, 15)
             
             HStack {
-                Text(date)
+                Text(store.spotDetailData.spotName.isEmpty ? "spotDetail" : date)
                     .textStyle(.captionS)
                 
                 Spacer()

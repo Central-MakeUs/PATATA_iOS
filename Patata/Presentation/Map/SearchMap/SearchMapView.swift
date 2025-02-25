@@ -135,9 +135,9 @@ extension SearchMapView {
                     }
             }
             .frame(maxWidth: .infinity)
-            .padding(.horizontal, 15)
-            .padding(.vertical, 15)
-            .background(.gray20)
+            .frame(height: 48)
+            .padding(.horizontal, 20)
+            .background(.gray10)
             .clipShape(RoundedRectangle(cornerRadius: 30))
             .onTapGesture {
                 store.send(.viewEvent(.tappedSearch))
@@ -274,7 +274,7 @@ extension SearchMapView {
     }
     
     private func spotDetailSheet(spot: MapSpotEntity) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
                 if spot.category == .recommendSpot {
                     Text("작가추천")
@@ -317,6 +317,7 @@ extension SearchMapView {
                 
                 Spacer()
             }
+            .padding(.top, 2)
             
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
@@ -324,6 +325,7 @@ extension SearchMapView {
                         .hashTagStyle()
                 }
             }
+            .padding(.top, 10)
             
             DownImageView(url: spot.images[safe: 0] ?? nil, option: .max, fallBackImg: "ImageDefault")
                 .aspectRatio(contentMode: .fill)
@@ -331,6 +333,7 @@ extension SearchMapView {
                 .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
                 .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .padding(.top, 10)
         }
         .padding(.horizontal, 15)
         .padding(.vertical, 12)

@@ -13,37 +13,48 @@ struct CategoryRecommendView: View {
     
     var body: some View {
         contentView
+            .redacted(reason: spotItem.spotName.isEmpty ? .placeholder : [])
     }
 }
 
 extension CategoryRecommendView {
     private var contentView: some View {
         HStack(alignment: .top) {
-            DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
-                .aspectRatio(1, contentMode: .fit)
-                .frame(width: 120, height: 120)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .overlay {
-                    ZStack(alignment: .bottomLeading) {
-                        LinearGradient(
-                            gradient: Gradient(stops: [
-                             .init(color: Color.clear, location: 0.78),
-                                .init(color: Color.gray50, location: 1.0)
-                            ]),
-                            startPoint: .top,
-                            endPoint: .bottom
-                        )
-                        
-                        SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: spotItem.isScraped) {
-                            tappedButton()
-                        }
-                        .padding(.leading, 4)
-                        .padding(.bottom, 4)
-                    }
+            if spotItem.spotName.isEmpty {
+                Rectangle()
+                    .foregroundStyle(.gray30)
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(width: 120, height: 120)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
-                }
-                .padding(.leading, 10)
-                .padding(.vertical, 10)
+                    .padding(.leading, 10)
+                    .padding(.vertical, 10)
+            } else {
+                DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
+                    .aspectRatio(1, contentMode: .fit)
+                    .frame(width: 120, height: 120)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .overlay {
+                        ZStack(alignment: .bottomLeading) {
+                            LinearGradient(
+                                gradient: Gradient(stops: [
+                                    .init(color: Color.clear, location: 0.78),
+                                    .init(color: Color.gray50, location: 1.0)
+                                ]),
+                                startPoint: .top,
+                                endPoint: .bottom
+                            )
+                            
+                            SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: spotItem.isScraped) {
+                                tappedButton()
+                            }
+                            .padding(.leading, 4)
+                            .padding(.bottom, 4)
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                    }
+                    .padding(.leading, 10)
+                    .padding(.vertical, 10)
+            }
             
             ZStack(alignment: .topTrailing) {
                 spotDesView
@@ -57,14 +68,14 @@ extension CategoryRecommendView {
                         .padding(.trailing, 10)
                 }
             }
+            
         }
-        
     }
     
     private var spotDesView: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                limitText(spotItem.spotAddress, to: 10)
+                limitText(spotItem.spotAddress.isEmpty ? "dddd" : spotItem.spotAddress, to: 10)
                     .foregroundStyle(.textInfo)
                     .textStyle(.captionM)
                 
@@ -72,7 +83,7 @@ extension CategoryRecommendView {
             }
             
             
-            Text(spotItem.spotName)
+            Text(spotItem.spotAddress.isEmpty ? "dddd" : spotItem.spotName)
                 .foregroundStyle(.textDefault)
                 .textStyle(.subtitleSM)
                 .padding(.top, 1)

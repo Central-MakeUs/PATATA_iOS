@@ -12,6 +12,7 @@ extension View {
         self
             .font(style.font)
             .lineSpacing(style.lineHeight - style.fontSize)
+            .tracking(-1)
     }
 }
 

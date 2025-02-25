@@ -54,27 +54,38 @@ extension SpotCategoryView {
                 filterView
                     .padding(.top, 12)
                     .padding(.horizontal, 15)
-                
-                ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                    CategoryRecommendView(spotItem: item) {
-                        store.send(.viewEvent(.tappedArchiveButton(index)))
-                    }
-                    .background(.white)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal, 15)
-                    .padding(.bottom, 4)
-                    .onAppear {
-                        if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
-                            store.send(.viewEvent(.nextPage))
+                if store.spotItems.isEmpty {
+                    ForEach(0..<10) { _ in
+                        CategoryRecommendView(spotItem: SpotEntity()) {
+                            print("tap")
                         }
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .padding(.horizontal, 15)
+                        .padding(.bottom, 4)
                     }
-                    .asButton {
-                        store.send(.viewEvent(.tappedSpot(index)))
+                } else {
+                    ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                        CategoryRecommendView(spotItem: item) {
+                            store.send(.viewEvent(.tappedArchiveButton(index)))
+                        }
+                        .background(.white)
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .padding(.horizontal, 15)
+                        .padding(.bottom, 4)
+                        .onAppear {
+                            if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
+                                store.send(.viewEvent(.nextPage))
+                            }
+                        }
+                        .asButton {
+                            store.send(.viewEvent(.tappedSpot(index)))
+                        }
                     }
                 }
             }
             .background(.gray10)
-
+            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
         }
     }
     

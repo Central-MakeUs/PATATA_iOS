@@ -12,7 +12,6 @@ import ComposableArchitecture
 struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
-        var dataState: DataState = .loading
         let viewState: ViewState
         var spotId: Int
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
@@ -24,11 +23,6 @@ struct SpotDetailFeature {
         var commentText: String = ""
         var bottomSheetIsPresent: Bool = false
         var alertIsPresent: Bool = false
-    }
-    
-    enum DataState {
-        case loading
-        case detail
     }
     
     enum ViewState {
@@ -109,7 +103,6 @@ extension SpotDetailFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
-                state.dataState = .loading
                 return .run { [state = state] send in
                     await send(.networkType(.fetchSpotDetail(state.spotId)))
                 }
@@ -221,8 +214,6 @@ extension SpotDetailFeature {
             case let .dataTransType(.spotDetail(data)):
                 state.spotDetailData = data
                 state.reviewData = data.reviews
-                
-                state.dataState = .detail
                 
             case let .dataTransType(.archiveState(data)):
                 state.spotDetailData = SpotDetailEntity(
