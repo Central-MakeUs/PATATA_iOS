@@ -15,6 +15,7 @@ struct ArchiveView: View {
     @Perception.Bindable var store: StoreOf<ArchiveFeature>
     private let columns = [
         GridItem(.flexible(), spacing: 4),
+        GridItem(.flexible(), spacing: 4),
         GridItem(.flexible())
     ]
     
@@ -75,10 +76,6 @@ extension ArchiveView {
                 .padding(.bottom, 14)
                 .background(.white)
             
-            Color.gray10
-                .frame(maxWidth: .infinity)
-                .frame(height: 4)
-            
             if store.archiveList.isEmpty {
                 Spacer()
                 
@@ -104,6 +101,7 @@ extension ArchiveView {
                                 }
                         }
                     }
+                    .padding(.top, 4)
                     .background(.white)
                 }
             }
@@ -115,20 +113,32 @@ extension ArchiveView {
 extension ArchiveView {
     private var fakeNavBar: some View {
         ZStack {
-            Text("아카이브")
-                .textStyle(.subtitleL)
-                .foregroundStyle(.textDefault)
-            
-            HStack {
-                Spacer()
+            if !store.archiveList.isEmpty {
+                Text("아카이브")
+                    .textStyle(.subtitleL)
+                    .foregroundStyle(.textDefault)
                 
-                Text(store.chooseIsValid ? "삭제" : "선택")
-                    .padding(.trailing, 15)
-                    .textStyle(.subtitleM)
-                    .foregroundStyle(store.chooseIsValid ? .blue100 : .textDefault)
-                    .asButton {
-                        store.send(.viewEvent(.tappedChoseButton))
-                    }
+                HStack {
+                    Spacer()
+                    
+                    Text(store.chooseIsValid ? "삭제" : "선택")
+                        .padding(.trailing, 15)
+                        .textStyle(.subtitleM)
+                        .foregroundStyle(store.chooseIsValid ? .blue100 : .textDefault)
+                        .asButton {
+                            store.send(.viewEvent(.tappedChoseButton))
+                        }
+                }
+            } else {
+                HStack {
+                    Spacer()
+                    
+                    Text("아카이브")
+                        .textStyle(.subtitleL)
+                        .foregroundStyle(.textDefault)
+                    
+                    Spacer()
+                }
             }
         }
     }
@@ -170,7 +180,7 @@ extension ArchiveView {
 
 extension ArchiveView {
     private func archiveItem(_ item: ArchiveListEntity) -> some View {
-        DownImageView(url: item.representativeImageUrl, option: .custom(CGSize(width: 800, height: 800)), fallBackImg: "ImageDefault")
+        DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
             .aspectRatio(1, contentMode: .fit)
             .clipped()
             .overlay(alignment: .topTrailing) {

@@ -71,7 +71,7 @@ extension MySpotListView {
                 }
             } else {
                 ScrollView(.vertical) {
-                    VStack(spacing: 0) {
+                    VStack(spacing: 4) {
                         if store.spotListEntity.isEmpty {
                             ForEach(0..<10) { index in
                                 spotListView(spot: TodaySpotListEntity(), index: index)
@@ -87,7 +87,7 @@ extension MySpotListView {
                             }
                         }
                     }
-                    .padding(.top, 8)
+                    .padding(.top, 4)
                 }
                 .background(.gray10)
                 .redacted(reason: store.spotListEntity.isEmpty ? .placeholder : [])

@@ -49,8 +49,9 @@ extension SplashView {
     }
     
     private var titleView: some View {
-        Text("patata")
-            .foregroundStyle(.white)
-            .textStyle(.headlineL)
+        Image("PatataMainWhite")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 162, height: 48)
     }
 }
