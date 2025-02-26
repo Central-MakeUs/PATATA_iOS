@@ -164,10 +164,10 @@ extension SearchResultView {
         VStack(alignment: .leading, spacing: 0) {
             if !item.spotName.isEmpty {
                 DownImageView(url: item.imageUrl, option: .max, fallBackImg: "ImageDefault")
-                    .aspectRatio(1, contentMode: .fit)
+                    .aspectRatio(1, contentMode: .fill)
                     .frame(maxWidth: .infinity)
-                    .clipped()
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .clipped()
                     .overlay(alignment: .topTrailing) {
                         SpotArchiveButton(height: 40, width: 40, viewState: .category, isSaved: item.isScraped) {
                             store.send(.viewEvent(.tappedArchiveButton(index)))

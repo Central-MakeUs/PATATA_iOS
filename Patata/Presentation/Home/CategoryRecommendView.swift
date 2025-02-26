@@ -30,9 +30,10 @@ extension CategoryRecommendView {
                     .padding(.vertical, 10)
             } else {
                 DownImageView(url: URL(string: spotItem.imageUrl ?? ""), option: .mid, fallBackImg: "ImageDefault")
-                    .aspectRatio(1, contentMode: .fit)
+                    .aspectRatio(1, contentMode: .fill)
                     .frame(width: 120, height: 120)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipped()
                     .overlay {
                         ZStack(alignment: .bottomLeading) {
                             LinearGradient(

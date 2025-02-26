@@ -40,8 +40,8 @@ extension TodayRecommendView {
                } else {
                    DownImageView(url: URL(string: item.imageUrl ?? ""), option: .custom(CGSize(width: 600, height: 600)), fallBackImg: "ImageDefault")
                        .aspectRatio(5/6, contentMode: .fill)
-                       .clipped()
                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                       .clipped()
                        .padding(.top, 13)
                        .overlay {
                            ZStack {

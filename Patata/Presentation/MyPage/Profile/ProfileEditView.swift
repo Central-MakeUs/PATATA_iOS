@@ -106,9 +106,10 @@ extension ProfileEditView {
                 if selectedImage.isEmpty {
                     if let imageData = store.profileData.profileImage {
                         DownImageView(url: imageData, option: .mid, fallBackImg: store.profileImage)
-                            .aspectRatio(1, contentMode: .fit)
+                            .aspectRatio(1, contentMode: .fill)
                             .frame(width: 100, height: 100)
                             .clipShape(Circle())
+                            .clipped()
                             .overlay(alignment: .bottomTrailing) {
                                 Image("EditActive")
                                     .resizable()
@@ -141,9 +142,10 @@ extension ProfileEditView {
                 } else {
                     Image(uiImage: selectedImage[0])
                         .resizable()
-                        .aspectRatio(1, contentMode: .fit)
+                        .aspectRatio(1, contentMode: .fill)
                         .frame(width: 100, height: 100)
                         .clipShape(Circle())
+                        .clipped()
                         .overlay(alignment: .bottomTrailing) {
                             Image("EditActive")
                                 .resizable()

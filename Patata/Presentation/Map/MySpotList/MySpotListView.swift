@@ -366,8 +366,8 @@ extension MySpotListView {
                             .foregroundStyle(.gray30)
                             .aspectRatio(1, contentMode: .fill)
                             .frame(width: (imageWidth - 8) / 2)
-                            .clipped()
                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .clipped()
                     }
                 }
                 .padding(.horizontal, 15)
@@ -377,8 +377,8 @@ extension MySpotListView {
                         .aspectRatio(contentMode: .fill)
                         .frame(maxWidth: .infinity)
                         .frame(height: imageWidth * 0.5)
-                        .clipped()
                         .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .clipped()
                         .padding(.horizontal, 15)
                 } else if spotImage.count == 2 {
                     HStack(spacing: 8) {
@@ -386,8 +386,8 @@ extension MySpotListView {
                             DownImageView(url: image, option: .max, fallBackImg: imageDefault)
                                 .aspectRatio(1, contentMode: .fill)
                                 .frame(width: (imageWidth - 8) / 2)
-                                .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                                .clipped()
                         }
                     }
                     .padding(.horizontal, 15)
@@ -398,8 +398,8 @@ extension MySpotListView {
                                 DownImageView(url: image, option: .mid, fallBackImg: imageDefault)
                                     .aspectRatio(1, contentMode: .fill)
                                     .frame(width: (imageWidth - 8) / 2.5)
-                                    .clipped()
                                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                                    .clipped()
                             }
                         }
                         .padding(.horizontal, 15)

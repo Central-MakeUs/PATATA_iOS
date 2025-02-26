@@ -457,8 +457,8 @@ extension SpotEditorView {
                                         DownImageView(url: url, option: .mid, fallBackImg: "ImageDefault")
                                             .aspectRatio(1, contentMode: .fill)
                                             .frame(width: (imageWidth - 8) / 2.5)
-                                            .clipped()
                                             .clipShape(RoundedRectangle(cornerRadius: 8))
+                                            .clipped()
                                             .overlay(alignment: .bottom) {
                                                 if index == 0 {
                                                     HStack {

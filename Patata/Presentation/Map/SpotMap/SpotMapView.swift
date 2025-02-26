@@ -324,8 +324,8 @@ extension SpotMapView {
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth: .infinity)
                 .frame(height: (UIScreen.main.bounds.width - 30) * 0.5)
-                .clipped()
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipped()
                 .padding(.top, 10)
         }
         .padding(.horizontal, 15)
