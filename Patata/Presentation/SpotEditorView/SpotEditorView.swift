@@ -23,6 +23,7 @@ struct SpotEditorView: View {
     @State private var totalExceed: Bool = false
     @State private var invalidExceed: Bool = false
     @State private var selectedIndex: Int = 6
+    @State private var deleteIndex: Int? = 0
     
     enum Field: Hashable {
         case title
@@ -383,7 +384,8 @@ extension SpotEditorView {
                                 resizedImageDatas: $resizedImageDatas,
                                 isResizing: $isResizing,
                                 invalidExceed: $invalidExceed,
-                                totalExceed: $totalExceed
+                                totalExceed: $totalExceed,
+                                deleteIndex: $deleteIndex
                             ) {
                                 VStack(alignment: .center) {
                                     Image("ImageDefault")
@@ -437,10 +439,7 @@ extension SpotEditorView {
                                             .aspectRatio(contentMode: .fit)
                                             .frame(width: 34, height: 34)
                                             .onTapGesture {
-                                                selectedImages.remove(at: index)
-                                                if index < resizedImageDatas.count {
-                                                    resizedImageDatas.remove(at: index)
-                                                }
+                                                deleteIndex = index
                                             }
                                     }
                                 }

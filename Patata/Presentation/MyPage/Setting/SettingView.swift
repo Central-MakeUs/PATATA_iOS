@@ -146,7 +146,7 @@ extension SettingView {
             }
             
             Text("설정")
-                .textStyle(.subtitleL)
+                .textStyle(.subtitleM)
                 .foregroundStyle(.textDefault)
         }
     }

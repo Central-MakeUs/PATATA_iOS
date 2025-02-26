@@ -20,8 +20,11 @@ public struct PhotoPickerView<Content: View>: View {
     @Binding private var isResizing: Bool
     @Binding private var invalidExceed: Bool
     @Binding private var totalExceed: Bool
+    @Binding private var deleteIndex: Int?
 
     private let imageResizeManager = ImageResizeManager()
+    @State private var delete: Bool = false
+    
     private let maxSelectedCount: Int
     private var permissionManager = PermissionManager.shared
     private var disabled: Bool {
@@ -40,6 +43,7 @@ public struct PhotoPickerView<Content: View>: View {
         isResizing: Binding<Bool>,
         invalidExceed: Binding<Bool>,
         totalExceed: Binding<Bool>,
+        deleteIndex: Binding<Int?> = .constant(nil),
         maxSelectedCount: Int = 3,
         matching: PHPickerFilter = .images,
         photoLibrary: PHPhotoLibrary = .shared(),
@@ -53,6 +57,7 @@ public struct PhotoPickerView<Content: View>: View {
         self._isResizing = isResizing
         self._invalidExceed = invalidExceed
         self._totalExceed = totalExceed
+        self._deleteIndex = deleteIndex
         self.maxSelectedCount = maxSelectedCount
         self.matching = matching
         self.photoLibrary = photoLibrary
@@ -61,7 +66,7 @@ public struct PhotoPickerView<Content: View>: View {
 
     public var body: some View {
         PhotosPicker(
-            selection: $selectedPhotos,  // 🔥 선택한 사진을 유지
+            selection: $selectedPhotos,
             maxSelectionCount: maxSelectedCount,
             matching: matching,
             photoLibrary: photoLibrary
@@ -69,10 +74,24 @@ public struct PhotoPickerView<Content: View>: View {
             content()
         }
         .onChange(of: selectedPhotos) { newValue in
-            handleSelectedPhotos(newValue)
+            if !delete {
+                handleSelectedPhotos(newValue)
+            } else {
+                delete = false
+            }
         }
-        .onChange(of: selectedImages) { _ in
-            syncSelectedPhotos()
+        .onChange(of: deleteIndex) { newValue in
+            guard let index = newValue, index >= 0, index < selectedPhotos.count else { return }
+
+            let photoToRemove = selectedPhotos[index]
+            
+            resizedImageDatas.remove(at: index)
+            selectedImages.remove(at: index)
+            selectedPhotos.remove(at: index)
+            photoItemToImageMap.removeValue(forKey: photoToRemove)
+            
+            delete = true
+            deleteIndex = nil
         }
     }
 }
@@ -83,7 +102,7 @@ extension PhotoPickerView {
             await MainActor.run {
                 isResizing = true
             }
-
+            
             do {
                 let loadedImages = try await withThrowingTaskGroup(of: (PhotosPickerItem, UIImage)?.self) { group in
                     for photo in newPhotos {
@@ -95,7 +114,7 @@ extension PhotoPickerView {
                             return nil
                         }
                     }
-
+                    
                     var results: [(PhotosPickerItem, UIImage)] = []
                     for try await result in group {
                         if let validResult = result {
@@ -104,20 +123,19 @@ extension PhotoPickerView {
                     }
                     return results
                 }
-
+                
                 let tempImages = loadedImages.map { $0.1 }
-
-                // ✅ 선택한 사진을 유지하고 매핑 정보 저장
+                
                 let combinedImages = tempImages
                 let combinedMapping = Dictionary(uniqueKeysWithValues: loadedImages)
-
+                
                 await MainActor.run {
                     selectedImages = combinedImages
-                    photoItemToImageMap.merge(combinedMapping) { _, new in new }  // 기존 데이터 유지
+                    photoItemToImageMap.merge(combinedMapping) { _, new in new }
                 }
-
+                
                 let (resizedDatas, isIndividualExceeded, isTotalExceeded) = try await imageResizeManager.resizeImages(combinedImages)
-
+                
                 if isIndividualExceeded {
                     await MainActor.run {
                         isImageSizeValid = false
@@ -128,11 +146,17 @@ extension PhotoPickerView {
                     }
                     return
                 }
-
+                
                 if isTotalExceeded {
                     await MainActor.run {
+                        delete = true
+                        
                         selectedImages = Array(combinedImages.prefix(combinedImages.count - 1))
                         resizedImageDatas = resizedDatas
+                        
+                        selectedPhotos.removeLast()
+                        photoItemToImageMap = photoItemToImageMap.filter { selectedPhotos.contains($0.key ) }
+                        
                         isImageSizeValid = true
                         invalidExceed = false
                         totalExceed = true
@@ -140,7 +164,7 @@ extension PhotoPickerView {
                     }
                     return
                 }
-
+                
                 await MainActor.run {
                     resizedImageDatas = resizedDatas
                     isImageSizeValid = true
@@ -157,16 +181,16 @@ extension PhotoPickerView {
         }
     }
 
-    /// ✅ `selectedImages`에서 제거된 항목이 있다면 `selectedPhotos`에서도 제거
     private func syncSelectedPhotos() {
-        let currentImagesSet = Set(selectedImages.map { $0.pngData() })  // 현재 선택된 이미지
+        let currentImagesSet = Set(selectedImages.map { $0.pngData() })
         let newSelectedPhotos = selectedPhotos.filter { photo in
             if let image = photoItemToImageMap[photo] {
-                return currentImagesSet.contains(image.pngData())  // 존재하면 유지
+                return currentImagesSet.contains(image.pngData())
             }
             return false
         }
-
-        selectedPhotos = newSelectedPhotos  // 업데이트된 선택 항목 반영
+        
+        delete = true
+        selectedPhotos = newSelectedPhotos
     }
 }

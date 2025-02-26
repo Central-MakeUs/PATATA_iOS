@@ -89,9 +89,18 @@ extension AddSpotMapView {
                 }
                 
                 VStack {
-                    addressView
-                        .padding(.vertical, 20)
-                        .padding(.horizontal, 15)
+                    
+                    ZStack {
+                        Color.red
+                            .opacity(0.9)
+                            .frame(height: 2)
+                            .blur(radius: 3)
+                            .offset(y: -1)
+                        
+                        addressView
+                            .padding(.vertical, 20)
+                            .padding(.horizontal, 15)
+                    }
                 }
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
@@ -102,7 +111,7 @@ extension AddSpotMapView {
     private var fakeNavgationBar: some View {
         ZStack {
             Text("스팟 추가하기")
-                .textStyle(.subtitleL)
+                .textStyle(.subtitleM)
                 .foregroundStyle(.textDefault)
             
             HStack {
