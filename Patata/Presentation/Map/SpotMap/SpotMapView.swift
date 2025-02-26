@@ -315,7 +315,7 @@ extension SpotMapView {
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
                     Text("#\(tag)")
-                        .hashTagStyle(font: .subtitleXS)
+                        .hashTagStyle(font: .subtitleXS,verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
                 }
             }
             .padding(.top, 10)

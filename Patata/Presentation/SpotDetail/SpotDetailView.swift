@@ -70,11 +70,8 @@ extension SpotDetailView {
                                 .padding(.top, 10)
                                 .padding(.horizontal, 15)
                             
-                            // 수정
-                            Divider()
-                                .frame(height: 0.8)
-                                .background(.gray10)
-                                .foregroundStyle(.gray10)
+                            Color.gray10
+                                .frame(height: 1)
                             
                             if store.reviewData.isEmpty {
                                 HStack {
@@ -283,7 +280,7 @@ extension SpotDetailView {
             HStack {
                 ForEach(Array(store.spotDetailData.tags.enumerated()), id: \.offset) { index, tag in
                     Text("#" + tag)
-                        .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS)
+                        .hashTagStyle(backgroundColor: .blue10, textColor: .gray80, font: .captionS, verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
                 }
                 
                 Spacer()
@@ -423,9 +420,8 @@ extension SpotDetailView {
                 .padding(.vertical, 12)
             
             if index != items.count - 1 {
-                Divider()
-                    .frame(height: 0.8)
-                    .background(.gray10)
+                Color.gray10
+                    .frame(height: 2)
             }
         }
     }

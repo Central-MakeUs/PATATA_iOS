@@ -188,7 +188,7 @@ extension ArchiveView {
 extension ArchiveView {
     private func archiveItem(_ item: ArchiveListEntity) -> some View {
         DownImageView(url: item.representativeImageUrl, option: .max, fallBackImg: "ImageDefault")
-            .aspectRatio(1, contentMode: .fit)
+            .aspectRatio(1, contentMode: .fill)
             .clipped()
             .overlay(alignment: .topTrailing) {
                 if store.chooseIsValid {

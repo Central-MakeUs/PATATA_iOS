@@ -277,7 +277,8 @@ extension MySpotListView {
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
                     Text(spot.spotName.isEmpty ? "spotName" : "#\(tag)")
-                        .hashTagStyle()
+                        .hashTagStyle(verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
+                    
                 }
             }
             .padding(.top, 12)
@@ -346,7 +347,7 @@ extension MySpotListView {
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
                     Text(spot.spotName.isEmpty ? "spotName" : "#\(tag)")
-                        .hashTagStyle()
+                        .hashTagStyle(verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
                 }
             }
             .padding(.top, 12)

@@ -193,7 +193,7 @@ extension SearchResultView {
                     .textStyle(.captionS)
                     .foregroundStyle(.textInfo)
                 
-                SaveCommentCountView(archiveCount: item.spotScraps, commentCount: item.reviews, imageSize: 6)
+                SaveCommentCountView(archiveCount: item.spotScraps, commentCount: item.reviews, imageSize: 10)
             }
             .padding(.top, 4)
         }

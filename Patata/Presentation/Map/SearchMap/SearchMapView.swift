@@ -288,7 +288,7 @@ extension SearchMapView {
                 }
                 
                 Text(spot.spotName)
-                    .textStyle(.subtitleS)
+                    .textStyle(.subtitleM)
                     .foregroundStyle(.blue100)
                 
                 Image(spot.category.getCategoryCase().image ?? "SnapIcon")
@@ -298,7 +298,7 @@ extension SearchMapView {
                 
                 Text(spot.category.getCategoryCase().title)
                     .foregroundStyle(.gray70)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                 
                 Spacer()
                 
@@ -309,11 +309,11 @@ extension SearchMapView {
             
             HStack(spacing: 4) {
                 Text(spot.distance)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textSub)
                 
                 Text(spot.spotAddress + spot.spotAddressDetail)
-                    .textStyle(.captionS)
+                    .textStyle(.subtitleXS)
                     .foregroundStyle(.textInfo)
                 
                 Spacer()
@@ -323,7 +323,7 @@ extension SearchMapView {
             HStack(spacing: 8) {
                 ForEach(Array(spot.tags.enumerated()), id: \.offset) { _, tag in
                     Text("#\(tag)")
-                        .hashTagStyle()
+                        .hashTagStyle(verticalPadding: 8, horizontalPadding: 12, cornerRadius: 20)
                 }
             }
             .padding(.top, 10)
