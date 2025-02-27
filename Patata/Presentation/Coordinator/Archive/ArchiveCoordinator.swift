@@ -16,6 +16,7 @@ enum ArchiveScreen {
     case spotedit(SpotEditorFeature)
     case addSpotMap(AddSpotMapFeature)
     case report(ReportFeature)
+    case category(SpotCategoryFeature)
 }
 
 @Reducer
@@ -36,14 +37,9 @@ struct ArchiveCoordinator {
         case router(IdentifiedRouterActionOf<ArchiveScreen>)
         
         case viewEvent(ViewEventType)
-        case delegate(Delegate)
         
         case bindingPopupIsPresent(Bool)
         case bindingAlertIsPrenset(Bool)
-        
-        enum Delegate {
-            case tappedConfirmButton
-        }
     }
     
     enum ViewEventType {
@@ -65,7 +61,8 @@ extension ArchiveCoordinator {
                 state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
             case .router(.routeAction(id: .archive, action: .archive(.delegate(.tappedConfirmButton)))):
-                return .send(.delegate(.tappedConfirmButton))
+                state.isHideTabBar = true
+                state.routes.push(.category(SpotCategoryFeature.State(initialIndex: 0)))
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type, id))))):
                 if type == "Post" {
@@ -128,6 +125,13 @@ extension ArchiveCoordinator {
                 state.routes.popToRoot()
                 state.isHideTabBar = false
                 state.alertIsPresent = true
+                
+            case .router(.routeAction(id: .category, action: .category(.delegate(.tappedNavBackButton)))):
+                state.isHideTabBar = false
+                state.routes.pop()
+                
+            case let .router(.routeAction(id: .category, action: .category(.delegate(.tappedSpot(spotId))))):
+                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
             case let .bindingPopupIsPresent(isPresent):
                 state.popupIsPresent = isPresent

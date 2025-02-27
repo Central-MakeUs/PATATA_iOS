@@ -37,6 +37,10 @@ struct ArchiveCoordinatorView: View {
                 case let .report(reportStore):
                     ReportView(store: reportStore)
                         .hideTabBar(store.isHideTabBar)
+                    
+                case let .category(categoryStore):
+                    SpotCategoryView(store: categoryStore)
+                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .customAlert(
@@ -95,6 +99,8 @@ extension ArchiveScreen.State: Identifiable {
             return ID.addSpotMap
         case .report:
             return ID.report
+        case .category:
+            return ID.category
         }
     }
     
@@ -104,6 +110,7 @@ extension ArchiveScreen.State: Identifiable {
         case spotedit
         case addSpotMap
         case report
+        case category
         
         var id: ID {
             return self

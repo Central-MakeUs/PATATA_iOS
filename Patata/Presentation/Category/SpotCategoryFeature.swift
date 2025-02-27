@@ -89,6 +89,8 @@ extension SpotCategoryFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
+                print("onAppear", state.initialIndex)
+                
                 state.currentPage = 0
                 state.totalPages = 0
                 state.selectedIndex = state.initialIndex
@@ -179,6 +181,8 @@ extension SpotCategoryFeature {
                 return .send(.delegate(.tappedNavBackButton))
                 
             case let .viewEvent(.tappedSpot(index)):
+                state.initialIndex = state.selectedIndex
+                
                 return .send(.delegate(.tappedSpot(state.spotItems[index].spotId)))
                 
             case let .viewEvent(.tappedArchiveButton(index)):

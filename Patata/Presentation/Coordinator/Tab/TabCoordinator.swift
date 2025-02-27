@@ -73,9 +73,6 @@ extension TabCoordinator {
             case .myPageTabAction(.delegate(.successRevoke)):
                 return .send(.delegate(.successRevoke))
                 
-            case .archiveTabAction(.delegate(.tappedConfirmButton)):
-                state.tabState = .home
-                
             default:
                 break
             }

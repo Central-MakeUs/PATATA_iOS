@@ -43,11 +43,15 @@ struct SpotCategoryView: View {
 extension SpotCategoryView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            if store.spotItems.isEmpty {
+            VStack {
                 fakeNavBar
                 
                 scrollMenuView
                     .padding(.top, 10)
+            }
+            .background(.white)
+            
+            if store.spotItems.isEmpty {
                 
                 ScrollView {
                     skeletonFilterView
@@ -94,24 +98,24 @@ extension SpotCategoryView {
                     
                 }
                 .background(.gray10)
-                .safeAreaInset(edge: .top) {
-                    VStack {
-                        fakeNavBar
-                        
-                        scrollMenuView
-                            .padding(.top, 10)
-                    }
-                    .background(
-                        Color.white
-                            .opacity(0.85)
-                            .ignoresSafeArea(.all)
-                    )
-                    .background(
-                        BlurView(style: .systemMaterial)
-                            .opacity(0.85)
-                            .ignoresSafeArea(.all)
-                    )
-                }
+//                .safeAreaInset(edge: .top) {
+//                    VStack {
+//                        fakeNavBar
+//                        
+//                        scrollMenuView
+//                            .padding(.top, 10)
+//                    }
+//                    .background(
+//                        Color.white
+//                            .opacity(0.85)
+//                            .ignoresSafeArea(.all)
+//                    )
+//                    .background(
+//                        BlurView(style: .systemMaterial)
+//                            .opacity(0.85)
+//                            .ignoresSafeArea(.all)
+//                    )
+//                }
             }
         }
     }
