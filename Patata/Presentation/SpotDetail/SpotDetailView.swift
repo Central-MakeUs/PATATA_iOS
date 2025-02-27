@@ -187,9 +187,10 @@ extension SpotDetailView {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
                 ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
                     DownImageView(url: image, option: .custom(CGSize(width: 650, height: 650)), fallBackImg: "ImageDefault")
-                        .aspectRatio(131/140, contentMode: .fill)
+                        .aspectRatio(131/140, contentMode: .fit)
                         .frame(maxWidth: UIScreen.main.bounds.width)
-                        .frame(height: UIScreen.main.bounds.height * 0.6)
+                        .frame(height: UIScreen.main.bounds.height * 0.7)
+                        .background(.black)
                         .clipped()
                 }
             }
