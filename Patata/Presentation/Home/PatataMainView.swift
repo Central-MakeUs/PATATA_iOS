@@ -179,9 +179,17 @@ extension PatataMainView {
                     categoryView(categoryItem: item)
                         .frame(maxWidth: .infinity)
                         .aspectRatio(1.22, contentMode: .fit)
-                        .background(.white)
+                        .background(store.spotCategorySelected == item ? .gray20 : .white)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                         .shadow(color: .shadowColor.opacity(0.24), radius: 4)
+                        .overlay {
+                            if store.spotCategorySelected == item {
+                                Rectangle()
+                                    .stroke(Color.gray30)
+                                    .foregroundStyle(.gray20)
+                                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                            }
+                        }
                         .asButton {
                             store.send(.viewEvent(.tappedCategoryButton(item)))
                         }

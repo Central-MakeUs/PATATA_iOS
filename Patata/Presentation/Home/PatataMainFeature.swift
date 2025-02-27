@@ -16,6 +16,7 @@ struct PatataMainFeature {
         var spotItems: [SpotEntity] = []
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
+        var spotCategorySelected: CategoryCase = .all
     }
     
     enum Action {
@@ -77,6 +78,7 @@ extension PatataMainFeature {
             switch action {
             case .viewCycle(.onAppear):
                 let categoryIndex = state.selectedIndex
+                state.spotCategorySelected = .all
                 
                 return .run { send in
                     await send(.networkType(.fetchCategorySpot(categoryIndex)))
@@ -108,7 +110,13 @@ extension PatataMainFeature {
                 }
                 
             case let .viewEvent(.tappedCategoryButton(category)):
-                return .send(.delegate(.tappedCategoryButton(category)))
+                state.spotCategorySelected = category
+                
+                return .run { send in
+                    try? await Task.sleep(for: .seconds(0.1))
+                    
+                    await send(.delegate(.tappedCategoryButton(category)))
+                }
                 
             case let .networkType(.fetchCategorySpot(index)):
                 return .run { send in
