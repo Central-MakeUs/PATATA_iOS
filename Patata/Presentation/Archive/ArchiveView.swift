@@ -72,23 +72,18 @@ struct ArchiveView: View {
 extension ArchiveView {
     private var contentView: some View {
         VStack(spacing: 0) {
+            fakeNavBar
+                .padding(.top, 4)
+                .padding(.bottom, 14)
+                .background(.white)
             
             if store.archiveList.isEmpty {
-                fakeNavBar
-                    .padding(.top, 4)
-                    .padding(.bottom, 14)
-                
                 Spacer()
                 
                 searchFailView
                 
                 Spacer()
             } else {
-                
-                fakeNavBar
-                    .padding(.top, 4)
-                    .padding(.bottom, 14)
-                
                 ScrollView(.vertical) {
                     LazyVGrid(columns: columns, spacing: 4) {
                         ForEach(Array(store.archiveList.enumerated()), id: \.element.spotId) { index, item in

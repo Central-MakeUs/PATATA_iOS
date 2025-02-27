@@ -367,7 +367,7 @@ extension SpotDetailView {
             HStack {
                 Text(nick)
                     .textStyle(.subtitleSM)
-                    .foregroundStyle(.textSub)
+                    .foregroundStyle(nick == UserDefaultsManager.nickname ? .blue100 : .textSub)
                 
                 Spacer()
                 

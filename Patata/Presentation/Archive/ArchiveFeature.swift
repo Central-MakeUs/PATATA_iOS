@@ -150,6 +150,7 @@ extension ArchiveFeature {
                 state.chooseIsValid = false
                 state.deleteText = "\(state.selectedSpotList.count)개의 항목이 삭제되었습니다!"
                 state.archiveList = archiveList
+                state.selectedSpotList.removeAll()
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent

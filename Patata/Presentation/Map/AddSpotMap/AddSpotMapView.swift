@@ -89,18 +89,9 @@ extension AddSpotMapView {
                 }
                 
                 VStack {
-                    
-                    ZStack {
-                        Color.red
-                            .opacity(0.9)
-                            .frame(height: 2)
-                            .blur(radius: 3)
-                            .offset(y: -1)
-                        
-                        addressView
-                            .padding(.vertical, 20)
-                            .padding(.horizontal, 15)
-                    }
+                    addressView
+                        .padding(.vertical, 20)
+                        .padding(.horizontal, 15)
                 }
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
