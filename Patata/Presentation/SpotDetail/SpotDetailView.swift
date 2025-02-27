@@ -187,9 +187,9 @@ extension SpotDetailView {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {
                 ForEach(Array(store.spotDetailData.images.enumerated()), id: \.offset) { _, image in
                     DownImageView(url: image, option: .custom(CGSize(width: 650, height: 650)), fallBackImg: "ImageDefault")
-                        .aspectRatio(131/140, contentMode: .fit)
+                        .aspectRatio(131/140, contentMode: .fill)
                         .frame(maxWidth: UIScreen.main.bounds.width)
-                        .frame(height: UIScreen.main.bounds.height * 0.7)
+                        .frame(height: UIScreen.main.bounds.height * 0.6)
                         .background(.black)
                         .clipped()
                 }
@@ -198,6 +198,7 @@ extension SpotDetailView {
             .aspectRatio(1, contentMode: .fit)
             .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             .sizeState(size: $sizeState)
+            .background(.black)
             .overlay(alignment: .bottom) {
                 Group {
                     if store.spotDetailData.images.count != 1 {

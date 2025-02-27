@@ -135,6 +135,20 @@ extension View {
             
         return Text(limitedString)
     }
+    
+    @ViewBuilder func shimmering(
+        active: Bool = true,
+        animation: Animation = ShimmerAnimation.defaultAnimation,
+        gradient: Gradient = ShimmerAnimation.defaultGradient,
+        bandSize: CGFloat = 0.3,
+        mode: ShimmerAnimation.Mode = .mask
+    ) -> some View {
+        if active {
+            modifier(ShimmerAnimation(animation: animation, gradient: gradient, bandSize: bandSize, mode: mode))
+        } else {
+            self
+        }
+    }
 }
 
 struct RoundedCorner: Shape {

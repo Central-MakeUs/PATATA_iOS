@@ -31,7 +31,6 @@ struct SpotCategoryView: View {
                 .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"], selectedIndex: $selectedIndex) { item in
                         store.send(.viewEvent(.tappedBottomSheetItem(item)))
-                        // 여기서 필터에 맞게 통신 아마 onChange에서 통신할듯
                     }
                 }
                 .onAppear {
@@ -44,21 +43,37 @@ struct SpotCategoryView: View {
 extension SpotCategoryView {
     private var contentView: some View {
         VStack(spacing: 0) {
-            ScrollView(.vertical) {
-                filterView
-                    .padding(.top, 12)
-                    .padding(.horizontal, 15)
-                if store.spotItems.isEmpty {
-                    ForEach(0..<10) { _ in
-                        CategoryRecommendView(spotItem: SpotEntity()) {
-                            print("tap")
-                        }
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+            if store.spotItems.isEmpty {
+                fakeNavBar
+                
+                scrollMenuView
+                    .padding(.top, 10)
+                
+                ScrollView {
+                    skeletonFilterView
+                        .padding(.top, 12)
+                        .padding(.horizontal, 20)
+                        .shimmering(
+                            gradient: Gradient(
+                                colors:
+                                    [
+                                        Color.black.opacity(0.3),
+                                        Color.black.opacity(0.1),
+                                        Color.black.opacity(0.3)
+                                    ]),
+                            mode: .mask
+                        )
+                    
+                    skeletonView(count: 1)
+                }
+                .background(.gray10)
+                .scrollDisabled(true)
+            } else {
+                ScrollView(.vertical) {
+                    filterView
+                        .padding(.top, 12)
                         .padding(.horizontal, 15)
-                        .padding(.bottom, 4)
-                    }
-                } else {
+                    
                     ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
                         CategoryRecommendView(spotItem: item) {
                             store.send(.viewEvent(.tappedArchiveButton(index)))
@@ -76,27 +91,27 @@ extension SpotCategoryView {
                             store.send(.viewEvent(.tappedSpot(index)))
                         }
                     }
-                }
-            }
-            .background(.gray10)
-            .redacted(reason: store.spotItems.isEmpty ? .placeholder : [])
-            .safeAreaInset(edge: .top) {
-                VStack {
-                    fakeNavBar
                     
-                    scrollMenuView
-                        .padding(.top, 10)
                 }
-                .background(
-                    Color.white
-                        .opacity(0.85)
-                        .ignoresSafeArea(.all)
-                )
-                .background(
-                    BlurView(style: .systemMaterial)
-                        .opacity(0.85)
-                        .ignoresSafeArea(.all)
-                )
+                .background(.gray10)
+                .safeAreaInset(edge: .top) {
+                    VStack {
+                        fakeNavBar
+                        
+                        scrollMenuView
+                            .padding(.top, 10)
+                    }
+                    .background(
+                        Color.white
+                            .opacity(0.85)
+                            .ignoresSafeArea(.all)
+                    )
+                    .background(
+                        BlurView(style: .systemMaterial)
+                            .opacity(0.85)
+                            .ignoresSafeArea(.all)
+                    )
+                }
             }
         }
     }
@@ -173,6 +188,19 @@ extension SpotCategoryView {
             }
         }
     }
+    
+    private var skeletonFilterView: some View {
+        HStack(spacing: 0) {
+            Color.gray.opacity(0.8)
+                .frame(width: 40, height: 18)
+            
+            Spacer()
+            
+            Color.gray.opacity(0.8)
+                .frame(width: 40, height: 18)
+            
+        }
+    }
 }
 
 extension SpotCategoryView {
@@ -193,6 +221,26 @@ extension SpotCategoryView {
                         .offset(y: item.isSelected ? 15 : 0)
                 }
             }
-        
+    }
+    
+    private func skeletonView(count: Int) -> some View {
+        VStack {
+            ForEach(1...count, id: \.self) { _ in
+                SkeletonView()
+                    .shimmering(
+                        gradient: Gradient(
+                            colors:
+                                [
+                                    Color.black.opacity(0.3),
+                                    Color.black.opacity(0.1),
+                                    Color.black.opacity(0.3)
+                                ]),
+                        mode: .mask
+                    )
+            }
+        }
+        .background(.white)
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 15)
     }
 }
