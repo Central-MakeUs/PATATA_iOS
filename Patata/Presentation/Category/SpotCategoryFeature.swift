@@ -108,6 +108,7 @@ extension SpotCategoryFeature {
                 state.listLoadTrigger = false
                 state.currentPage = 0
                 state.totalPages = 0
+                state.spotItems = []
                 
                 let currentPage = state.currentPage
                 let filter = state.filter
