@@ -42,12 +42,12 @@ extension SettingView {
             VStack(spacing: 1) {
                 settingBar("이용약관")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://positive-honeycrisp-618.notion.site/17cf3ecbcd5b8064b5e0ffe27dd1a16b?pvs=4")!)
                     }
                 
                 settingBar("개인정보 수집 및 이용 동의")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://positive-honeycrisp-618.notion.site/Patata-1a7f3ecbcd5b800fb92de6c4015e1d90?pvs=4")!)
                     }
                 
                 settingBar("오픈소스 라이선스")
@@ -83,24 +83,24 @@ extension SettingView {
             }
             
             VStack(spacing: 1) {
-                settingBar("PATATA 팀 정보 찾아가기")
+                settingBar("PATATA 앱 평점 주기")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://apps.apple.com/kr/app/%ED%8C%8C%ED%83%80%ED%83%80-patata/id6742177268")!)
                     }
                 
                 settingBar("공지사항")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://positive-honeycrisp-618.notion.site/1a7f3ecbcd5b80f5976fcb2e05dca293?pvs=4")!)
                     }
                 
                 settingBar("FAQ")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://positive-honeycrisp-618.notion.site/FAQ-1a7f3ecbcd5b8099893edbf39ef7686c?pvs=4")!)
                     }
                 
                 settingBar("문의하기")
                     .asButton {
-                        UIApplication.shared.open(URL(string: "https://www.notion.so/patata-17cc18082ff280d5a5e9cef2e2f76237")!)
+                        UIApplication.shared.open(URL(string: "https://docs.google.com/forms/d/e/1FAIpQLSeZq1WqWLZ-GXEfIANbL-s_-BWP_CQ9gbAzi5utbAMYlZ-cOg/viewform?usp=header")!)
                     }
             }
             
