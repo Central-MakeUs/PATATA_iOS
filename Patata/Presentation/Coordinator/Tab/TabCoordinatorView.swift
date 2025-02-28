@@ -119,20 +119,22 @@ struct TabCoordinatorView: View {
                             bounds: CGRect( x: 0, y: 0, width: UIScreen.main.scale, height: 8),
                             colors: [
                                 UIColor.clear.cgColor,
-                                UIColor.black.withAlphaComponent(0.05).cgColor
+                                UIColor.black.withAlphaComponent(0.012).cgColor
                             ]
                         )
                         
                         let standardAppearance = UITabBarAppearance()
+                        let blurEffect = UIBlurEffect(style: .light)
                         standardAppearance.configureWithDefaultBackground()
-                        standardAppearance.backgroundColor = .white
+                        standardAppearance.backgroundEffect = blurEffect
+                        standardAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.80)
                         standardAppearance.backgroundImage = UIImage()
                         standardAppearance.shadowImage = image
-                        
+
                         let scrollEdgeAppearance = UITabBarAppearance()
                         scrollEdgeAppearance.configureWithTransparentBackground()
-                        scrollEdgeAppearance.backgroundColor = .white
-                        scrollEdgeAppearance.backgroundImage = UIImage()
+                        scrollEdgeAppearance.backgroundEffect = blurEffect
+                        scrollEdgeAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.80)
                         scrollEdgeAppearance.shadowImage = image
                         
                         UITabBar.appearance().standardAppearance = standardAppearance

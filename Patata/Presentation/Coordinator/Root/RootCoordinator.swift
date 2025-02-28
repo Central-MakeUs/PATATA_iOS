@@ -25,24 +25,35 @@ struct RootCoordinator {
 
         var routes: IdentifiedArrayOf<Route<RootScreen.State>>
         var viewState: RootCoordinatorViewState = .start
+        var beforeViewState: RootCoordinatorViewState = .start
         var isPresent: Bool = false
+        var currentNetworkState: Bool = true
+        var networkIsValid: Bool = false
+        var isFirst: Bool = true
         
         var tabCoordinator: TabCoordinator.State = TabCoordinator.State.initialState
+        var networkFeatureState: NetworkErrorFeature.State = NetworkErrorFeature.State()
     }
 
     enum RootCoordinatorViewState: Equatable {
         case start
         case tab
+        case networkError
     }
 
     enum Action {
         case router(IdentifiedRouterActionOf<RootScreen>)
 
         case tabCoordinatorAction(TabCoordinator.Action)
+        case networkFeatureAction(NetworkErrorFeature.Action)
         case tokenExpired
         case viewCycle(ViewCycle)
         case appLifecycle(AppLifecycle)
         case locationAction(LocationAction)
+        case networkErrorType(NetworkErrorType)
+        case networkMonitorStart
+        case changeViewState(Bool)
+        case checkNetworkValid(Bool)
         
         case bindingIsPresent(Bool)
     }
@@ -58,10 +69,15 @@ struct RootCoordinator {
         case inactive
     }
     
+    enum NetworkErrorType {
+        case nwMonitor
+    }
+    
     enum LocationAction: Equatable {
         case permissionResponse(Bool)
     }
     
+    @Dependency(\.nwPathMonitorManager) var nwPathMonitorManager
     @Dependency(\.networkManager) var networkManager
     @Dependency(\.errorManager) var errorManager
     @Dependency(\.locationManager) var locationManager
@@ -69,6 +85,10 @@ struct RootCoordinator {
     var body: some ReducerOf<Self> {
         Scope(state: \.tabCoordinator, action: \.tabCoordinatorAction) {
             TabCoordinator()
+        }
+        
+        Scope(state: \.networkFeatureState, action: \.networkFeatureAction) {
+            NetworkErrorFeature()
         }
 
         Reduce { state, action in
@@ -79,6 +99,7 @@ struct RootCoordinator {
                         let permission = await locationManager.checkLocationPermission()
                         
                         await send(.locationAction(.permissionResponse(permission)))
+                        await send(.networkMonitorStart)
                     },
                     .run { send in
                         for await error in networkManager.getNetworkError() {
@@ -88,6 +109,32 @@ struct RootCoordinator {
                         }
                     }
                 )
+                
+            case .networkMonitorStart:
+                return .run { send in
+                    nwPathMonitorManager.start()
+                    await send(.networkErrorType(.nwMonitor))
+                }
+                
+            case .networkErrorType(.nwMonitor):
+                return .run { [state = state] send in
+                    
+                    for await isValid in  nwPathMonitorManager.getToConnectionTrigger() {
+                        print(isValid)
+                        if state.currentNetworkState != isValid {
+                            if !isValid {
+                                await send(.changeViewState(isValid))
+                                print("networkError")
+                            } else {
+                                print("here")
+                                await send(.checkNetworkValid(isValid))
+                            }
+                        } else {
+                            print("trururururu")
+                            await send(.checkNetworkValid(isValid))
+                        }
+                    }
+                }
                 
             case .appLifecycle(.background):
                 return .run { _ in
@@ -138,7 +185,6 @@ struct RootCoordinator {
                             profileData: MyPageEntity()
                         )))
                     ]
-                    print("dfajmsfhadjkshfjkasd")
                     state.routes = newRoutes
                     
                 } else {
@@ -183,6 +229,25 @@ struct RootCoordinator {
                 UserDefaultsManager.refreshToken = ""
                 UserDefaultsManager.nickname = ""
                 UserDefaultsManager.appleUser = false
+                
+            case let .changeViewState(isValid):
+                state.networkIsValid = isValid
+                 
+                if state.isFirst {
+                    state.beforeViewState = state.viewState
+                }
+                
+                state.viewState = .networkError
+                state.isFirst = false
+                
+            case .networkFeatureAction(.delegate(.tappedButton)):
+                if state.networkIsValid {
+                    state.viewState = state.beforeViewState
+                    state.isFirst = true
+                }
+                
+            case let .checkNetworkValid(valid):
+                state.networkIsValid = valid
                 
             case .tokenExpired:
                 state.routes.removeAll()

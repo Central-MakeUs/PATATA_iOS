@@ -99,7 +99,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                                 .frame(width: 50, height: 4)
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .padding(.top, 8)
-                                .padding(.bottom, 6)
+                                .padding(.bottom, 12)
                                 .contentShape(Rectangle())
                             
                             sheetContent()

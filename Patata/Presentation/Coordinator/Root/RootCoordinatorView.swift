@@ -37,6 +37,9 @@ struct RootCoordinatorView: View {
 
                 case .tab:
                     TabCoordinatorView(store: store.scope(state: \.tabCoordinator, action: \.tabCoordinatorAction))
+                    
+                case .networkError:
+                    NetworkErrorView(store: store.scope(state: \.networkFeatureState, action: \.networkFeatureAction))
                 }
             }
             .customAlert(
