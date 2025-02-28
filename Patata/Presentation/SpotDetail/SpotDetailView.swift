@@ -190,6 +190,7 @@ extension SpotDetailView {
                         .aspectRatio(131/140, contentMode: .fit)
                         .frame(maxWidth: UIScreen.main.bounds.width)
                         .frame(height: UIScreen.main.bounds.height * 0.7)
+                        .background(.gray30)
                         .clipped()
                 }
             }
