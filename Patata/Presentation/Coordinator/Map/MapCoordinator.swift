@@ -213,6 +213,8 @@ extension MapCoordinator {
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 
+                return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.successAddSpot)))))
+                
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_, viewState))))):
                 state.isHideTabBar = true
                 state.routes.pop()

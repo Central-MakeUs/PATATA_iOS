@@ -56,6 +56,7 @@ struct SpotMapFeature {
             case successEdit
             case detailBack
             case moveCamera
+            case successAddSpot
         }
     }
     
@@ -219,6 +220,16 @@ extension SpotMapFeature {
                 
             case .delegate(.detailBack):
                 state.isFirst = false
+                
+            case .delegate(.successAddSpot):
+                state.isFirst = false
+                
+                let userLocation = state.userLocation
+                let mbr = state.mbrLocation
+                
+                return .run { send in
+                    await send(.networkType(.fetchMapMarker(userLocation: userLocation, mbr: mbr, categoryId: .all, false)))
+                }
                 
             case let .networkType(.fetchMapMarker(userLocation, mbrLocation, categoryId, isReload)):
                 return .run { send in
