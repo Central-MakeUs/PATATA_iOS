@@ -26,6 +26,7 @@ struct SpotCategoryFeature {
         var isPresent: Bool = false
         var filterText: String = "거리순"
         var spotItems: [SpotEntity] = []
+        var isFirst: Bool = true
     }
     
     enum Action {
@@ -243,18 +244,21 @@ extension SpotCategoryFeature {
             case let .dataTransType(.userLocation(coord)):
                 state.userLocation = coord
                 
-                return .run { [state = state] send in
-                    await send(
-                        .networkType(
-                            .fetchCategoryItem(
-                                page: state.currentPage,
-                                filter: state.filter,
-                                scroll: false,
-                                categoryId: state.selectedIndex,
-                                userLocation: coord
+                if state.isFirst {
+                    state.isFirst = false
+                    return .run { [state = state] send in
+                        await send(
+                            .networkType(
+                                .fetchCategoryItem(
+                                    page: state.currentPage,
+                                    filter: state.filter,
+                                    scroll: false,
+                                    categoryId: state.selectedIndex,
+                                    userLocation: coord
+                                )
                             )
                         )
-                    )
+                    }
                 }
                 
             case let .dataTransType(.archiveState(data, index)):
