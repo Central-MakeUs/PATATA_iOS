@@ -181,7 +181,7 @@ extension SpotDetailView {
             }
         }
     }
-    
+     
     private var spotDetailImage: some View {
         ZStack(alignment: .topTrailing) {
             TabView(selection: $store.currentIndex.sending(\.bindingCurrentIndex)) {

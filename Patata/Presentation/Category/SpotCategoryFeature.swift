@@ -89,10 +89,8 @@ extension SpotCategoryFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
-                print("onAppear", state.initialIndex)
                 
                 state.currentPage = 0
-                state.totalPages = 0
                 state.selectedIndex = state.initialIndex
                 
                 state.listLoadTrigger = false
@@ -223,7 +221,7 @@ extension SpotCategoryFeature {
             case let .dataTransType(.fetchCategoryItem(data, scroll)):
                 if scroll {
                     state.totalCount = data.totalCount
-                    state.totalPages = data.totalPages
+//                    state.totalPages = data.totalPages
                     state.currentPage = data.currentPage
                     state.spotItems.append(contentsOf: data.spots)
                     state.listLoadTrigger = true
@@ -267,7 +265,7 @@ extension SpotCategoryFeature {
                     category: state.spotItems[index].category,
                     imageUrl: state.spotItems[index].imageUrl,
                     reviews: state.spotItems[index].reviews,
-                    spotScraps: state.spotItems[index].spotScraps,
+                    spotScraps: data.isArchive ? state.spotItems[index].spotScraps + 1 : state.spotItems[index].spotScraps - 1,
                     isScraped: data.isArchive,
                     tags: state.spotItems[index].tags
                 )

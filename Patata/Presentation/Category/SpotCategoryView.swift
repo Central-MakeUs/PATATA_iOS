@@ -78,44 +78,29 @@ extension SpotCategoryView {
                         .padding(.top, 12)
                         .padding(.horizontal, 15)
                     
-                    ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                        CategoryRecommendView(spotItem: item) {
-                            store.send(.viewEvent(.tappedArchiveButton(index)))
-                        }
-                        .background(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .padding(.horizontal, 15)
-                        .padding(.bottom, 4)
-                        .onAppear {
-                            if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger {
-                                store.send(.viewEvent(.nextPage))
+                    LazyVStack {
+                        ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                            CategoryRecommendView(spotItem: item) {
+                                store.send(.viewEvent(.tappedArchiveButton(index)))
                             }
-                        }
-                        .asButton {
-                            store.send(.viewEvent(.tappedSpot(index)))
+                            .background(.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 10))
+                            .padding(.horizontal, 15)
+                            .padding(.bottom, 4)
+                            .onAppear {
+                                print(index, store.totalPages, store.spotItems.count, store.listLoadTrigger)
+                                if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger && store.spotItems.count != store.totalCount {
+                                    store.send(.viewEvent(.nextPage))
+                                }
+                            }
+                            .asButton {
+                                store.send(.viewEvent(.tappedSpot(index)))
+                            }
                         }
                     }
                     
                 }
                 .background(.gray10)
-//                .safeAreaInset(edge: .top) {
-//                    VStack {
-//                        fakeNavBar
-//                        
-//                        scrollMenuView
-//                            .padding(.top, 10)
-//                    }
-//                    .background(
-//                        Color.white
-//                            .opacity(0.85)
-//                            .ignoresSafeArea(.all)
-//                    )
-//                    .background(
-//                        BlurView(style: .systemMaterial)
-//                            .opacity(0.85)
-//                            .ignoresSafeArea(.all)
-//                    )
-//                }
             }
         }
     }
