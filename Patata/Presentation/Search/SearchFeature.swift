@@ -216,7 +216,7 @@ extension SearchFeature {
                         spotId: state.searchSpotItems[state.selectSpotIndex].spotId,
                         spotName: state.searchSpotItems[state.selectSpotIndex].spotName,
                         imageUrl: state.searchSpotItems[state.selectSpotIndex].imageUrl,
-                        spotScraps: state.searchSpotItems[state.selectSpotIndex].spotScraps,
+                        spotScraps: isArchive ? state.searchSpotItems[state.selectSpotIndex].spotScraps + 1 : state.searchSpotItems[state.selectSpotIndex].spotScraps - 1,
                         isScraped: isArchive,
                         reviews: state.searchSpotItems[state.selectSpotIndex].reviews,
                         distance: state.searchSpotItems[state.selectSpotIndex].distance
@@ -286,7 +286,7 @@ extension SearchFeature {
                     spotId: state.searchSpotItems[index].spotId,
                     spotName: state.searchSpotItems[index].spotName,
                     imageUrl: state.searchSpotItems[index].imageUrl,
-                    spotScraps: state.searchSpotItems[index].spotScraps,
+                    spotScraps: data.isArchive ? state.searchSpotItems[index].spotScraps + 1 : state.searchSpotItems[index].spotScraps - 1,
                     isScraped: data.isArchive,
                     reviews: state.searchSpotItems[index].reviews,
                     distance: state.searchSpotItems[index].distance

@@ -193,7 +193,7 @@ extension PatataMainFeature {
                             category: state.spotItems[index].category,
                             imageUrl: state.spotItems[index].imageUrl,
                             reviews: state.spotItems[index].reviews,
-                            spotScraps: state.spotItems[index].spotScraps,
+                            spotScraps: data.isArchive ? state.spotItems[index].spotScraps + 1 : state.spotItems[index].spotScraps - 1,
                             isScraped: data.isArchive,
                             tags: state.spotItems[index].tags
                         )
@@ -207,7 +207,7 @@ extension PatataMainFeature {
                         category: state.spotItems[index].category,
                         imageUrl: state.spotItems[index].imageUrl,
                         reviews: state.spotItems[index].reviews,
-                        spotScraps: state.spotItems[index].spotScraps,
+                        spotScraps: data.isArchive ? state.spotItems[index].spotScraps + 1 : state.spotItems[index].spotScraps - 1,
                         isScraped: data.isArchive,
                         tags: state.spotItems[index].tags
                     )
