@@ -7,6 +7,7 @@
 
 import Foundation
 import ComposableArchitecture
+import UIKit
 
 // 처음 들어올때 스팟을 등록하러 왔는지 수정하러 왔는지 체크 필요 이건 처음에 모든 값이 들어오는지로 판단해야될듯
 @Reducer
@@ -23,12 +24,14 @@ struct SpotEditorFeature {
         var categoryText: String = "카테고리를 선택해주세요"
         var imageURLs: [URL?] = []
         var hashTags: [String] = []
-        var imageDatas: [Data] = []
+        var imageDatas: [Data]
+        var selectedImages: [UIImage] = []
         var errorMsg: String = ""
         var isFirst: Bool = true
         let beforeViewState: BeforeViewState
         var agreeToTerms: Bool = false
         var alertIsPresent: Bool = false
+        var deleteIndex: Int? = nil
         
         // bindingState
         var title: String = ""
@@ -65,7 +68,7 @@ struct SpotEditorFeature {
             case tappedBackButton
             case successSpotAdd
             case tappedXButton
-            case tappedLocation(Coordinate, ViewState)
+            case tappedLocation(Coordinate, ViewState, SpotDetailEntity, [Data])
             case changeAddress(Coordinate, String)
             case successSpotEdit(BeforeViewState)
         }
@@ -80,6 +83,9 @@ struct SpotEditorFeature {
         case bindingIsPresentPopup(Bool)
         case bindingAgreeToTerms(Bool)
         case bindingAlert(Bool)
+        case bindingImageData([Data])
+        case bindingImage([UIImage])
+        case bindingDeleteIndex(Int?)
     }
     
     enum ViewCycle {
@@ -101,13 +107,14 @@ struct SpotEditorFeature {
         case closeBottomSheet(Bool)
         case hashTagOnSubmit
         case deleteHashTag(Int)
-        case tappedSpotAddButton([Data])
+        case tappedSpotAddButton
         case dismissPopup
         case tappedXButton
         case tappedLocation
         case tappedSpotEditButton
         case openAlert
         case dismissAlert
+        case deleteImage(Int)
     }
     
     enum NetworkType {
@@ -171,9 +178,7 @@ extension SpotEditorFeature {
             case .viewEvent(.dismissPopup):
                 state.isPresentPopup = false
                 
-            case let .viewEvent(.tappedSpotAddButton(imageDatas)):
-                state.imageDatas = imageDatas
-                
+            case .viewEvent(.tappedSpotAddButton):
                 return .run { send in
                     await send(.networkType(.createSpot))
                 }
@@ -189,7 +194,18 @@ extension SpotEditorFeature {
             case .viewEvent(.tappedLocation):
                 let viewState = state.viewState
                 let coord = state.spotLocation
-                return .send(.delegate(.tappedLocation(coord, viewState)))
+                let spotDetail = SpotDetailEntity(spotId: 0, isAuthor: false, spotAddress: "", spotAddressDetail: state.location, spotName: state.title, spotDescription: state.detail, categoryId: CategoryCase(rawValue: CategoryCase.getCategoryId(text: state.categoryText)) ?? .all, memberName: "", images: state.imageURLs, reviewCount: 0, isScraped: false, tags: state.hashTags, reviews: [], spotCoord: Coordinate(latitude: 0, longitude: 0), memberId: nil)
+                
+                return .send(.delegate(.tappedLocation(coord, viewState, spotDetail, state.imageDatas)))
+                
+            case let .viewEvent(.deleteImage(index)):
+                if index < state.selectedImages.count && index < state.imageDatas.count {
+                    state.imageDatas.remove(at: index)
+                    state.selectedImages.remove(at: index)
+                }
+                
+                state.deleteIndex = nil
+                state.deleteIndex = index
                 
             case .viewEvent(.openAlert):
                 state.alertIsPresent = true
@@ -213,6 +229,21 @@ extension SpotEditorFeature {
                     state.imageURLs = state.spotDetail.images
                     state.categoryText = state.spotDetail.categoryId.getCategoryCase().title
                     state.spotLocation = state.spotDetail.spotCoord
+                } else if state.viewState == .add && state.isFirst {
+                    state.isFirst = false
+                    state.title = state.spotDetail.spotName
+                    state.location = state.spotDetail.spotAddressDetail
+                    state.detail = state.spotDetail.spotDescription
+                    state.hashTags = state.spotDetail.tags
+                    state.categoryText = state.spotDetail.categoryId.getCategoryCase().title
+                    
+                    if !state.imageDatas.isEmpty {
+                        state.imageDatas.forEach { data in
+                            if let image = UIImage(data: data) {
+                                state.selectedImages.append(image)
+                            }
+                        }
+                    }
                 }
                 
             case .networkType(.createSpot):
@@ -411,6 +442,15 @@ extension SpotEditorFeature {
                 
             case let .bindingAlert(isPresent):
                 state.alertIsPresent = isPresent
+                
+            case let .bindingImageData(data):
+                state.imageDatas = data
+                
+            case let .bindingImage(image):
+                state.selectedImages = image
+                
+            case let .bindingDeleteIndex(index):
+                state.deleteIndex = index
                 
             default:
                 break

@@ -134,7 +134,7 @@ extension HomeCoordinator {
                 state.routes.push(.report(ReportFeature.State(viewState: .review, id: id)))
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
                 
             case .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(_))))):
                 state.routes.pop()
@@ -151,15 +151,15 @@ extension HomeCoordinator {
                 state.routes.popToRoot()
                 state.isHideTabBar = false
                 
-            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _, spotDetail, _))))):
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
                 
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotEdit)))):
                 state.errorMSG = "게시물이 수정되었습니다."
                 state.routes.pop()
                 state.popupIsPresent = true
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _))))):
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _, _, _))))):
                 state.routes.pop()
                 
                 return .run { send in

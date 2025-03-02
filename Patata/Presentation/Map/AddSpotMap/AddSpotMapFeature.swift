@@ -17,6 +17,8 @@ struct AddSpotMapFeature {
     @ObservableState
     struct State: Equatable {
         var viewState: ViewState
+        var spotDetailEntity: SpotDetailEntity
+        var datas: [Data]
         var mapManager: NaverMapManager = NaverMapManager.addSpotShared
         var userLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var address: String = ""
@@ -44,7 +46,8 @@ struct AddSpotMapFeature {
         
         enum Delegate {
             case tappedBackButton(ViewState)
-            case tappedAddConfirmButton(Coordinate, String, ViewState)
+            case tappedAddConfirmButton(Coordinate, String, ViewState, SpotDetailEntity, datas: [Data])
+            case popEditorView(SpotDetailEntity, [Data])
         }
     }
     
@@ -153,6 +156,10 @@ extension AddSpotMapFeature {
                 state.mapManager.clearCurrentMarkers()
                 state.addValid = true
                 
+            case let .delegate(.popEditorView(spotDetailEntity, imageData)):
+                state.spotDetailEntity = spotDetailEntity
+                state.datas = imageData
+                
             case .dataTransType(.fetchRealm):
                 return .run { send in
                     let coord = await dataSourceActor.fetch()
@@ -181,7 +188,7 @@ extension AddSpotMapFeature {
                 if state.addValid {
                     state.isPresent = false
                     
-                    return .send(.delegate(.tappedAddConfirmButton(coord, address, state.viewState)))
+                    return .send(.delegate(.tappedAddConfirmButton(coord, address, state.viewState, state.spotDetailEntity, datas: state.datas)))
                 } else {
                     state.mapManager.updateMarkers(markers: state.addSpotEntity)
                     state.isPresent = true

@@ -14,16 +14,14 @@ struct SpotEditorView: View {
     
     @Perception.Bindable var store: StoreOf<SpotEditorFeature>
     
-    @State private var selectedImages: [UIImage] = []
     @State private var sizeState: CGSize = .zero
     @FocusState private var focusedField: Field?
-    @State private var resizedImageDatas: [Data] = []
     @State private var isImageSizeValid: Bool = false
     @State private var isResizing: Bool = false
     @State private var totalExceed: Bool = false
     @State private var invalidExceed: Bool = false
     @State private var selectedIndex: Int = 6
-    @State private var deleteIndex: Int? = 0
+    @State private var deleteIndex: Int? = nil
     
     enum Field: Hashable {
         case title
@@ -378,14 +376,14 @@ extension SpotEditorView {
                     HStack(spacing: 8) {
                         if store.viewState == .add {
                             PhotoPickerView(
-                                selectedImages: $selectedImages,
+                                selectedImages: $store.selectedImages.sending(\.bindingImage),
                                 showPermissionAlert: $store.showPermissionAlert.sending(\.bindingPermission),
                                 isImageSizeValid: $isImageSizeValid,
-                                resizedImageDatas: $resizedImageDatas,
+                                resizedImageDatas: $store.imageDatas.sending(\.bindingImageData),
                                 isResizing: $isResizing,
                                 invalidExceed: $invalidExceed,
                                 totalExceed: $totalExceed,
-                                deleteIndex: $deleteIndex
+                                deleteIndex: $store.deleteIndex.sending(\.bindingDeleteIndex)
                             ) {
                                 VStack(alignment: .center) {
                                     Image("ImageDefault")
@@ -408,7 +406,7 @@ extension SpotEditorView {
                             }
                             .padding(.leading, 15)
                             
-                            ForEach(Array(selectedImages.enumerated()), id: \.offset) { index, image in
+                            ForEach(Array(store.selectedImages.enumerated()), id: \.offset) { index, image in
                                 ZStack(alignment: .topTrailing) {
                                     Image(uiImage: image)
                                         .resizable()
@@ -439,7 +437,7 @@ extension SpotEditorView {
                                             .aspectRatio(contentMode: .fit)
                                             .frame(width: 34, height: 34)
                                             .onTapGesture {
-                                                deleteIndex = index
+                                                store.send(.viewEvent(.deleteImage(index)))
                                             }
                                     }
                                 }
@@ -614,12 +612,12 @@ extension SpotEditorView {
             Spacer()
         }
         .padding(.vertical, 14)
-        .background(store.viewState == .add ? (store.spotEditorIsValid && !selectedImages.isEmpty ? .black : .gray50) : (store.spotEditorIsValid ? .black : .gray50))
+        .background(store.viewState == .add ? (store.spotEditorIsValid && !store.selectedImages.isEmpty ? .black : .gray50) : (store.spotEditorIsValid ? .black : .gray50))
         .clipShape(RoundedRectangle(cornerRadius: 24))
         .asButton {
             if store.spotEditorIsValid {
-                if store.viewState == .add && !selectedImages.isEmpty {
-                    store.send(.viewEvent(.tappedSpotAddButton(resizedImageDatas)))
+                if store.viewState == .add && !store.selectedImages.isEmpty {
+                    store.send(.viewEvent(.tappedSpotAddButton))
                 } else {
                     store.send(.viewEvent(.tappedSpotEditButton))
                 }

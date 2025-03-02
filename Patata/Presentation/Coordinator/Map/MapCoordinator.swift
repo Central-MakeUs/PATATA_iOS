@@ -70,7 +70,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
                 
             case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -147,11 +147,12 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.push(.successView(SuccessFeature.State(viewState: .spot)))
                 
-            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState))))):
+            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState, spotDetail, imageData))))):
                 if viewState == .edit {
-                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
                 } else {
                     state.routes.pop()
+                    return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.popEditorView(spotDetail, imageData))))))
                 }
                 
             case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotEdit(viewState))))):
@@ -182,7 +183,7 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
                 
             case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
                 state.isHideTabBar = true
@@ -199,9 +200,9 @@ extension MapCoordinator {
                 
                 state.routes.pop()
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState))))):
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState, spotDetail, imageData))))):
                 if viewState == .map || viewState == .searchMap {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: spotCoord, spotAddress: spotAddress, beforeViewState: .map)))
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: spotDetail, spotLocation: spotCoord, spotAddress: spotAddress, imageDatas: imageData, beforeViewState: .map)))
                 } else {
                     state.routes.pop()
                     return .run { send in
@@ -227,11 +228,11 @@ extension MapCoordinator {
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, viewState))))):
                 if viewState == .map {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .map)))
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .map)))
                 } else if viewState == .mapSearch {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .searchMap)))
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .searchMap)))
                 } else {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
+                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
                 }
                 
                 

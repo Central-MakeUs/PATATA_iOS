@@ -73,7 +73,7 @@ extension MyPageCoordinator {
                 
             case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedAddSpotButton(coord))))):
                 state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotCoord: coord)))
+                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
                 
             case let .router(.routeAction(id: .myPage, action: .myPage(.delegate(.tappedSpot(spotId))))):
                 state.isHideTabBar = true
@@ -90,7 +90,7 @@ extension MyPageCoordinator {
                 state.popupIsPresent = true
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
-                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, beforeViewState: .other)))
+                state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedBackButton)))):
                 state.isHideTabBar = false
@@ -122,9 +122,9 @@ extension MyPageCoordinator {
                 state.isHideTabBar = false
                 state.routes.popToRoot()
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, viewState))))):
+            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, viewState, spotDetail, imageData))))):
                 if viewState == .map {
-                    state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .add, spotDetail: SpotDetailEntity(), spotLocation: coord, spotAddress: spotAddress, beforeViewState: .other)))
+                    state.routes.push(.spotedit(SpotEditorFeature.State(viewState: .add, spotDetail: spotDetail, spotLocation: coord, spotAddress: spotAddress, imageDatas: imageData, beforeViewState: .other)))
                 } else {
                     state.routes.pop()
                     
@@ -155,8 +155,14 @@ extension MyPageCoordinator {
                 state.routes.popToRoot()
                 state.isHideTabBar = false
                 
-            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, _))))):
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotCoord: coord)))
+            case let .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedLocation(coord, viewState, spotDetail, imageDatas))))):
+                if viewState == .add {
+                    state.routes.pop()
+                    return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.popEditorView(spotDetail, imageDatas))))))
+                } else {
+                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
+                }
+                
                 
             case .router(.routeAction(id: .setting, action: .setting(.delegate(.tappedOpenSource)))):
                 state.routes.push(.openSource(OpenSourceFeature.State()))
