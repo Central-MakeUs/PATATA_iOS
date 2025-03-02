@@ -48,6 +48,7 @@ struct AddSpotMapFeature {
             case tappedBackButton(ViewState)
             case tappedAddConfirmButton(Coordinate, String, ViewState, SpotDetailEntity, datas: [Data])
             case popEditorView(SpotDetailEntity, [Data])
+            case tappedEditorBackButton
         }
     }
     
@@ -159,6 +160,10 @@ extension AddSpotMapFeature {
             case let .delegate(.popEditorView(spotDetailEntity, imageData)):
                 state.spotDetailEntity = spotDetailEntity
                 state.datas = imageData
+                
+            case .delegate(.tappedEditorBackButton):
+                state.spotDetailEntity = SpotDetailEntity()
+                state.datas = []
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in

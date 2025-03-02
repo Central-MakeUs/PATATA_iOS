@@ -139,6 +139,8 @@ extension MapCoordinator {
                 state.isHideTabBar = true
                 state.routes.pop()
                 
+                return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedEditorBackButton)))))
+                
             case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedXButton)))):
                 state.isHideTabBar = false
                 state.routes.popToRoot()

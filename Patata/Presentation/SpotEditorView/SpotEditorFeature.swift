@@ -450,7 +450,9 @@ extension SpotEditorFeature {
                 state.selectedImages = image
                 
             case let .bindingDeleteIndex(index):
+                print("binding", index)
                 state.deleteIndex = index
+                print("bindingAfter", state.deleteIndex)
                 
             default:
                 break

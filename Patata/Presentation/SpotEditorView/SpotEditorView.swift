@@ -618,8 +618,10 @@ extension SpotEditorView {
             if store.spotEditorIsValid {
                 if store.viewState == .add && !store.selectedImages.isEmpty {
                     store.send(.viewEvent(.tappedSpotAddButton))
-                } else {
+                } else if store.viewState == .edit {
                     store.send(.viewEvent(.tappedSpotEditButton))
+                } else {
+                    store.send(.viewEvent(.openAlert))
                 }
             } else {
                 store.send(.viewEvent(.openAlert))

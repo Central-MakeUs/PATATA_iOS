@@ -81,10 +81,11 @@ public struct PhotoPickerView<Content: View>: View {
             }
         }
         .onChange(of: deleteIndex) { newValue in
-            print("deleelelelel")
-            print("delete", newValue, selectedPhotos.count/*, newValue < selectedPhotos.count*/)
+            if selectedPhotos.count == 0 {
+                deleteIndex = nil
+            }
+            
             guard let index = newValue, index >= 0, index < selectedPhotos.count else { return }
-
             let photoToRemove = selectedPhotos[index]
             
             selectedPhotos.remove(at: index)

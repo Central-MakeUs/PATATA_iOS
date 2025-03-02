@@ -143,6 +143,8 @@ extension MyPageCoordinator {
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.tappedBackButton)))):
                 state.routes.pop()
                 
+                return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedEditorBackButton)))))
+                
             case .router(.routeAction(id: .spotedit, action: .spotedit(.delegate(.successSpotAdd)))):
                 state.routes.push(.success(SuccessFeature.State(viewState: .spot)))
                 
