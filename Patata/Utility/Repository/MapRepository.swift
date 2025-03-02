@@ -63,6 +63,18 @@ final class MapRepository: @unchecked Sendable {
             }
         }
     }
+    
+    func fetchMySpotList(
+        mbrLocation: MBRCoordinates,
+        userLocation: Coordinate,
+        categoryId: Int,
+        isSearch: Bool,
+        page: Int
+        ) async throws(PAError) -> MyListMapSpotEntity {
+            let dto = try await networkManager.requestNetworkWithRefresh(dto: MyListMapSpotDTO.self, router: MapRouter.fetchMySpotList(mbrLocation: mbrLocation, userLocation: userLocation, categoryId: categoryId, isSearch: isSearch, page: page)).result
+            
+            return await mapper.dtoToEntity(dto)
+    }
 }
 
 extension MapRepository: DependencyKey {

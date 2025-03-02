@@ -31,6 +31,10 @@ struct MapMapper: Sendable {
             distance: DistanceUnit.formatDistance(dto.distance)
         )
     }
+    
+    func dtoToEntity(_ dto: MyListMapSpotCountDTO) async -> MyListMapSpotEntity {
+        return await MyListMapSpotEntity(currentPage: dto.currentPage, totalPages: dto.totalPages, totalCount: dto.totalCount, spots: dto.spots.asyncMap { await dtoToEntity($0) })
+    }
 }
 
 extension MapMapper {

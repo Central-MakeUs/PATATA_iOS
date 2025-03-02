@@ -49,7 +49,7 @@ extension MySpotListView {
                     Spacer()
                 } else {
                     ScrollView(.vertical) {
-                        VStack(spacing: 4) {
+                        LazyVStack(spacing: 4) {
                             if store.mapSpotEntity.isEmpty {
                                 ForEach(0..<10) { index in
                                     mapSpotView(spot: MapSpotEntity(), index: index)
@@ -61,6 +61,11 @@ extension MySpotListView {
                                         .background(.white)
                                         .asButton {
                                             store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                        }
+                                        .onAppear {
+                                            if store.totalpages != store.currentPage && index >= store.mapSpotEntity.count - 6 && store.listLoadTrigger && store.totalCount != store.mapSpotEntity.count {
+                                                store.send(.viewEvent(.nextPage))
+                                            }
                                         }
                                 }
                             }
