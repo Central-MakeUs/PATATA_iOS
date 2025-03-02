@@ -27,7 +27,7 @@ extension LoginRepository {
     }
     
     func appleLogin(identityToken: String) async throws(PAError) -> LoginEntity {
-        let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(identityToken: identityToken)))
+        let data = try await networkManager.requestNetwork(dto: LoginDTO.self, router: LoginRouter.apple(AppleLoginRequestDTO(authorizationCode: identityToken)))
         
         UserDefaultsManager.appleUser = true
         

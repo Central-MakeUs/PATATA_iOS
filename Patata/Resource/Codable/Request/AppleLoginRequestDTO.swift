@@ -8,5 +8,5 @@
 import Foundation
 
 struct AppleLoginRequestDTO: DTO, Encodable {
-    let identityToken: String
+    let authorizationCode: String
 }

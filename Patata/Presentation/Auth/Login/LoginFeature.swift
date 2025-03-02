@@ -74,8 +74,8 @@ struct LoginFeature {
                         
                         let tokens = loginManager.handleAuthorization(authorization)
                         
-                        if let idToken = tokens.id {
-                            await send(.networkType(.appleLogin(idToken)))
+                        if let auth = tokens.auth {
+                            await send(.networkType(.appleLogin(auth)))
                         }
                     } catch {
                         await send(.dataTransType(.error(error)))
