@@ -235,7 +235,7 @@ extension SpotEditorFeature {
                     state.location = state.spotDetail.spotAddressDetail
                     state.detail = state.spotDetail.spotDescription
                     state.hashTags = state.spotDetail.tags
-                    state.categoryText = state.spotDetail.categoryId.getCategoryCase().title
+                    state.categoryText = state.spotDetail.categoryId == .all ? "카테고리를 선택해주세요" : state.spotDetail.categoryId.getCategoryCase().title
                     
                     if !state.imageDatas.isEmpty {
                         state.imageDatas.forEach { data in

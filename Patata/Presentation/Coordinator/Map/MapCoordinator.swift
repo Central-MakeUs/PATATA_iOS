@@ -91,8 +91,11 @@ extension MapCoordinator {
             case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .map {
                     state.isHideTabBar = false
-                } else {
+                } else if viewState == .mapSearch {
                     state.isHideTabBar = true
+                    state.routes.pop()
+                    
+                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
                 }
                 
                 state.routes.pop()
@@ -268,6 +271,22 @@ extension MapCoordinator {
                     return .run { send in
                         await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.deleteSpot)))))
                     }
+                } else {
+                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
+                }
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.deleteSpot(msg, viewState))))):
+                state.routes.pop()
+                
+                if viewState == .map {
+                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.noSpotData(msg))))))
+                } else if viewState == .mapSearch {
+                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.noDataSpot(msg))))))
+                } else if viewState == .other {
+                    state.errorMSG = msg
+                    state.popupIsPresent = true
+                    
+                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
                 }
                 
             case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):

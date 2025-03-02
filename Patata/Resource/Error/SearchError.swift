@@ -9,4 +9,5 @@ import Foundation
 
 enum SearchError: Error {
     case noData
+    case deleteSpot
 }

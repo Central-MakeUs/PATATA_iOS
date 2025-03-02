@@ -114,6 +114,8 @@ extension ErrorManager {
             case .noData:
                 print("검색어에 대한 정보 없음")
                 return ""
+            case .deleteSpot:
+                return "삭제되었거나 존재하지 않는 스팟입니다."
             }
             
         case .unknown(let apiResponseErrorDTO):

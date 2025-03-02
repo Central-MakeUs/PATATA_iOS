@@ -39,6 +39,8 @@ enum APIError: Error {
         case "COMMON400":
             return .common(.invalidRequest)
             
+        case "SPOT4000":
+            return .search(.deleteSpot)
         case "SPOT4005":
             return .search(.noData)
             

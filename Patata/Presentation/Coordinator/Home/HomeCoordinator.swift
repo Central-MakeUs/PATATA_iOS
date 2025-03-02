@@ -103,13 +103,27 @@ extension HomeCoordinator {
                     state.isHideTabBar = true
                 }
                 
-                return .run { [routes = state.routes] send in
-                    if let _ = routes.last(where: { $0.id == .search }) {
-                        await send(.router(.routeAction(
-                            id: .search,
-                            action: .search(.delegate(.deletePop))
-                        )))
-                    }
+                if viewState == .search {
+                    return .send(.router(.routeAction(id: .search, action: .search(.delegate(.deletePop)))))
+                } else if viewState == .other {
+                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
+                }
+                
+            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.deleteSpot(msg, viewState))))):
+                state.routes.pop()
+                state.errorMSG = msg
+                state.popupIsPresent = true
+                
+                if viewState == .home {
+                    state.isHideTabBar = false
+                } else {
+                    state.isHideTabBar = true
+                }
+                
+                if viewState == .search {
+                    return .send(.router(.routeAction(id: .search, action: .search(.delegate(.deletePop)))))
+                } else if viewState == .other {
+                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
                 }
                 
             case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(archive, viewState))))):

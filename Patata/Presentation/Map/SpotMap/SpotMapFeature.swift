@@ -23,6 +23,7 @@ struct SpotMapFeature {
         var selectedMenuIndex: Int = 0
         var spotReloadButton: Bool = false
         var isFirst: Bool = true
+        var errorMSG: String = ""
         
         // bindingState
         var isPresented: Bool = false
@@ -57,6 +58,7 @@ struct SpotMapFeature {
             case detailBack
             case moveCamera
             case successAddSpot
+            case noSpotData(String)
         }
     }
     
@@ -182,6 +184,20 @@ extension SpotMapFeature {
             case .viewEvent(.dismiss):
                 state.alertPresent = false
                 
+            case let .delegate(.noSpotData(msg)):
+                state.errorMSG = msg
+                state.alertPresent = true
+                state.isPresented = false
+                
+                let user = state.userLocation
+                let mbr = state.mbrLocation
+                let category = CategoryCase(rawValue: state.selectedMenuIndex) ?? .all
+                
+                return .run { send in
+                    await send(.networkType(.fetchMapMarker(userLocation: user, mbr: mbr, categoryId: category, false)))
+                    await send(.viewEvent(.bottomSheetDismiss))
+                }
+                
             case let .mapAction(.getMBRLocation(mbrLocation)):
                 state.mbrLocation = mbrLocation
                 
@@ -260,8 +276,9 @@ extension SpotMapFeature {
                 
                 state.mapManager.updateMarkers(markers: markers)
                 
-                if isReload {
-                    state.alertPresent = markers.isEmpty
+                if isReload && markers.isEmpty {
+                    state.errorMSG = "해당 지역에 아직 스팟이 등록되어있지 않아요"
+                    state.alertPresent = true
                 }
             case .dataTransType(.fetchRealm):
                 return .run { send in

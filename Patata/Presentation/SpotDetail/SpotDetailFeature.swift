@@ -53,6 +53,7 @@ struct SpotDetailFeature {
             case editSpotDetail(SpotDetailEntity, ViewState)
             case report(String, id: Int?)
             case reviewReport(id: Int?)
+            case deleteSpot(String, ViewState)
         }
     }
     
@@ -155,13 +156,21 @@ extension SpotDetailFeature {
                 }
                 
             case let .networkType(.fetchSpotDetail(spotId)):
+                let viewState = state.viewState
+                
                 return .run { send in
                     do {
                         let data = try await spotRepository.fetchSpot(spotId: spotId)
                         
                         await send(.dataTransType(.spotDetail(data)))
                     } catch {
-                        print(errorManager.handleError(error) ?? "")
+                        let errorMSG = errorManager.handleError(error) ?? ""
+                        
+                        print(errorMSG)
+                        
+                        if errorMSG == "삭제되었거나 존재하지 않는 스팟입니다." {
+                            await send(.delegate(.deleteSpot(errorMSG, viewState)))
+                        }
                     }
                 }
                 

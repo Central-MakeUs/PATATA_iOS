@@ -25,7 +25,7 @@ struct SpotMapView: View {
                     HStack {
                         Spacer()
                         
-                        Text("해당 지역에 아직 스팟이 등록되어있지 않아요")
+                        Text(store.errorMSG)
                             .textStyle(.subtitleXS)
                             .foregroundStyle(.blue20)
                             .padding(.vertical, 14)

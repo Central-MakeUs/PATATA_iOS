@@ -23,8 +23,8 @@ struct SearchMapFeature {
         var searchSpotItems: [MapSpotEntity] = []
         var selectedIndex: Int = 0
         var selectedMenuIndex: Int = 0
-        var isFirst: Bool = false
-        var isOtherFirst: Bool = false
+        var isFirst: Bool = true
+        var isOtherFirst: Bool = true
         var reloadButtonIsHide: Bool = true
         var isTappedReload: Bool = false
         var errorMSG: String = ""
@@ -60,6 +60,7 @@ struct SearchMapFeature {
             case deleteSpot
             case successEdit
             case detailBack
+            case noDataSpot(String)
         }
     }
     
@@ -119,8 +120,8 @@ extension SearchMapFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
-                state.isFirst = true
-                state.isOtherFirst = true
+//                state.isFirst = true
+//                state.isOtherFirst = true
                 state.reloadButtonIsHide = true
                 
                 state.mapManager.clearCurrentMarkers()
@@ -236,6 +237,18 @@ extension SearchMapFeature {
                 
             case .delegate(.successEdit):
                 state.isPresented = false
+                
+            case let .delegate(.noDataSpot(msg)):
+                state.errorMSG = msg
+                state.errorIsPresented = true
+                
+                let search = state.searchText
+                let user = state.userLocation
+                let mbr = state.mbrLocation
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(spotName: search, userLocation: user, mbrLocation: mbr, reload: false)))
+                }
                 
             case let .delegate(.mySpotListSearch(searchText)):
                 state.searchSpotItems = []
