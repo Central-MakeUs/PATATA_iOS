@@ -73,6 +73,9 @@ extension MySpotListView {
                     }
                     .background(.gray10)
                     .redacted(reason: store.mapSpotEntity.isEmpty ? .placeholder : [])
+                    .refreshable {
+                        store.send(.viewEvent(.refresh))
+                    }
                 }
             } else {
                 ScrollView(.vertical) {
@@ -96,6 +99,9 @@ extension MySpotListView {
                 }
                 .background(.gray10)
                 .redacted(reason: store.spotListEntity.isEmpty ? .placeholder : [])
+                .refreshable {
+                    store.send(.viewEvent(.refresh))
+                }
             }
             
         }

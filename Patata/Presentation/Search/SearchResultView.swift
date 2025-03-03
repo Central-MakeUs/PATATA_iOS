@@ -59,6 +59,9 @@ extension SearchResultView {
                         proxy.scrollTo(scrollViewTopID)
                     }
                 }
+                .refreshable {
+                    store.send(.viewEvent(.refresh))
+                }
                 .safeAreaInset(edge: .top) {
                     fakeNavBar
                         .padding(.bottom, 14)

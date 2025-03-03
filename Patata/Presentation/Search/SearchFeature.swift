@@ -77,6 +77,7 @@ struct SearchFeature {
         case dismissFilter(String)
         case openFilter
         case reset
+        case refresh
     }
     
     enum NetworkType {
@@ -140,6 +141,15 @@ extension SearchFeature {
                     }
                 } else {
                     return .send(.delegate(.successSearch(searchText, state.beforeViewState)))
+                }
+                
+            case .viewEvent(.refresh):
+                let searchText = state.searchText
+                let userLocation = state.userLocation
+                let filter = state.filter
+                
+                return .run { send in
+                    await send(.networkType(.searchSpot(page: 0, filter: filter, scroll: false, userLocation: userLocation)))
                 }
                 
             case .viewEvent(.searchStart):

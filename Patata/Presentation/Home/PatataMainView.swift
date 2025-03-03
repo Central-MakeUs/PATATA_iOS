@@ -111,6 +111,9 @@ extension PatataMainView {
                                 store.send(.viewEvent(.tappedAddButton))
                             }
                     }
+                    .refreshable {
+                        store.send(.viewCycle(.onAppear))
+                    }
                     .safeAreaInset(edge: .top) {
                         fakeNavgationBar
                             .padding(.bottom, 12)
@@ -126,6 +129,7 @@ extension PatataMainView {
                             )
                     }
                     .scrollDisabled(isScrollDisabled)
+                    
                 }
             }
         }

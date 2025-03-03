@@ -96,6 +96,9 @@ extension SpotDetailView {
                 }
             }
             .redacted(reason: store.spotDetailData.spotName.isEmpty ? .placeholder : [])
+            .refreshable {
+                store.send(.viewCycle(.onAppear))
+            }
             .safeAreaInset(edge: .top) {
                 fakeNavBar
                     .padding(.bottom, 14)

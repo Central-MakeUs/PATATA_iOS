@@ -59,6 +59,7 @@ struct SpotCategoryFeature {
         case nextPage
         case tappedSpot(Int)
         case tappedArchiveButton(Int)
+        case refresh
     }
     
     enum NetworkType {
@@ -137,6 +138,28 @@ extension SpotCategoryFeature {
                 state.filter = FilterCase.getFilter(text: filter)
                 state.isPresent = false
                 
+                state.currentPage = 0
+                state.totalPages = 0
+                
+                let currentPage = state.currentPage
+                let filter = state.filter
+                let userLocation = state.userLocation
+                
+                return .run { [state = state] send in
+                    await send(
+                        .networkType(
+                            .fetchCategoryItem(
+                                page: currentPage,
+                                filter: filter,
+                                scroll: false,
+                                categoryId: state.selectedIndex,
+                                userLocation: userLocation
+                            )
+                        )
+                    )
+                }
+                
+            case .viewEvent(.refresh):
                 state.currentPage = 0
                 state.totalPages = 0
                 

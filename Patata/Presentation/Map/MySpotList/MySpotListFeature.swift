@@ -84,6 +84,7 @@ struct MySpotListFeature {
         case tappedSpot(Int)
         case tappedSearch
         case nextPage
+        case refresh
     }
     
     @Dependency(\.spotRepository) var spotRepository
@@ -158,6 +159,32 @@ extension MySpotListFeature {
                 
                 return .run { send in
                     await send(.networkType(.fetchSpot(mbr, user, category, isSearch: true, page: currentPage, isScroll: true)))
+                }
+                
+            case .viewEvent(.refresh):
+                let user = state.userCoord
+                let category = CategoryCase(rawValue: state.selectedIndex) ?? .all
+                
+                if state.viewState == .home {
+                    return .run { send in
+                        await send(.networkType(.fetchSpotList(user)))
+                    }
+                } else if state.viewState == .map {
+                    let mbrCoord = state.mbrLocation
+                    let userLocation = state.userCoord
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSpot(mbrCoord, userLocation, category, isSearch: false, page: 0, isScroll: false)))
+                    }
+                    
+                } else {
+                    let mbrCoord = state.isSearch ? nil : state.mbrLocation
+                    let userLocation = state.userCoord
+                    let searchText = state.searchText
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchSearchSpot(mbrCoord, userLocation, searchText)))
+                    }
                 }
                 
             case .delegate(.delete):

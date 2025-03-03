@@ -105,6 +105,9 @@ extension ArchiveView {
                     .padding(.top, 4)
                     .background(.white)
                 }
+                .refreshable {
+                    store.send(.viewCycle(.onAppear))
+                }
             }
         }
         .background(store.archiveList.isEmpty ? .gray20 : .white)

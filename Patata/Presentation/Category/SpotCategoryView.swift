@@ -101,6 +101,9 @@ extension SpotCategoryView {
                     
                 }
                 .background(.gray10)
+                .refreshable {
+                    store.send(.viewEvent(.refresh))
+                }
             }
         }
     }
