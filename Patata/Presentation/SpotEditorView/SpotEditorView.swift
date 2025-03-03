@@ -441,6 +441,11 @@ extension SpotEditorView {
                                             }
                                     }
                                 }
+                                .onDrag {
+                                    store.send(.viewEvent(.onDrag(index)))
+                                    return NSItemProvider(object: String(describing: index) as NSString)
+                                }
+                                .onDrop(of: [.text], delegate: ItemDropDelegate(index: index, isDragging: $store.isDragging.sending(\.bindingIsDragging), selectedImages: $store.selectedImages.sending(\.bindingImage), currentImage: $store.currentImage.sending(\.bindingCurrentImage), draggingIndex: $store.draggingIndex.sending(\.bindingDraggingIndex), resizeData: $store.imageDatas.sending(\.bindingImageData)))
                             }
                         } else {
                             ScrollView(.horizontal) {
@@ -665,5 +670,40 @@ extension SpotEditorView {
             
             Spacer()
         }
+    }
+}
+
+struct ItemDropDelegate: DropDelegate {
+    let index: Int
+
+    @Binding var isDragging: Bool
+    @Binding var selectedImages: [UIImage]
+    @Binding var currentImage: UIImage?
+    @Binding var draggingIndex: Int?
+    @Binding var resizeData: [Data]
+    
+    func dropUpdated(info: DropInfo) -> DropProposal? {
+        return DropProposal(operation: .move)
+    }
+    
+    func dropEntered(info: DropInfo) {
+        isDragging = true
+        guard let currentImage = currentImage,
+              let from = selectedImages.firstIndex(of: currentImage),
+              from != index else {
+            return
+        }
+
+        
+        let toIndex = from < index ? index + 1 : index
+        selectedImages.move(fromOffsets: IndexSet(integer: from), toOffset: toIndex)
+        resizeData.move(fromOffsets: IndexSet(integer: from), toOffset: toIndex)
+    }
+    
+    func performDrop(info: DropInfo) -> Bool {
+        currentImage = nil
+        isDragging = false
+        draggingIndex = nil
+        return true
     }
 }

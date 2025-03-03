@@ -32,6 +32,9 @@ struct SpotEditorFeature {
         var agreeToTerms: Bool = false
         var alertIsPresent: Bool = false
         var deleteIndex: Int? = nil
+        var currentImage: UIImage? = nil
+        var isDragging: Bool = false
+        var draggingIndex: Int? = nil
         
         // bindingState
         var title: String = ""
@@ -86,6 +89,9 @@ struct SpotEditorFeature {
         case bindingImageData([Data])
         case bindingImage([UIImage])
         case bindingDeleteIndex(Int?)
+        case bindingCurrentImage(UIImage?)
+        case bindingIsDragging(Bool)
+        case bindingDraggingIndex(Int?)
     }
     
     enum ViewCycle {
@@ -115,6 +121,7 @@ struct SpotEditorFeature {
         case openAlert
         case dismissAlert
         case deleteImage(Int)
+        case onDrag(Int)
     }
     
     enum NetworkType {
@@ -212,6 +219,11 @@ extension SpotEditorFeature {
                 
             case .viewEvent(.dismissAlert):
                 state.alertIsPresent = false
+                
+            case let .viewEvent(.onDrag(index)):
+                state.currentImage = state.selectedImages[index]
+                state.isDragging = true
+                state.draggingIndex = index
                 
             case let .delegate(.changeAddress(spotCoord, address)):
                 state.isFirst = false
@@ -450,9 +462,16 @@ extension SpotEditorFeature {
                 state.selectedImages = image
                 
             case let .bindingDeleteIndex(index):
-                print("binding", index)
                 state.deleteIndex = index
-                print("bindingAfter", state.deleteIndex)
+                
+            case let .bindingCurrentImage(image):
+                state.currentImage = image
+                
+            case let .bindingIsDragging(bool):
+                state.isDragging = bool
+                
+            case let .bindingDraggingIndex(index):
+                state.draggingIndex = index
                 
             default:
                 break
