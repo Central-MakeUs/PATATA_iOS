@@ -341,7 +341,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Patata;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스팟 등록에 필요한 사진 선택을 위해 사진 접근 권한이 필요합니다. 선택하신 사진은 스팟 등록 용도로만 사용되며, 서버에 안전하게 저장됩니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사용자가 공유하고 싶은 장소의 사진을 업로드하여 새로운 스팟을 생성하기 위해 사진 접근 권한이 필요합니다. 선택한 사진은 스팟 정보와 함께 서버에 저장되어 다른 사용자들과 공유됩니다. 업로드된 사진은 스팟의 대표 이미지로 사용되며, 앱 내의 스팟 목록과 상세 페이지에서 표시됩니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -383,7 +383,7 @@
 				INFOPLIST_KEY_CFBundleDisplayName = Patata;
 				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
 				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
-				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "스팟 등록에 필요한 사진 선택을 위해 사진 접근 권한이 필요합니다. 선택하신 사진은 스팟 등록 용도로만 사용되며, 서버에 안전하게 저장됩니다.";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "사용자의 주변 장소를 보다 명시적으로 나타내기 위해 현재 위치 정보를 수집하여, 위치 정보는 앱 내에서만 사용되고 저장되지 않습니다.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "사용자가 공유하고 싶은 장소의 사진을 업로드하여 새로운 스팟을 생성하기 위해 사진 접근 권한이 필요합니다. 선택한 사진은 스팟 정보와 함께 서버에 저장되어 다른 사용자들과 공유됩니다. 업로드된 사진은 스팟의 대표 이미지로 사용되며, 앱 내의 스팟 목록과 상세 페이지에서 표시됩니다.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
