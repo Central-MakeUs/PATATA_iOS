@@ -175,6 +175,8 @@ extension SpotDetailFeature {
                 }
                 
             case .networkType(.patchArchiveState):
+                let viewState = state.viewState
+                
                 let spotId = [state.spotDetailData.spotId]
                 
                 return .run { send in
@@ -183,7 +185,13 @@ extension SpotDetailFeature {
                         
                         await send(.dataTransType(.archiveState(data)))
                     } catch {
-                        print(errorManager.handleError(error) ?? "")
+                        let errorMSG = errorManager.handleError(error) ?? ""
+                        
+                        print(errorMSG)
+                        
+                        if errorMSG == "삭제되었거나 존재하지 않는 스팟입니다." {
+                            await send(.delegate(.deleteSpot(errorMSG, viewState)))
+                        }
                     }
                 }
                 
@@ -199,13 +207,21 @@ extension SpotDetailFeature {
                 }
                 
             case let .networkType(.createReview(comment)):
+                let viewState = state.viewState
+                
                 return .run { [state = state] send in
                     do {
                         let data = try await reviewRepository.createReview(spotId: state.spotDetailData.spotId, text: comment)
                         
                         await send(.dataTransType(.reviewData(data)))
                     } catch {
-                        print(errorManager.handleError(error) ?? "")
+                        let errorMSG = errorManager.handleError(error) ?? ""
+                        
+                        print(errorMSG)
+                        
+                        if errorMSG == "삭제되었거나 존재하지 않는 스팟입니다." {
+                            await send(.delegate(.deleteSpot(errorMSG, viewState)))
+                        }
                     }
                 }
                 

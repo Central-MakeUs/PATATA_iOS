@@ -6,17 +6,15 @@
 //
 
 import Foundation
-import ComposableArchitecture
 import UIKit
 
 final class AppStoreCheckManager {
-    @Dependency(\.networkManager) var networkManager
     // 현재 버전 : 타겟 -> 일반 -> Version
     static let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String
     
     // 개발자가 내부적으로 확인하기 위한 용도 : 타겟 -> 일반 -> Build
     static let buildNumber = Bundle.main.infoDictionary?["CFBundleVersion"] as? String
-    static let appStoreOpenUrlString = "itms-apps://itunes.apple.com/app/apple-store/6742177268"
+    static let appStoreOpenUrlString = "itms-apps://apps.apple.com/app/id6742177268"
     
     // 앱 스토어 최신 정보 확인
     func latestVersion() async -> String? {
