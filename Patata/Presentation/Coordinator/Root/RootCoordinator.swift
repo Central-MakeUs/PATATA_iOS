@@ -54,6 +54,8 @@ struct RootCoordinator {
         case networkMonitorStart
         case changeViewState(Bool)
         case checkNetworkValid(Bool)
+        case checkVersion
+        case openAlert
         
         case bindingIsPresent(Bool)
     }
@@ -100,6 +102,7 @@ struct RootCoordinator {
                         
                         await send(.locationAction(.permissionResponse(permission)))
                         await send(.networkMonitorStart)
+                        await send(.checkVersion)
                     },
                     .run { send in
                         for await error in networkManager.getNetworkError() {
@@ -135,6 +138,39 @@ struct RootCoordinator {
                         }
                     }
                 }
+                
+            case .checkVersion:
+                return .run { send in
+                    guard let marketingVersion = await AppStoreCheckManager().latestVersion() else {
+                        print("앱스토어 버전을 찾지 못했습니다.")
+                        return
+                    }
+                    // 현재 기기의 버전
+                    let currentProjectVersion = AppStoreCheckManager.appVersion ?? ""
+                    
+                    // 앱스토어의 버전을 .을 기준으로 나눈 것
+                    let splitMarketingVersion = marketingVersion.split(separator: ".").map { $0 }
+                    
+                    // 현재 기기의 버전을 .을 기준으로 나눈 것
+                    let splitCurrentProjectVersion = currentProjectVersion.split(separator: ".").map { $0 }
+                    
+                    if splitCurrentProjectVersion.count > 0 && splitMarketingVersion.count > 0 {
+                        
+                        // 현재 기기의 Major 버전이 앱스토어의 Major 버전보다 낮다면 알럿을 띄운다.
+                        if splitCurrentProjectVersion[0] < splitMarketingVersion[0] {
+                            await send(.openAlert)
+                            // 현재 기기의 Minor 버전이 앱스토어의 Minor 버전보다 낮다면 알럿을 띄운다.
+                        } else if splitCurrentProjectVersion[1] < splitMarketingVersion[1] {
+                            await send(.openAlert)
+                            // Patch의 버전이 다르거나 최신 버전이라면 아무 알럿도 띄우지 않는다.
+                        } else {
+                            print("현재 최신 버전입니다.")
+                        }
+                    }
+                }
+                
+            case .openAlert:
+                state.isPresent = true
                 
             case .appLifecycle(.background):
                 return .run { _ in

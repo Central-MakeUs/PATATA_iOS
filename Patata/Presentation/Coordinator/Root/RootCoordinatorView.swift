@@ -44,14 +44,22 @@ struct RootCoordinatorView: View {
             }
             .customAlert(
                 isPresented: $store.isPresent.sending(\.bindingIsPresent),
-                title: AlertMessage.locationPermission.title,
-                message: AlertMessage.locationPermission.message,
-                cancelText: AlertMessage.locationPermission.cancelTitle,
-                confirmText: AlertMessage.locationPermission.actionTitle) {
-                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(settingsUrl)
+                title: AlertMessage.updateVersion.title,
+                message: AlertMessage.updateVersion.message,
+                cancelText: AlertMessage.updateVersion.cancelTitle,
+                confirmText: AlertMessage.updateVersion.actionTitle) {
+                    AppStoreCheckManager().openAppStore()
                 }
-            }
+//            .customAlert(
+//                isPresented: $store.isPresent.sending(\.bindingIsPresent),
+//                title: AlertMessage.locationPermission.title,
+//                message: AlertMessage.locationPermission.message,
+//                cancelText: AlertMessage.locationPermission.cancelTitle,
+//                confirmText: AlertMessage.locationPermission.actionTitle) {
+//                if let settingsUrl = URL(string: UIApplication.openSettingsURLString) {
+//                    UIApplication.shared.open(settingsUrl)
+//                }
+//            }
             .onAppear {
                 store.send(.viewCycle(.onAppear))
             }
