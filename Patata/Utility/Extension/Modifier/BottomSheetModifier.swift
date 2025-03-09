@@ -95,13 +95,6 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
                         }
                     } else {
                         VStack {
-                            Rectangle()
-                                .frame(width: 50, height: 4)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .padding(.top, 8)
-                                .padding(.bottom, 12)
-                                .contentShape(Rectangle())
-                            
                             sheetContent()
                                 .fixedSize(horizontal: false, vertical: true)
                                 .foregroundStyle(.textDefault)
@@ -120,7 +113,7 @@ struct BottomSheetModifier<SheetContent: View>: ViewModifier {
         .cornerRadius(20, corners: [.topLeft, .topRight])
         .offset(y: sheetOffset + dragOffset)
         .ignoresSafeArea(edges: .bottom)
-        .gesture(
+        .simultaneousGesture(
             DragGesture(minimumDistance: isFull ? .infinity : 0)
                 .onChanged { value in
                     if isFullSheet && !isMap {

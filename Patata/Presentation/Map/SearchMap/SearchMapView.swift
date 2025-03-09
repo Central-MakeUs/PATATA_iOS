@@ -23,7 +23,7 @@ struct SearchMapView: View {
                     AnyView(
                         WithPerceptionTracking {
                             spotDetailSheet(spot: store.searchSpotItems[safe: store.selectedIndex] ?? MapSpotEntity())
-                                .asButton {
+                                .onTapGesture {
                                     store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[safe: store.selectedIndex]?.spotId ?? 0)))
                                 }
                         }

@@ -64,7 +64,7 @@ struct SpotMapView: View {
                     AnyView(
                         WithPerceptionTracking(content: {
                             spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
-                                .asButton {
+                                .onTapGesture {
                                     store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
                                 }
                         })
