@@ -157,6 +157,8 @@ extension ProfileEditFeature {
                     state.isValid = false
                 }
                 
+                state.dataState = .data
+                
             case let .validCheckText(nickname):
                 let limitedText = String(nickname.prefix(10))
                 
