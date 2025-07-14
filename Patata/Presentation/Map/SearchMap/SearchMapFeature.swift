@@ -16,7 +16,7 @@ struct SearchMapFeature {
     @ObservableState
     struct State: Equatable {
         var searchText: String
-        var mapManager: NaverMapManager = NaverMapManager.searchMapShared
+        var mapManager: MapManager = MapManager.searchMapShared
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))

@@ -18,9 +18,9 @@ import NMapsMap
 // 초기값으로는 좌표값과 카테고리가 있어야지
 
 struct UIMapView: UIViewRepresentable {
-    let mapManager: NaverMapManager
+    let mapManager: MapManager
     
-    func makeCoordinator() -> NaverMapManager {
+    func makeCoordinator() -> MapManager {
         mapManager
     }
     

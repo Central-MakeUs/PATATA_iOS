@@ -14,7 +14,7 @@ struct SpotMapFeature {
     
     @ObservableState
     struct State: Equatable {
-        var mapManager: NaverMapManager = NaverMapManager.spotMapShared
+        var mapManager: MapManager = MapManager.spotMapShared
         var userLocation: Coordinate = Coordinate(latitude: 37.5666791, longitude: 126.9784147)
         var cameraLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var mbrLocation: MBRCoordinates = MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0))

@@ -77,6 +77,7 @@ extension ProfileEditView {
                 .asButton {
                     store.send(.viewEvent(.tappedConfirmButton))
                 }
+                
             }
             .background(.white)
         }

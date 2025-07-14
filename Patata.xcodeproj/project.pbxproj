@@ -11,10 +11,8 @@
 		DF0715732D5B7874001CFF31 /* RealmSwift in Embed Frameworks */ = {isa = PBXBuildFile; productRef = DF0715712D5B77B0001CFF31 /* RealmSwift */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		DF1764912D5139F9003FA3B3 /* PopupView in Frameworks */ = {isa = PBXBuildFile; productRef = DF1764902D5139F9003FA3B3 /* PopupView */; };
 		DF37A23C2D650693000D0CCB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */; };
-		DF43BC312DB0F0E600EF833A /* README.md in Resources */ = {isa = PBXBuildFile; fileRef = DF43BC302DB0F0E600EF833A /* README.md */; };
 		DF8D2B392D527EC10081561A /* Logging in Frameworks */ = {isa = PBXBuildFile; productRef = DF8D2B382D527EC10081561A /* Logging */; };
 		DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */ = {isa = PBXBuildFile; productRef = DF9D5F762D42572F00042314 /* NMapsMap */; };
-		DFA57A742D35241F001E785A /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = DFA57A732D35241F001E785A /* .gitignore */; };
 		DFA57A802D3527E4001E785A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A7F2D3527E4001E785A /* Alamofire */; };
 		DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A822D3527F4001E785A /* Kingfisher */; };
 		DFA57A862D35282C001E785A /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A852D35282C001E785A /* ComposableArchitecture */; };
@@ -39,7 +37,6 @@
 
 /* Begin PBXFileReference section */
 		DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		DF43BC302DB0F0E600EF833A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		DFA57A602D35214B001E785A /* Patata.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Patata.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFA57A732D35241F001E785A /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -49,6 +46,9 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
+				Presentation/ErrorView/NetworkErrorView.swift,
+				Presentation/NetworkErrorFeature.swift,
+				"Preview Content/Preview Assets.xcassets",
 			);
 			target = DFA57A5F2D35214B001E785A /* Patata */;
 		};
@@ -89,7 +89,6 @@
 		DFA57A572D35214B001E785A = {
 			isa = PBXGroup;
 			children = (
-				DF43BC302DB0F0E600EF833A /* README.md */,
 				DF37A23B2D650693000D0CCB /* PrivacyInfo.xcprivacy */,
 				DFA57A732D35241F001E785A /* .gitignore */,
 				DFA57A622D35214B001E785A /* Patata */,
@@ -191,9 +190,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DF43BC312DB0F0E600EF833A /* README.md in Resources */,
 				DF37A23C2D650693000D0CCB /* PrivacyInfo.xcprivacy in Resources */,
-				DFA57A742D35241F001E785A /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

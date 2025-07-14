@@ -19,7 +19,7 @@ struct AddSpotMapFeature {
         var viewState: ViewState
         var spotDetailEntity: SpotDetailEntity
         var datas: [Data]
-        var mapManager: NaverMapManager = NaverMapManager.addSpotShared
+        var mapManager: MapManager = MapManager.addSpotShared
         var userLocation: Coordinate = Coordinate(latitude: 0, longitude: 0)
         var address: String = ""
         var spotCoord: Coordinate
