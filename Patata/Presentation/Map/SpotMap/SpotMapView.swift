@@ -294,7 +294,7 @@ extension SpotMapView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: ((store.mapSpotEntity.isEmpty ? false : store.mapSpotEntity[safe: store.selectIndex]?.isScraped) != nil)) {
+                SpotArchiveButton(height: 24, width: 24, isSaved:  store.mapSpotEntity[safe: store.selectIndex]?.isScraped ?? false) {
                     store.send(.viewEvent(.tappedArchiveButton))
                 }
             }

@@ -302,7 +302,7 @@ extension SearchMapView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved: ((store.searchSpotItems.isEmpty ? false : store.searchSpotItems[safe: store.selectedIndex]?.isScraped) != nil)) {
+                SpotArchiveButton(height: 24, width: 24, isSaved: store.searchSpotItems[safe: store.selectedIndex]?.isScraped ?? false) {
                     store.send(.viewEvent(.tappedArchiveButton))
                 }
             }
