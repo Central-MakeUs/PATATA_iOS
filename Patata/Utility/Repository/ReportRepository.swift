@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import ComposableArchitecture
+import Dependencies
 
 final class ReportRepository: @unchecked Sendable {
     @Dependency(\.networkManager) var networkManager

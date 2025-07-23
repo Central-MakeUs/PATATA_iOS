@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import ComposableArchitecture
+import Dependencies
 
 struct Nick: DTO, Encodable {
     let nickName: String

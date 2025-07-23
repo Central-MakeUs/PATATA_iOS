@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import ComposableArchitecture
+import Dependencies
 
 final class MapRepository: @unchecked Sendable {
     @Dependency(\.mapMapper) var mapper

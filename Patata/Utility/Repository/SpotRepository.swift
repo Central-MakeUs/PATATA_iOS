@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import ComposableArchitecture
+import Dependencies
 
 // categoryId: Int, page: Int = 0, size: Int = 10, latitude: Double? = nil, longitude: Double? = nil, sortBy: String = "RECOMMEND"
 
