@@ -9,7 +9,7 @@ import Foundation
 import ComposableArchitecture
 
 @Reducer
-struct OnboardPageFeature {
+struct OnboardingFeature {
     
     @ObservableState
     struct State: Equatable {

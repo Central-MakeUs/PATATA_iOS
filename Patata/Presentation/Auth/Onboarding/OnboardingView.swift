@@ -14,7 +14,7 @@ struct OnboardingView: View {
 //        @AppStorage("_isFirstLaunching") var isFirstLaunching: Bool = true
     
     
-    @Perception.Bindable var store: StoreOf<OnboardPageFeature>
+    @Perception.Bindable var store: StoreOf<OnboardingFeature>
     
     @State private var isShowingToast = false
     
