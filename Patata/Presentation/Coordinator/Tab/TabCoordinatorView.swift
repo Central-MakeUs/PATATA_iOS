@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import TCACoordinators
 import ComposableArchitecture
 
 struct TabCoordinatorView: View {
