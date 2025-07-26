@@ -28,6 +28,11 @@ struct RootCoordinatorView: View {
                 if let store = store.scope(state: \.login, action: \.login) {
                     LoginView(store: store)
                 }
+                
+            case .tabBar:
+                if let store = store.scope(state: \.tabBar, action: \.tabBar) {
+                    TabCoordinatorView(store: store)
+                }
             }
         }
     }

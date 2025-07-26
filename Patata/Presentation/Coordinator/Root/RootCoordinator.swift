@@ -6,7 +6,6 @@
 //
 
 import ComposableArchitecture
-@preconcurrency import TCACoordinators
 
 @Reducer
 struct RootCoordinator: Reducer {
@@ -15,7 +14,7 @@ struct RootCoordinator: Reducer {
         case splash(SplashFeature.State = .init())
         case onboarding(OnboardingFeature.State)
         case login(LoginFeature.State)
-        
+        case tabBar(TabCoordinator.State)
         
         init() { self = .splash() }
     }
@@ -26,6 +25,7 @@ struct RootCoordinator: Reducer {
         case splashAction(SplashFeature.Action)
         case onboarding(OnboardingFeature.Action)
         case login(LoginFeature.Action)
+        case tabBar(TabCoordinator.Action)
     }
     
     var body: some Reducer<State, Action> {
@@ -38,6 +38,9 @@ struct RootCoordinator: Reducer {
                     return .send(._sceneChange(.login(.init())))
                 }
                 
+            case .login(.delegate(.loginSuccess)):
+                return .send(._sceneChange(.tabBar(TabCoordinator.State(tabState: .home))))
+                
             case let ._sceneChange(new):
                 state = new
                 
@@ -48,6 +51,15 @@ struct RootCoordinator: Reducer {
         }
         .ifCaseLet(\.splash, action: \.splashAction) {
             SplashFeature()
+        }
+        .ifCaseLet(\.onboarding, action: \.onboarding) {
+            OnboardingFeature()
+        }
+        .ifCaseLet(\.login, action: \.login) {
+            LoginFeature()
+        }
+        .ifCaseLet(\.tabBar, action: \.tabBar) {
+            TabCoordinator()
         }
     }
 }

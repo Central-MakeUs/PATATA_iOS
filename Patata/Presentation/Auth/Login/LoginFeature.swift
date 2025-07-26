@@ -26,7 +26,6 @@ struct LoginFeature {
         case delegate(Delegate)
         
         enum Delegate {
-            case startButtonTapped
             case loginSuccess
         }
         
@@ -38,7 +37,6 @@ struct LoginFeature {
     enum ViewEvent {
         case tappedAppleLogin
         case tappedGoogleLogin
-        case tappedStartButton
         case dismiss
     }
     
@@ -59,14 +57,6 @@ struct LoginFeature {
     var body: some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-                
-            case .viewEvent(.tappedStartButton):
-                if state.currentIndex == 2 {
-                    return .send(.delegate(.startButtonTapped))
-                } else {
-                    state.currentIndex += 1
-                }
-                
             case .viewEvent(.tappedAppleLogin):
                 return .run { send in
                     do {
@@ -86,7 +76,7 @@ struct LoginFeature {
                 return .run { send in
                     do {
                         let idToken = try await loginManager.googleLogin()
-                        print("success", idToken)
+                        
                         await send(.networkType(.googleLogin(idToken.tokenString)))
                     } catch {
                         await send(.dataTransType(.error(error)))
