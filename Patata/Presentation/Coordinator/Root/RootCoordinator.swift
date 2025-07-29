@@ -8,58 +8,166 @@
 import ComposableArchitecture
 
 @Reducer
-struct RootCoordinator: Reducer {
+struct RootCoordinator {
     @ObservableState
-    enum State {
-        case splash(SplashFeature.State = .init())
-        case onboarding(OnboardingFeature.State)
-        case login(LoginFeature.State)
-        case tabBar(TabCoordinator.State)
+    struct State {
+        var rootPath = RootPathFeature.State()
         
-        init() { self = .splash() }
+        var currentNetworkState: Bool = true
+        var isPresent: Bool = false
     }
     
-    @CasePathable
     enum Action {
-        case _sceneChange(State)
-        case splashAction(SplashFeature.Action)
-        case onboarding(OnboardingFeature.Action)
-        case login(LoginFeature.Action)
-        case tabBar(TabCoordinator.Action)
+        case rootPath(RootPathFeature.Action)
+        case viewCycle(ViewCycle)
+        case locationAction(LocationAction)
+        case networkErrorType(NetworkErrorType)
+        case appLifecycle(AppLifecycle)
+        case networkMonitorStart
+        case checkVersion
+        case tokenExpired
+        case openAlert
+        
+        case changeViewState(Bool)
+        case checkNetworkValid(Bool)
     }
     
-    var body: some Reducer<State, Action> {
+    enum LocationAction: Equatable {
+        case permissionResponse(Bool)
+    }
+    
+    enum NetworkErrorType {
+        case nwMonitor
+    }
+    
+    enum AppLifecycle {
+        case background
+        case willEnterForeground
+        case active
+        case inactive
+    }
+    
+    enum ViewCycle {
+        case onAppear
+    }
+    
+    @Dependency(\.nwPathMonitorManager) var nwPathMonitorManager
+    @Dependency(\.networkManager) var networkManager
+    @Dependency(\.errorManager) var errorManager
+    @Dependency(\.locationManager) var locationManager
+    
+    var body: some ReducerOf<Self> {
+        Scope(state: \.rootPath, action: \.rootPath) {
+            RootPathFeature()
+        }
+        
         Reduce { state, action in
             switch action {
-            case let .splashAction(.delegate(.isFirstUser(isFirst))):
-                if isFirst {
-                    return .send(._sceneChange(.onboarding(.init())))
-                } else {
-                    return .send(._sceneChange(.login(.init())))
+            case .viewCycle(.onAppear):
+                return .merge(
+                    .run { send in
+                        let permission = await locationManager.checkLocationPermission()
+                        
+                        await send(.locationAction(.permissionResponse(permission)))
+                        await send(.networkMonitorStart)
+                        await send(.checkVersion)
+                    },
+                    .run { send in
+                        for await error in networkManager.getNetworkError() {
+                            if errorManager.checkTokenError(error) {
+                                await send(.tokenExpired)
+                            }
+                        }
+                    }
+                )
+                
+            case .networkMonitorStart:
+                return .run { send in
+                    nwPathMonitorManager.start()
+                    await send(.networkErrorType(.nwMonitor))
                 }
                 
-            case .login(.delegate(.loginSuccess)):
-                return .send(._sceneChange(.tabBar(TabCoordinator.State(tabState: .home))))
+            case .networkErrorType(.nwMonitor):
+                return .run { [state = state] send in
+                    
+                    for await isValid in  nwPathMonitorManager.getToConnectionTrigger() {
+                        if state.currentNetworkState != isValid {
+                            if !isValid {
+                                await send(.changeViewState(isValid))
+                            } else {
+                                await send(.checkNetworkValid(isValid))
+                            }
+                        } else {
+                            await send(.checkNetworkValid(isValid))
+                        }
+                    }
+                }
                 
-            case let ._sceneChange(new):
-                state = new
+            case .checkVersion:
+                return .run { send in
+                    guard let marketingVersion = await AppStoreCheckManager().latestVersion() else {
+                        print("앱스토어 버전을 찾지 못했습니다.")
+                        return
+                    }
+                    // 현재 기기의 버전
+                    let currentProjectVersion = AppStoreCheckManager.appVersion ?? ""
+                    
+                    // 앱스토어의 버전을 .을 기준으로 나눈 것
+                    let splitMarketingVersion = marketingVersion.split(separator: ".").map { $0 }
+                    
+                    // 현재 기기의 버전을 .을 기준으로 나눈 것
+                    let splitCurrentProjectVersion = currentProjectVersion.split(separator: ".").map { $0 }
+                    
+                    if splitCurrentProjectVersion.count > 0 && splitMarketingVersion.count > 0 {
+                        
+                        // 현재 기기의 Major 버전이 앱스토어의 Major 버전보다 낮다면 알럿을 띄운다.
+                        if splitCurrentProjectVersion[0] < splitMarketingVersion[0] {
+                            await send(.openAlert)
+                            // 현재 기기의 Minor 버전이 앱스토어의 Minor 버전보다 낮다면 알럿을 띄운다.
+                        } else if splitCurrentProjectVersion[1] < splitMarketingVersion[1] {
+                            await send(.openAlert)
+                            // Patch의 버전이 다르거나 최신 버전이라면 아무 알럿도 띄우지 않는다.
+                        } else {
+                            print("현재 최신 버전입니다.")
+                        }
+                    }
+                }
                 
-            default:
+            case .openAlert:
+                state.isPresent = true
+                
+            case .appLifecycle(.background):
+                return .run { _ in
+                    locationManager.stopUpdatingLocation()
+                }
+                
+            case .appLifecycle(.active):
+                return .run { send in
+                    let hasPermission = await locationManager.checkLocationPermission()
+                    await send(.locationAction(.permissionResponse(hasPermission)))
+                }
+                
+            case .appLifecycle(.inactive):
+                return .run { _ in
+                    locationManager.stopUpdatingLocation()
+                }
+                
+            case let .locationAction(.permissionResponse(hasPermission)):
+//                state.isPresent = !hasPermission
+                
+                return .run { _ in
+                    if hasPermission {
+                        locationManager.startUpdatingLocation()
+                    } else {
+                        locationManager.stopUpdatingLocation()
+                    }
+                }
+                
+            default :
                 break
             }
+            
             return .none
-        }
-        .ifCaseLet(\.splash, action: \.splashAction) {
-            SplashFeature()
-        }
-        .ifCaseLet(\.onboarding, action: \.onboarding) {
-            OnboardingFeature()
-        }
-        .ifCaseLet(\.login, action: \.login) {
-            LoginFeature()
-        }
-        .ifCaseLet(\.tabBar, action: \.tabBar) {
-            TabCoordinator()
         }
     }
 }
