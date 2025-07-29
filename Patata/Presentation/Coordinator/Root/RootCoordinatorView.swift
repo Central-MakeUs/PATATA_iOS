@@ -13,26 +13,31 @@ struct RootCoordinatorView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            switch store.state {
-            case .splash:
-                if let store = store.scope(state: \.splash, action: \.splashAction) {
-                    SplashView(store: store)
+            VStack {
+                switch store.rootPath {
+                case .splash:
+                    if let store = store.scope(state: \.rootPath.splash, action: \.rootPath.splash) {
+                        SplashView(store: store)
+                    }
+                    
+                case .onboarding:
+                    if let store = store.scope(state: \.rootPath.onboarding, action: \.rootPath.onboarding) {
+                        OnboardingView(store: store)
+                    }
+                    
+                case .login:
+                    if let store = store.scope(state: \.rootPath.login, action: \.rootPath.login) {
+                        LoginNavigationView(store: store)
+                    }
+                    
+                case .tabBar:
+                    if let store = store.scope(state: \.rootPath.tabBar, action: \.rootPath.tabBar) {
+                        TabCoordinatorView(store: store)
+                    }
                 }
-                
-            case .onboarding:
-                if let store = store.scope(state: \.onboarding, action: \.onboarding) {
-                    OnboardingView(store: store)
-                }
-                
-            case .login:
-                if let store = store.scope(state: \.login, action: \.login) {
-                    LoginView(store: store)
-                }
-                
-            case .tabBar:
-                if let store = store.scope(state: \.tabBar, action: \.tabBar) {
-                    TabCoordinatorView(store: store)
-                }
+            }
+            .onAppear {
+                store.send(.viewCycle(.onAppear))
             }
         }
     }

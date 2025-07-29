@@ -18,9 +18,6 @@ struct PatataApp: App {
             RootCoordinatorView(store: Store(initialState: RootCoordinator.State(), reducer: {
                 RootCoordinator()
             }))
-//            RootCoordinatorView(store: Store(initialState: RootCoordinator.State.initialState, reducer: {
-//                RootCoordinator()
-//            }))
             .onOpenURL { url in
                 GIDSignIn.sharedInstance.handle(url)
             }
