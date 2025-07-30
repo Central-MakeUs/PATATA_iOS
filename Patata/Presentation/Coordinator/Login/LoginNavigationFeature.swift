@@ -12,6 +12,7 @@ import ComposableArchitecture
 enum LoginPath {
     case login(LoginFeature)
     case profileEdit(ProfileEditFeature)
+    case success(SuccessFeature)
 }
 
 @Reducer
@@ -31,6 +32,7 @@ struct LoginNavigationFeature {
         enum Delegate {
             case loginCompleted
             case tappedBackButton
+            case successChangeNickname
         }
     }
 
@@ -49,10 +51,13 @@ struct LoginNavigationFeature {
                 }
 
             case .routes(.element(id: _, action: .profileEdit(.delegate(.successChangeNickname)))):
-                return .send(.delegate(.loginCompleted))
+                state.routes.append(.success(SuccessFeature.State(viewState: .first)))
                 
             case let .routes(.element(id: id, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
                 state.routes.pop(to: id)
+                
+            case .routes(.element(id: _, action: .success(.delegate(.tappedConfirmButton)))):
+                return .send(.delegate(.successChangeNickname))
 
             default:
                 break

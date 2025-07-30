@@ -46,6 +46,9 @@ struct RootPathFeature {
             case .login(.delegate(.loginCompleted)):
                 return .send(._sceneChange(.tabBar(TabCoordinator.State())))
                 
+            case .login(.delegate(.successChangeNickname)):
+                return .send(._sceneChange(.tabBar(TabCoordinator.State())))
+                
             case let ._sceneChange(new):
                 state = new
                 

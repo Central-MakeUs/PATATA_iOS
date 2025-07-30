@@ -19,6 +19,10 @@ struct LoginNavigationView: View {
                 switch $0.case {
                 case let .profileEdit(store):
                     ProfileEditView(store: store)
+                    
+                case let .success(store):
+                    SuccessView(store: store)
+                    
                 default:
                     EmptyView()
                 }
