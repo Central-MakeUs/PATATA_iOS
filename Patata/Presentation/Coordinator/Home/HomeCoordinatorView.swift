@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import TCACoordinators
 import ComposableArchitecture
 import PopupView
 
@@ -16,39 +15,33 @@ struct HomeCoordinatorView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            TCARouter(store.scope(state: \.routes, action: \.router)) { screen in
-                switch screen.case {
-                case let .home(homeStore):
-                    PatataMainView(store: homeStore)
-                        .hideTabBar(store.isHideTabBar)
+            NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
+                EmptyView()
+            } destination: { store in
+                switch store.case {
+                case let .home(store):
+                    PatataMainView(store: store)
                     
-                case let .search(searchStore):
-                    SearchView(store: searchStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .search(store):
+                    SearchView(store: store)
                     
-                case let .category(categoryStore):
-                    SpotCategoryView(store: categoryStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .category(store):
+                    SpotCategoryView(store: store)
                     
-                case let .spotDetail(detailStore):
-                    SpotDetailView(store: detailStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .spotDetail(store):
+                    SpotDetailView(store: store)
                     
-                case let .mySpotList(listStore):
-                    MySpotListView(store: listStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .mySpotList(store):
+                    MySpotListView(store: store)
                     
-                case let .spotedit(spotEditStore):
-                    SpotEditorView(store: spotEditStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .spotedit(store):
+                    SpotEditorView(store: store)
                     
-                case let .addSpotMap(addSpotMapStore):
-                    AddSpotMapView(store: addSpotMapStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .addSpotMap(store):
+                    AddSpotMapView(store: store)
                     
-                case let .report(reportStore):
-                    ReportView(store: reportStore)
-                        .hideTabBar(store.isHideTabBar)
+                case let .report(store):
+                    ReportView(store: store)
                 }
             }
             .customAlert(
@@ -93,42 +86,3 @@ struct HomeCoordinatorView: View {
         }
     }
 }
-
-extension HomeScreen.State: Identifiable {
-    var id: ID {
-        switch self {
-        case .home:
-            return ID.home
-        case .search:
-            return ID.search
-        case .category:
-            return ID.category
-        case .spotDetail:
-            return ID.spotDetail
-        case .mySpotList:
-            return ID.mySpotList
-        case .spotedit:
-            return ID.spotedit
-        case .addSpotMap:
-            return ID.addSpotMap
-        case .report:
-            return ID.report
-        }
-    }
-    
-    enum ID: Identifiable {
-        case home
-        case search
-        case category
-        case spotDetail
-        case mySpotList
-        case spotedit
-        case addSpotMap
-        case report
-        
-        var id: ID {
-            return self
-        }
-    }
-}
-
