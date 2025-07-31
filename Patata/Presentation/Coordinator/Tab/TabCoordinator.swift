@@ -13,20 +13,25 @@ struct TabCoordinator {
     
     @ObservableState
     struct State: Equatable {
-        static let initialState = State(tabState: .home, homeTabState: .initialState, mapTabState: .initialState, archiveTabState: .initialState, myPageTabState: .initialState)
+        @Shared(.inMemory("isHidden")) var isHidden: Bool = false
+        
         var tabState: TabCase
         
-        var homeTabState = HomeCoordinator.State.initialState
-        var mapTabState = MapCoordinator.State.initialState
-        var archiveTabState = ArchiveCoordinator.State.initialState
-        var myPageTabState = MyPageCoordinator.State.initialState
+        var home = HomeCoordinator.State()
+        var map = MapCoordinator.State()
+        var archive = ArchiveCoordinator.State()
+        var myPage = MyPageCoordinator.State()
+        
+        init() {
+            tabState = .home
+        }
     }
     
     enum Action {
-        case homeTabAction(HomeCoordinator.Action)
-        case mapTabAction(MapCoordinator.Action)
-        case archiveTabAction(ArchiveCoordinator.Action)
-        case myPageTabAction(MyPageCoordinator.Action)
+        case home(HomeCoordinator.Action)
+        case map(MapCoordinator.Action)
+        case archive(ArchiveCoordinator.Action)
+        case myPage(MyPageCoordinator.Action)
         
         case delegate(Delegate)
         
@@ -40,37 +45,31 @@ struct TabCoordinator {
     }
     
     var body: some ReducerOf<Self> {
-        Scope(state: \.homeTabState, action: \.homeTabAction) {
+        Scope(state: \.home, action: \.home) {
             HomeCoordinator()
         }
         
-        Scope(state: \.mapTabState, action: \.mapTabAction) {
+        Scope(state: \.map, action: \.map) {
             MapCoordinator()
         }
         
-        Scope(state: \.archiveTabState, action: \.archiveTabAction) {
+        Scope(state: \.archive, action: \.archive) {
             ArchiveCoordinator()
         }
         
-        Scope(state: \.myPageTabState, action: \.myPageTabAction) {
+        Scope(state: \.myPage, action: \.myPage) {
             MyPageCoordinator()
         }
         
-        core()
-    }
-}
-
-extension TabCoordinator {
-    private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
             case let .bindingTab(tab):
                 state.tabState = tab
                 
-            case .myPageTabAction(.delegate(.tappedLogout)):
+            case .myPage(.delegate(.tappedLogout)):
                 return .send(.delegate(.tappedLogout))
                 
-            case .myPageTabAction(.delegate(.successRevoke)):
+            case .myPage(.delegate(.successRevoke)):
                 return .send(.delegate(.successRevoke))
                 
             default:
