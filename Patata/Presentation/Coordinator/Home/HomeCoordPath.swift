@@ -6,3 +6,16 @@
 //
 
 import Foundation
+import ComposableArchitecture
+
+@Reducer(state: .equatable)
+enum HomeCoordPath {
+    case home(PatataMainFeature)
+    case search(SearchFeature)
+    case category(SpotCategoryFeature)
+    case spotDetail(SpotDetailFeature)
+    case mySpotList(MySpotListFeature)
+    case spotedit(SpotEditorFeature)
+    case addSpotMap(AddSpotMapFeature)
+    case report(ReportFeature)
+}
