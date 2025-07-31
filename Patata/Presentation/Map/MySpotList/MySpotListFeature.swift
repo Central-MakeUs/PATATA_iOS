@@ -45,6 +45,7 @@ struct MySpotListFeature {
         case networkType(NetworkType)
         case dataTransType(DataTransType)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         // bindingAction
         case bindingArchive(Bool)
@@ -53,12 +54,15 @@ struct MySpotListFeature {
             case tappedBackButton(ViewState)
             case tappedSpot(Int)
             case tappedSearch(ViewState)
-            case delete
         }
     }
     
     enum ViewCycle {
         case onAppear
+    }
+    
+    enum ParentsAction {
+        case delete
     }
     
     enum NetworkType {
@@ -187,7 +191,7 @@ extension MySpotListFeature {
                     }
                 }
                 
-            case .delegate(.delete):
+            case .parentsAction(.delete):
                 let user = state.userCoord
                 let category = CategoryCase(rawValue: state.selectedIndex) ?? .all
                 

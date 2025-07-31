@@ -49,6 +49,7 @@ struct SearchFeature {
         case networkType(NetworkType)
         case dataTransType(DataTransType)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         // bindingAction
         case bindingSearchText(String)
@@ -58,9 +59,12 @@ struct SearchFeature {
             case tappedBackButton(BeforeViewState)
             case successSearch(String, BeforeViewState)
             case tappedSpotDetail(Int)
-            case deletePop
             case detailBack(Bool)
         }
+    }
+    
+    enum ParentsAction {
+        case deletePop
     }
     
     enum ViewCycle {
@@ -209,7 +213,7 @@ extension SearchFeature {
             case .viewEvent(.openFilter):
                 state.filterIsvalid = true
                 
-            case .delegate(.deletePop):
+            case .parentsAction(.deletePop):
                 state.scrollToTop = true
                 state.currentPage = 0
                 
