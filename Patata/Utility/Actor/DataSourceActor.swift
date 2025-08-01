@@ -53,7 +53,7 @@ final actor DataSourceActor {
     func fetch() async -> Coordinate {
         guard let realm else {
             print("firstFail")
-            return Coordinate(latitude: 126.9784147, longitude: 37.5666885)
+            return Coordinate(latitude: 37.5666885, longitude: 126.9784147)
         }
         
         let dto = realm.objects(CoordinateDTO.self)
@@ -63,7 +63,7 @@ final actor DataSourceActor {
             return coord.toDomain()
         } else {
             print("second fail")
-            return Coordinate(latitude: 126.9784147, longitude: 37.5666885)
+            return Coordinate(latitude: 37.5666885, longitude: 126.9784147)
         }
     }
 }
