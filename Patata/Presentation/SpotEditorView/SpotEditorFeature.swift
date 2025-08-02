@@ -66,13 +66,13 @@ struct SpotEditorFeature {
         case errorHandle(ErrorHandleType)
         case dataTransType(DataTransType)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         enum Delegate {
             case tappedBackButton
             case successSpotAdd
             case tappedXButton
             case tappedLocation(Coordinate, ViewState, SpotDetailEntity, [Data])
-            case changeAddress(Coordinate, String)
             case successSpotEdit(BeforeViewState)
         }
         
@@ -132,6 +132,10 @@ struct SpotEditorFeature {
     enum ErrorHandleType {
         case imageResize(Error)
         case networkFail(Error)
+    }
+    
+    enum ParentsAction {
+        case changeAddress(Coordinate, String)
     }
     
     enum DataTransType {
@@ -225,7 +229,7 @@ extension SpotEditorFeature {
                 state.isDragging = true
                 state.draggingIndex = index
                 
-            case let .delegate(.changeAddress(spotCoord, address)):
+            case let .parentsAction(.changeAddress(spotCoord, address)):
                 state.isFirst = false
                 state.spotLocation = spotCoord
                 state.spotAddress = address
