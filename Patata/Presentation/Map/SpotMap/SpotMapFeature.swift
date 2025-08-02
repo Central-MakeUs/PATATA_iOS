@@ -38,6 +38,7 @@ struct SpotMapFeature {
         case networkType(NetworkType)
         case mapAction(MapAction)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         case dataTransType(DataTransType)
         
         // bindingAction
@@ -52,12 +53,8 @@ struct SpotMapFeature {
             case tappedSpotAddButton(Coordinate)
             case tappedSearch
             case tappedSpotDetail(Int)
-            case deleteSpot
             case succesReport
-            case successEdit
-            case detailBack
             case moveCamera
-            case successAddSpot
             case noSpotData(String)
         }
     }
@@ -95,6 +92,13 @@ struct SpotMapFeature {
         case userLocation(Coordinate)
         case fetchMarkers([MapSpotEntity], Bool)
         case archiveState(ArchiveEntity)
+    }
+    
+    enum ParentsAction {
+        case successEdit
+        case successAddSpot
+        case detailBack
+        case deleteSpot
     }
     
     enum MapAction {
@@ -217,7 +221,7 @@ extension SpotMapFeature {
                 state.isPresented = true
                 return .send(.delegate(.tappedMarker))
                 
-            case .delegate(.deleteSpot):
+            case .parentsAction(.deleteSpot):
                 state.isPresented = false
                 
                 let userLocation = state.userLocation
@@ -231,13 +235,13 @@ extension SpotMapFeature {
             case .delegate(.succesReport):
                 state.isPresented = false
                 
-            case .delegate(.successEdit):
+            case .parentsAction(.successEdit):
                 state.isPresented = false
                 
-            case .delegate(.detailBack):
+            case .parentsAction(.detailBack):
                 state.isFirst = false
                 
-            case .delegate(.successAddSpot):
+            case .parentsAction(.successAddSpot):
                 state.isFirst = false
                 
                 let userLocation = state.userLocation
