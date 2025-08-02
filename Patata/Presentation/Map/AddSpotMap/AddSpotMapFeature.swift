@@ -41,14 +41,13 @@ struct AddSpotMapFeature {
         case dataTransType(DataTransType)
         case mapAction(MapAction)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         case bindingIsPresent(Bool)
         
         enum Delegate {
             case tappedBackButton(ViewState)
             case tappedAddConfirmButton(Coordinate, String, ViewState, SpotDetailEntity, datas: [Data])
-            case popEditorView(SpotDetailEntity, [Data])
-            case tappedEditorBackButton
         }
     }
     
@@ -71,6 +70,11 @@ struct AddSpotMapFeature {
         case checkValidSpot([MapSpotEntity])
         case fetchRealm
         case userLocation(Coordinate)
+    }
+    
+    enum ParentsAction {
+        case tappedEditorBackButton
+        case popEditorView(SpotDetailEntity, [Data])
     }
     
     enum MapAction {
@@ -157,11 +161,11 @@ extension AddSpotMapFeature {
                 state.mapManager.clearCurrentMarkers()
                 state.addValid = true
                 
-            case let .delegate(.popEditorView(spotDetailEntity, imageData)):
+            case let .parentsAction(.popEditorView(spotDetailEntity, imageData)):
                 state.spotDetailEntity = spotDetailEntity
                 state.datas = imageData
                 
-            case .delegate(.tappedEditorBackButton):
+            case .parentsAction(.tappedEditorBackButton):
                 state.spotDetailEntity = SpotDetailEntity()
                 state.datas = []
                 
