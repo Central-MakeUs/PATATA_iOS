@@ -42,6 +42,7 @@ struct SearchMapFeature {
         case dataTransType(DataTransType)
         case mapAction(MapAction)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         // bindingAction
         case bindingIsPresented(Bool)
@@ -55,11 +56,8 @@ struct SearchMapFeature {
             case tappedSpotAddButton(Coordinate)
             case tappedBackButton
             case tappedSearch
-            case mySpotListSearch(String)
             case tappedSpotDetail(Int)
-            case deleteSpot
             case successEdit
-            case detailBack
             case noDataSpot(String)
         }
     }
@@ -94,6 +92,12 @@ struct SearchMapFeature {
         case searchSpot(spotName: String, userLocation: Coordinate, mbrLocation: MBRCoordinates? = nil, reload: Bool = false)
         case otherSpot(mbrLocation: MBRCoordinates, userLocation: Coordinate, category: CategoryCase)
         case patchArchiveState
+    }
+    
+    enum ParentsAction {
+        case mySpotListSearch(String)
+        case detailBack
+        case deleteSpot
     }
     
     enum MapAction {
@@ -223,7 +227,7 @@ extension SearchMapFeature {
                     state.isPresented = false
                 }
                 
-            case .delegate(.deleteSpot):
+            case .parentsAction(.deleteSpot):
                 state.isPresented = false
                 
                 state.mapManager.clearCurrentMarkers()
@@ -250,7 +254,7 @@ extension SearchMapFeature {
                     await send(.networkType(.searchSpot(spotName: search, userLocation: user, mbrLocation: mbr, reload: false)))
                 }
                 
-            case let .delegate(.mySpotListSearch(searchText)):
+            case let .parentsAction(.mySpotListSearch(searchText)):
                 state.searchSpotItems = []
                 state.searchText = searchText
                 state.mapManager.clearCurrentMarkers()
@@ -261,7 +265,7 @@ extension SearchMapFeature {
                     await send(.networkType(.searchSpot(spotName: searchText, userLocation: userLocation)))
                 }
                 
-            case .delegate(.detailBack):
+            case .parentsAction(.detailBack):
                 state.isFirst = false
                 state.isOtherFirst = false
                 
