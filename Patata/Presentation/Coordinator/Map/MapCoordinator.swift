@@ -7,7 +7,6 @@
 
 import Foundation
 import ComposableArchitecture
-@preconcurrency import TCACoordinators
 
 // 바텀 시트가 올라올때 이지역에서 탐색 버튼이 필요없을거 같다 어차피 지도랑 상호작용(유저가 좌표를 이동해서 지역 탐색을 하지 못할거 같다)을 못해서 필요하지가 않다
 // 그리고 내 현재 위치의 버튼도 필요가 없을거 같다
@@ -15,34 +14,28 @@ import ComposableArchitecture
 // 서치후 화면을 보여줄때 탭을 숨기는게 맞다고 본다
 // 서치후 화면에서 서치 추가를 끝낸후에는 부모 뷰로 갈껀지? 아니면 서치 후 나오는 화면으로 갈껀지 그럼 다시 돌아왔을때 처음 검색어에 대한 바텀시트를 계속 띄운 상태로 다시 돌아올건지
 
-@Reducer(state: .equatable)
-enum MapScreen {
-    case spotMap(SpotMapFeature)
-    case mySpotList(MySpotListFeature)
-    case spotEditorView(SpotEditorFeature)
-    case search(SearchFeature)
-    case searchMap(SearchMapFeature)
-    case addSpotMap(AddSpotMapFeature)
-    case successView(SuccessFeature)
-    case spotDetail(SpotDetailFeature)
-    case report(ReportFeature)
-}
-
 @Reducer
 struct MapCoordinator {
     @ObservableState
     struct State: Equatable, Sendable {
-        static let initialState = State(routes: [.root(.spotMap(SpotMapFeature.State()), embedInNavigationView: true)])
-        var routes: IdentifiedArrayOf<Route<MapScreen.State>>
+        @Shared var isHidden: Bool
         
-        var isHideTabBar: Bool = false
+        var routes: StackState<MapCoordPath.State> = .init()
+        var root: SpotMapFeature.State = .init()
+        var screenIds: [ScreenType: StackElementID] = [:]
+        
         var popupIsPresent: Bool = false
         var errorMSG: String = ""
         var alertIsPresent: Bool = false
+        
+        init(isHidden: @autoclosure () -> Bool = false) {
+            self._isHidden = Shared(wrappedValue: isHidden(), .inMemory("isHidden"))
+        }
     }
     
     enum Action {
-        case router(IdentifiedRouterActionOf<MapScreen>)
+        case router(StackActionOf<MapCoordPath>)
+        case root(SpotMapFeature.Action)
         
         case viewEvent(ViewEventType)
         
@@ -56,6 +49,10 @@ struct MapCoordinator {
     }
     
     var body: some ReducerOf<Self> {
+        Scope(state: \.root, action: \.root) {
+            SpotMapFeature()
+        }
+        
         core()
     }
 }
@@ -64,241 +61,282 @@ extension MapCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSideButton(mbrLocation))))):
-                state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation, isSearch: false, searchText: "")))
+            case let .root(.delegate(.tappedSideButton(mbrLocation))):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation, isSearch: false, searchText: "")))
+                state.screenIds[.mySpotList] = state.routes.ids.last
                 
-            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotAddButton(coord))))):
-                state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
+            case let .root(.delegate(.tappedSpotAddButton(coord))):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
+                state.screenIds[.addSpotMap] = state.routes.ids.last
                 
-            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedMarker)))):
-                state.isHideTabBar = true
+            case .root(.delegate(.tappedMarker)):
+                state.$isHidden.withLock { $0 = true }
                 
-            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.bottomSheetDismiss)))):
-                state.isHideTabBar = false
+            case .root(.delegate(.bottomSheetDismiss)):
+                state.$isHidden.withLock { $0 = false }
                 
-            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSearch)))):
-                state.isHideTabBar = true
-                state.routes.push(.search(SearchFeature.State(beforeViewState: .map)))
+            case .root(.delegate(.tappedSearch)):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.search(SearchFeature.State(beforeViewState: .map)))
+                state.screenIds[.search] = state.routes.ids.last
                 
-            case let .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
+            case let .root(.delegate(.tappedSpotDetail(spotId))):
+                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
+                state.screenIds[.spotDetail] = state.routes.ids.last
                 
-            case .router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.moveCamera)))):
-                state.isHideTabBar = false
+            case .root(.delegate(.moveCamera)):
+                state.$isHidden.withLock { $0 = false }
                 
-            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedBackButton(viewState))))):
+            case let .router(.element(id: _, action: .mySpotList(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .map {
-                    state.isHideTabBar = false
+                    state.$isHidden.withLock { $0 = false }
                 } else if viewState == .mapSearch {
-                    state.isHideTabBar = true
-                    state.routes.pop()
+                    state.$isHidden.withLock { $0 = true }
+                    _ = state.routes.popLast()
                     
-                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
+                    if let id = state.screenIds[.searchMap] {
+                        return .send(.router(.element(id: id, action: .searchMap(.parentsAction(.detailBack)))))
+                    }
                 }
                 
-                state.routes.pop()
+                _ = state.routes.popLast()
                 
-            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSearch(viewState))))):
+            case let .router(.element(id: _, action: .mySpotList(.delegate(.tappedSearch(viewState))))):
                 if viewState == .mapSearch {
-                    state.routes.remove(id: .search)
-                    state.routes.push(.search(SearchFeature.State(beforeViewState: .searchMap)))
+                    
+                    if let id = state.screenIds[.search] {
+                        state.routes.pop(from: id)
+                    }
+                    
+                    state.routes.append(.search(SearchFeature.State(beforeViewState: .searchMap)))
                 } else {
-                    state.routes.push(.search(SearchFeature.State(beforeViewState: .mySpotList)))
+                    state.routes.append(.search(SearchFeature.State(beforeViewState: .mySpotList)))
                 }
                 
-                
-            case let .router(.routeAction(id: .search, action: .search(.delegate(.successSearch(searchText, viewState))))):
-                state.isHideTabBar = true
+            case let .router(.element(id: _, action: .search(.delegate(.successSearch(searchText, viewState))))):
+                state.$isHidden.withLock { $0 = true }
                 
                 if viewState == .searchMap {
-                    state.routes.popTo(id: .searchMap)
                     
-                    return .run { send in
-                        await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.mySpotListSearch(searchText))))))
+                    if let id = state.screenIds[.searchMap] {
+                        state.routes.pop(to: id)
+                        
+                        return .run { send in
+                            await send(.router(.element(id: id, action: .searchMap(.parentsAction(.mySpotListSearch(searchText))))))
+                        }
                     }
                 } else if viewState == .mySpotList {
-                    state.routes.remove(id: .mySpotList)
-                    state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
+                    if let id = state.screenIds[.mySpotList] {
+                        state.routes.pop(from: id)
+                    }
+                    state.routes.append(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 } else {
-                    state.routes.push(.searchMap(SearchMapFeature.State(searchText: searchText)))
+                    state.routes.append(.searchMap(SearchMapFeature.State(searchText: searchText)))
                 }
                 
-            case let .router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
+            case let .router(.element(id: _, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
+                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 
-            case let .router(.routeAction(id: .search, action: .search(.delegate(.tappedBackButton(viewState))))):
-                
+            case let .router(.element(id: _, action: .search(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .mySpotList {
-                    state.isHideTabBar = true
+                    state.$isHidden.withLock { $0 = true }
                 } else {
-                    state.isHideTabBar = false
+                    state.$isHidden.withLock { $0 = false }
                 }
                 
-                state.routes.pop()
+                _ = state.routes.popLast()
                 
-            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedBackButton)))):
-                state.isHideTabBar = true
-                state.routes.pop()
+            case .router(.element(id: _, action: .spotEditorView(.delegate(.tappedBackButton)))):
+                state.$isHidden.withLock { $0 = true }
+                _ = state.routes.popLast()
                 
-                return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedEditorBackButton)))))
+                if let id = state.screenIds[.addSpotMap] {
+                    return .send(.router(.element(id: id, action: .addSpotMap(.parentsAction(.tappedEditorBackButton)))))
+                }
                 
-            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedXButton)))):
-                state.isHideTabBar = false
-                state.routes.popToRoot()
+            case .router(.element(id: _, action: .spotEditorView(.delegate(.tappedXButton)))):
+                state.$isHidden.withLock { $0 = false }
                 
-            case .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotAdd)))):
-                state.isHideTabBar = true
-                state.routes.push(.successView(SuccessFeature.State(viewState: .spot)))
+                if let id = state.screenIds[.mySpotList] {
+                    state.routes.pop(from: id)
+                }
                 
-            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState, spotDetail, imageData))))):
+            case .router(.element(id: _, action: .spotEditorView(.delegate(.successSpotAdd)))):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.successView(SuccessFeature.State(viewState: .spot)))
+                
+            case let .router(.element(id: _, action: .spotEditorView(.delegate(.tappedLocation(coord, viewState, spotDetail, imageData))))):
                 if viewState == .edit {
-                    state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
+                    state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
                 } else {
-                    state.routes.pop()
-                    return .send(.router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.popEditorView(spotDetail, imageData))))))
+                    _ = state.routes.popLast()
+                    
+                    if let id = state.screenIds[.addSpotMap] {
+                        return .send(.router(.element(id: id, action: .addSpotMap(.parentsAction(.popEditorView(spotDetail, imageData))))))
+                    }
                 }
                 
-            case let .router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.successSpotEdit(viewState))))):
+            case let .router(.element(id: _, action: .spotEditorView(.delegate(.successSpotEdit(viewState))))):
                 state.errorMSG = "게시물이 수정되었습니다."
-                state.routes.pop()
+                _ = state.routes.popLast()
                 state.popupIsPresent = true
                 
                 if viewState == .searchMap {
-                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.successEdit)))))
+                    if let id = state.screenIds[.searchMap] {
+                        return .send(.router(.element(id: id, action: .searchMap(.delegate(.successEdit)))))
+                    }
                 } else {
-                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.successEdit)))))
+                    return .send(.root(.parentsAction(.successEdit)))
                 }
                 
-            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedBackButton)))):
-                state.isHideTabBar = false
-                state.routes.popToRoot()
+            case .router(.element(id: _, action: .searchMap(.delegate(.tappedBackButton)))):
+                state.$isHidden.withLock { $0 = false }
                 
-            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSearch)))):
-                state.isHideTabBar = true
-                state.routes.pop()
+                if let id = state.screenIds[.mySpotList] {
+                    state.routes.pop(from: id)
+                }
                 
-            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.bottomSheetDismiss)))):
-                state.isHideTabBar = true
+            case .router(.element(id: _, action: .searchMap(.delegate(.tappedSearch)))):
+                state.$isHidden.withLock { $0 = true }
+                _ = state.routes.popLast()
                 
-            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSideButton(mbrLocation, searchText, isSearch))))):
-                state.isHideTabBar = true
-                state.routes.push(.mySpotList(MySpotListFeature.State(viewState: .mapSearch, mbrLocation: mbrLocation, isSearch: isSearch, searchText: searchText)))
+            case .router(.element(id: _, action: .searchMap(.delegate(.bottomSheetDismiss)))):
+                state.$isHidden.withLock { $0 = true }
                 
-            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
-                state.isHideTabBar = true
-                state.routes.push(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
+            case let .router(.element(id: _, action: .searchMap(.delegate(.tappedSideButton(mbrLocation, searchText, isSearch))))):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.mySpotList(MySpotListFeature.State(viewState: .mapSearch, mbrLocation: mbrLocation, isSearch: isSearch, searchText: searchText)))
                 
-            case .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedMarker)))):
-                state.isHideTabBar = true
+            case let .router(.element(id: _, action: .searchMap(.delegate(.tappedSpotAddButton(coord))))):
+                state.$isHidden.withLock { $0 = true }
+                state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
                 
-            case let .router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.push(.spotDetail(SpotDetailFeature.State(viewState: .mapSearch, spotId: spotId)))
+            case .router(.element(id: _, action: .searchMap(.delegate(.tappedMarker)))):
+                state.$isHidden.withLock { $0 = true }
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedBackButton(viewState))))):
+            case let .router(.element(id: _, action: .searchMap(.delegate(.tappedSpotDetail(spotId))))):
+                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .mapSearch, spotId: spotId)))
+                
+            case let .router(.element(id: _, action: .addSpotMap(.delegate(.tappedBackButton(viewState))))):
                 if viewState == .map {
-                    state.isHideTabBar = false
+                    state.$isHidden.withLock { $0 = false }
                 } else {
-                    state.isHideTabBar = true
+                    state.$isHidden.withLock { $0 = true }
                 }
                 
-                state.routes.pop()
+                _ = state.routes.popLast()
                 
-            case let .router(.routeAction(id: .addSpotMap, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState, spotDetail, imageData))))):
+            case let .router(.element(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton(spotCoord, spotAddress, viewState, spotDetail, datas: imageData))))):
                 if viewState == .map || viewState == .searchMap {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: spotDetail, spotLocation: spotCoord, spotAddress: spotAddress, imageDatas: imageData, beforeViewState: .map)))
+                    state.routes.append(.spotEditorView(SpotEditorFeature.State(viewState: .add, spotDetail: spotDetail, spotLocation: spotCoord, spotAddress: spotAddress, imageDatas: imageData, beforeViewState: .map)))
                 } else {
-                    state.routes.pop()
-                    return .run { send in
-                        await send(.router(.routeAction(id: .spotEditorView, action: .spotEditorView(.delegate(.changeAddress(spotCoord, spotAddress))))))
+                    _ = state.routes.popLast()
+                    
+                    if let id = state.screenIds[.spotEditorView] {
+                        return .run { send in
+                            await send(.router(.element(id: id, action: .spotEditorView(.parentsAction(.changeAddress(spotCoord, spotAddress))))))
+                        }
                     }
                 }
                 
-            case .router(.routeAction(id: .successView, action: .successView(.delegate(.tappedConfirmButton)))):
-                state.isHideTabBar = false
-                state.routes.popToRoot()
+            case .router(.element(id: _, action: .successView(.delegate(.tappedConfirmButton)))):
+                state.$isHidden.withLock { $0 = false }
                 
-                return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.successAddSpot)))))
+                if let id = state.screenIds[.mySpotList] {
+                    state.routes.pop(from: id)
+                }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.tappedNavBackButton(_, viewState))))):
-                state.isHideTabBar = true
-                state.routes.pop()
+                return .send(.root(.parentsAction(.successAddSpot)))
+                
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.tappedNavBackButton(_, viewState))))):
+                state.$isHidden.withLock { $0 = true }
+                _ = state.routes.popLast()
                 
                 if viewState == .mapSearch {
-                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.detailBack)))))
+                    if let id = state.screenIds[.searchMap] {
+                        return .send(.router(.element(id: id, action: .searchMap(.parentsAction(.detailBack)))))
+                    }
                 } else if viewState == .map {
-                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.detailBack)))))
+                    return .send(.root(.parentsAction(.detailBack)))
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, viewState))))):
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, viewState))))):
                 if viewState == .map {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .map)))
+                    state.routes.append(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .map)))
                 } else if viewState == .mapSearch {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .searchMap)))
+                    state.routes.append(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .searchMap)))
                 } else {
-                    state.routes.push(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
+                    state.routes.append(.spotEditorView(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: Coordinate(latitude: 0, longitude: 0), spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
                 }
                 
-                
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.report(type, id))))):
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.report(type, id))))):
                 if type == "Post" {
-                    state.routes.push(.report(ReportFeature.State(viewState: .post, id: id)))
+                    state.routes.append(.report(ReportFeature.State(viewState: .post, id: id)))
                 } else {
-                    state.routes.push(.report(ReportFeature.State(viewState: .user, id: id)))
+                    state.routes.append(.report(ReportFeature.State(viewState: .user, id: id)))
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.reviewReport(id))))):
-                state.routes.push(.report(ReportFeature.State(viewState: .review, id: id)))
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.reviewReport(id))))):
+                state.routes.append(.report(ReportFeature.State(viewState: .review, id: id)))
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.delete(viewState))))):
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.delete(viewState))))):
                 if viewState == .map {
-                    state.isHideTabBar = false
+                    state.$isHidden.withLock { $0 = false }
                 } else {
-                    state.isHideTabBar = true
+                    state.$isHidden.withLock { $0 = true }
                 }
                 
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
                 
-                state.routes.pop()
+                _ = state.routes.popLast()
                 
                 if viewState == .map {
                     return .run { send in
-                        await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
+                        await send(.root(.parentsAction(.deleteSpot)))
                     }
                 } else if viewState == .mapSearch {
-                    return .run { send in
-                        await send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.deleteSpot)))))
+                    if let id = state.screenIds[.searchMap] {
+                        return .run { send in
+                            await send(.router(.element(id: id, action: .searchMap(.parentsAction(.deleteSpot)))))
+                        }
                     }
                 } else {
-                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
+                    if let id = state.screenIds[.mySpotList] {
+                        return .send(.router(.element(id: id, action: .mySpotList(.parentsAction(.delete)))))
+                    }
                 }
                 
-            case let .router(.routeAction(id: .spotDetail, action: .spotDetail(.delegate(.deleteSpot(msg, viewState))))):
-                state.routes.pop()
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.deleteSpot(msg, viewState))))):
+                _ = state.routes.popLast()
                 
                 if viewState == .map {
-                    return .send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.noSpotData(msg))))))
+                    return .send(.root(.parentsAction(.noSpotData(msg))))
                 } else if viewState == .mapSearch {
-                    return .send(.router(.routeAction(id: .searchMap, action: .searchMap(.delegate(.noDataSpot(msg))))))
+                    if let id = state.screenIds[.searchMap] {
+                        return .send(.router(.element(id: id, action: .searchMap(.parentsAction(.noDataSpot(msg))))))
+                    }
                 } else if viewState == .other {
                     state.errorMSG = msg
                     state.popupIsPresent = true
                     
-                    return .send(.router(.routeAction(id: .mySpotList, action: .mySpotList(.delegate(.delete)))))
+                    if let id = state.screenIds[.mySpotList] {
+                        return .send(.router(.element(id: id, action: .mySpotList(.parentsAction(.delete)))))
+                    }
                 }
                 
-            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedBackButton)))):
-                state.routes.pop()
+            case .router(.element(id: _, action: .report(.delegate(.tappedBackButton)))):
+                _ = state.routes.popLast()
                 
-            case .router(.routeAction(id: .report, action: .report(.delegate(.tappedConfirmButton)))):
-                state.routes.popToRoot()
+            case .router(.element(id: _, action: .report(.delegate(.tappedConfirmButton)))):
+                _ = state.routes.popLast()
                 state.alertIsPresent = true
-                state.isHideTabBar = false
+                state.$isHidden.withLock { $0 = false }
                 
                 return .run { send in
-                    await send(.router(.routeAction(id: .spotMap, action: .spotMap(.delegate(.deleteSpot)))))
+                    await send(.root(.parentsAction(.deleteSpot)))
                 }
                 
             case .viewEvent(.dismissPopup):
@@ -318,6 +356,59 @@ extension MapCoordinator {
             }
             return .none
         }
-        .forEachRoute(\.routes, action: \.router)
+        .forEach(\.routes, action: \.router)
+    }
+}
+
+extension MapCoordinator.State {
+    enum ScreenType {
+        case mySpotList
+        case spotEditorView
+        case search
+        case searchMap
+        case addSpotMap
+        case successView
+        case spotDetail
+        case report
+    }
+
+    var mySpotListId: StackElementID? {
+        get { screenIds[.mySpotList] }
+        set { screenIds[.mySpotList] = newValue }
+    }
+
+    var spotEditorViewId: StackElementID? {
+        get { screenIds[.spotEditorView] }
+        set { screenIds[.spotEditorView] = newValue }
+    }
+
+    var searchId: StackElementID? {
+        get { screenIds[.search] }
+        set { screenIds[.search] = newValue }
+    }
+
+    var searchMapId: StackElementID? {
+        get { screenIds[.searchMap] }
+        set { screenIds[.searchMap] = newValue }
+    }
+
+    var addSpotMapId: StackElementID? {
+        get { screenIds[.addSpotMap] }
+        set { screenIds[.addSpotMap] = newValue }
+    }
+
+    var successViewId: StackElementID? {
+        get { screenIds[.successView] }
+        set { screenIds[.successView] = newValue }
+    }
+
+    var spotDetailId: StackElementID? {
+        get { screenIds[.spotDetail] }
+        set { screenIds[.spotDetail] = newValue }
+    }
+
+    var reportId: StackElementID? {
+        get { screenIds[.report] }
+        set { screenIds[.report] = newValue }
     }
 }
