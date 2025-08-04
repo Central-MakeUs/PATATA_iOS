@@ -6,3 +6,13 @@
 //
 
 import Foundation
+import ComposableArchitecture
+
+@Reducer(state: .equatable)
+enum ArchiveCoorPath {
+    case spotDetail(SpotDetailFeature)
+    case spotedit(SpotEditorFeature)
+    case addSpotMap(AddSpotMapFeature)
+    case report(ReportFeature)
+    case category(SpotCategoryFeature)
+}
