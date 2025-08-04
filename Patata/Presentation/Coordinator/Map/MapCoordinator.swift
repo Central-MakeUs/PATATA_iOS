@@ -158,10 +158,7 @@ extension MapCoordinator {
                 
             case .router(.element(id: _, action: .spotEditorView(.delegate(.tappedXButton)))):
                 state.$isHidden.withLock { $0 = false }
-                
-                if let id = state.screenIds[.mySpotList] {
-                    state.routes.pop(from: id)
-                }
+                state.routes.removeAll()
                 
             case .router(.element(id: _, action: .spotEditorView(.delegate(.successSpotAdd)))):
                 state.$isHidden.withLock { $0 = true }
@@ -193,10 +190,7 @@ extension MapCoordinator {
                 
             case .router(.element(id: _, action: .searchMap(.delegate(.tappedBackButton)))):
                 state.$isHidden.withLock { $0 = false }
-                
-                if let id = state.screenIds[.mySpotList] {
-                    state.routes.pop(from: id)
-                }
+                state.routes.removeAll()
                 
             case .router(.element(id: _, action: .searchMap(.delegate(.tappedSearch)))):
                 state.$isHidden.withLock { $0 = true }
@@ -243,10 +237,7 @@ extension MapCoordinator {
                 
             case .router(.element(id: _, action: .successView(.delegate(.tappedConfirmButton)))):
                 state.$isHidden.withLock { $0 = false }
-                
-                if let id = state.screenIds[.mySpotList] {
-                    state.routes.pop(from: id)
-                }
+                state.routes.removeAll()
                 
                 return .send(.root(.parentsAction(.successAddSpot)))
                 
