@@ -58,7 +58,6 @@ struct SearchMapFeature {
             case tappedSearch
             case tappedSpotDetail(Int)
             case successEdit
-            case noDataSpot(String)
         }
     }
     
@@ -98,6 +97,7 @@ struct SearchMapFeature {
         case mySpotListSearch(String)
         case detailBack
         case deleteSpot
+        case noDataSpot(String)
     }
     
     enum MapAction {
@@ -242,7 +242,7 @@ extension SearchMapFeature {
             case .delegate(.successEdit):
                 state.isPresented = false
                 
-            case let .delegate(.noDataSpot(msg)):
+            case let .parentsAction(.noDataSpot(msg)):
                 state.errorMSG = msg
                 state.errorIsPresented = true
                 
