@@ -71,7 +71,7 @@ struct HomeCoordinator {
                 state.routes.append(.category(SpotCategoryFeature.State(initialIndex: category.rawValue)))
                 state.screenIds[.category] = state.routes.ids.last
                 
-            case let .router(.element(id: id, action: .search(.delegate(.tappedBackButton(_))))):
+            case .router(.element(id: _, action: .search(.delegate(.tappedBackButton(_))))):
                 state.$isHidden.withLock { $0 = false }
                 _ = state.routes.popLast()
                 
@@ -87,7 +87,7 @@ struct HomeCoordinator {
                 state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 state.screenIds[.spotDetail] = state.routes.ids.last
                 
-            case let .router(.element(id: id, action: .spotDetail(.delegate(.delete(viewState))))):
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.delete(viewState))))):
                 _ = state.routes.popLast()
                 state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
                 state.popupIsPresent = true
@@ -129,7 +129,7 @@ struct HomeCoordinator {
                     }
                 }
                 
-            case let .router(.element(id: id, action: .spotDetail(.delegate(.tappedNavBackButton(archive, viewState))))):
+            case let .router(.element(id: _, action: .spotDetail(.delegate(.tappedNavBackButton(archive, viewState))))):
                 _ = state.routes.popLast()
                 
                 if viewState == .home {
@@ -159,7 +159,7 @@ struct HomeCoordinator {
                 state.routes.append(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
                 state.screenIds[.spotedit] = state.routes.ids.last
                 
-            case let .router(.element(id: id, action: .mySpotList(.delegate(.tappedBackButton(_))))):
+            case .router(.element(id: _, action: .mySpotList(.delegate(.tappedBackButton(_))))):
                 _ = state.routes.popLast()
                 state.$isHidden.withLock { $0 = false }
                 
@@ -167,7 +167,7 @@ struct HomeCoordinator {
                 state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
                 state.screenIds[.spotDetail] = state.routes.ids.last
                 
-            case let .router(.element(id: id, action: .spotedit(.delegate(.tappedBackButton)))):
+            case .router(.element(id: _, action: .spotedit(.delegate(.tappedBackButton)))):
                 _ = state.routes.popLast()
                 state.$isHidden.withLock { $0 = true }
                 
@@ -191,7 +191,7 @@ struct HomeCoordinator {
                 
                 if let spotEditId = state.screenIds[.spotedit] {
                     return .run { send in
-                        await send(.router(.element(id: spotEditId, action: .spotedit(.delegate(.changeAddress(coord, spotAddress))))))
+                        await send(.router(.element(id: spotEditId, action: .spotedit(.parentsAction(.changeAddress(coord, spotAddress))))))
                     }
                 }
                 
