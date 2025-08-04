@@ -7,7 +7,6 @@
 
 import SwiftUI
 import ComposableArchitecture
-import TCACoordinators
 import PopupView
 
 struct MyPageCoordinatorView: View {
@@ -16,44 +15,33 @@ struct MyPageCoordinatorView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            TCARouter(store.scope(state: \.routes, action: \.router)) { screen in
-                switch screen.case {
-                case let .myPage(myPageStore):
-                    MyPageView(store: myPageStore)
-                        .hideTabBar(store.isHideTabBar)
-                    
+            NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
+                MyPageView(store: store.scope(state: \.root, action: \.root))
+            } destination: { store in
+                switch store.case {
                 case let .setting(settingStore):
                     SettingView(store: settingStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .deleteID(deleteIDStore):
                     DeleteIDView(store: deleteIDStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .profileEdit(profileStore):
                     ProfileEditView(store: profileStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .success(successStore):
                     SuccessView(store: successStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .spotDetail(spotDetailStore):
                     SpotDetailView(store: spotDetailStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .spotedit(spotEditStore):
                     SpotEditorView(store: spotEditStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .addSpotMap(addSpotMapStore):
                     AddSpotMapView(store: addSpotMapStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .openSource(openSource):
                     OpenSourceView(store: openSource)
-                        .hideTabBar(store.isHideTabBar)
-                    
                 }
             }
             .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
@@ -90,45 +78,3 @@ struct MyPageCoordinatorView: View {
         }
     }
 }
-
-extension MyPageScreen.State: Identifiable {
-    var id: ID {
-        switch self {
-        case .myPage:
-            return ID.myPage
-        case .setting:
-            return ID.setting
-        case .deleteID:
-            return ID.deleteID
-        case .profileEdit:
-            return ID.profileEdit
-        case .success:
-            return ID.success
-        case .spotDetail:
-            return ID.spotDetail
-        case .spotedit:
-            return ID.spotedit
-        case .addSpotMap:
-            return ID.addSpotMap
-        case .openSource:
-            return ID.openSource
-        }
-    }
-    
-    enum ID: Identifiable {
-        case myPage
-        case setting
-        case deleteID
-        case profileEdit
-        case success
-        case spotDetail
-        case spotedit
-        case addSpotMap
-        case openSource
-        
-        var id: ID {
-            return self
-        }
-    }
-}
-
