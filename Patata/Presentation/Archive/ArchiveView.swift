@@ -24,6 +24,7 @@ struct ArchiveView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .hideNav()
                 .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
                     HStack {
                         Spacer()
