@@ -36,8 +36,10 @@ struct RootPathFeature {
             case let .splash(.delegate(.isFirstUser(isFirst))):
                 if isFirst {
                     return .send(._sceneChange(.onboarding(.init())))
+                } else if UserDefaultsManager.refreshToken.isEmpty || UserDefaultsManager.nickname.isEmpty {
+                    return .send(._sceneChange(.login(LoginNavigationFeature.State())))
                 } else {
-                    return .send(._sceneChange(.login(.init())))
+                    return .send(._sceneChange(.tabBar(TabCoordinator.State())))
                 }
                 
             case .onboarding(.delegate(.startButtonTapped)):
