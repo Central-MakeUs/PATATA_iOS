@@ -7,7 +7,6 @@
 
 import SwiftUI
 import ComposableArchitecture
-import TCACoordinators
 import PopupView
 
 struct ArchiveCoordinatorView: View {
@@ -16,31 +15,24 @@ struct ArchiveCoordinatorView: View {
     
     var body: some View {
         WithPerceptionTracking {
-            TCARouter(store.scope(state: \.routes, action: \.router)) { screen in
-                switch screen.case {
-                case let .archive(archiveStore):
-                    ArchiveView(store: archiveStore)
-                        .hideTabBar(store.isHideTabBar)
-                    
+            NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
+                ArchiveView(store: store.scope(state: \.root, action: \.root))
+            } destination: { store in
+                switch store.case {
                 case let .spotDetail(detailStore):
                     SpotDetailView(store: detailStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .spotedit(spotEditStore):
                     SpotEditorView(store: spotEditStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .addSpotMap(addSpotMapStore):
                     AddSpotMapView(store: addSpotMapStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .report(reportStore):
                     ReportView(store: reportStore)
-                        .hideTabBar(store.isHideTabBar)
                     
                 case let .category(categoryStore):
                     SpotCategoryView(store: categoryStore)
-                        .hideTabBar(store.isHideTabBar)
                 }
             }
             .customAlert(
@@ -85,36 +77,3 @@ struct ArchiveCoordinatorView: View {
         }
     }
 }
-
-extension ArchiveScreen.State: Identifiable {
-    var id: ID {
-        switch self {
-        case .archive:
-            return ID.archive
-        case .spotDetail:
-            return ID.spotDetail
-        case .spotedit:
-            return ID.spotedit
-        case .addSpotMap:
-            return ID.addSpotMap
-        case .report:
-            return ID.report
-        case .category:
-            return ID.category
-        }
-    }
-    
-    enum ID: Identifiable {
-        case archive
-        case spotDetail
-        case spotedit
-        case addSpotMap
-        case report
-        case category
-        
-        var id: ID {
-            return self
-        }
-    }
-}
-
