@@ -29,7 +29,7 @@ struct ReportView: View {
             
             WithPerceptionTracking {
                 contentView
-                    .navigationBarBackButtonHidden()
+                    .hideNav()
                     .onTapGesture {
                         hideKeyboard()
                     }

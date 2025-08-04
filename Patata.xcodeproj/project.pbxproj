@@ -47,7 +47,6 @@
 			membershipExceptions = (
 				Info.plist,
 				Presentation/ErrorView/NetworkErrorView.swift,
-				Presentation/NetworkErrorFeature.swift,
 				"Preview Content/Preview Assets.xcassets",
 			);
 			target = DFA57A5F2D35214B001E785A /* Patata */;

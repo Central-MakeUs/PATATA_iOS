@@ -18,7 +18,7 @@ struct AddSpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .navigationBarBackButtonHidden()
+                .hideNav()
                 .popup(isPresented: $store.isPresent.sending(\.bindingIsPresent), view: {
                     HStack {
                         Spacer()

@@ -23,7 +23,7 @@ struct SuccessView: View {
                 .ignoresSafeArea()
                 
                 contentView
-                    .navigationBarBackButtonHidden()
+                    .hideNav()
             }
         }
     }

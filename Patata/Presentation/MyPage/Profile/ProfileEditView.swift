@@ -23,14 +23,14 @@ struct ProfileEditView: View {
             if store.dataState == .progress {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .navigationBarBackButtonHidden(true)
+                    .hideNav()
             } else {
                 contentView
                     .onAppear {
                         store.send(.viewCycle(.onAppear))
                     }
                     .background(.gray20)
-                    .navigationBarBackButtonHidden()
+                    .hideNav()
                     .onTapGesture {
                         hideKeyboard()
                     }

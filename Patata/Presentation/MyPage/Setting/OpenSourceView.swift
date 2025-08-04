@@ -15,7 +15,7 @@ struct OpenSourceView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .navigationBarBackButtonHidden()
+                .hideNav()
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }

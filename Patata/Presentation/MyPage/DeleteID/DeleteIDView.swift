@@ -14,7 +14,7 @@ struct DeleteIDView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .navigationBarBackButtonHidden()
+                .hideNav()
         }
     }
 }

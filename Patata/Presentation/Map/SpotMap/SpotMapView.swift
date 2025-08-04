@@ -21,6 +21,7 @@ struct SpotMapView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .hideNav()
                 .popup(isPresented: $store.alertPresent.sending(\.bindingAlertPresent), view: {
                     HStack {
                         Spacer()

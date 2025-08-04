@@ -79,6 +79,21 @@ extension View {
             )
         }
     }
+    
+    @ViewBuilder
+    func hideNav() -> some View {
+        if #available(iOS 18.0, *) {
+            self.toolbarVisibility(
+                .hidden,
+                for: .navigationBar
+            )
+        } else {
+            self.toolbar(
+                .hidden,
+                for: .navigationBar
+            )
+        }
+    }
 }
 
 extension View {

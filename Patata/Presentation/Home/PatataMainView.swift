@@ -35,7 +35,7 @@ struct PatataMainView: View {
         WithPerceptionTracking {
             contentView
                 .background(.gray10)
-                .navigationBarBackButtonHidden()
+                .hideNav()
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }

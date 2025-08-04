@@ -26,7 +26,7 @@ struct SpotDetailView: View {
         WithPerceptionTracking {
             ZStack {
                 contentView
-                    .navigationBarHidden(true)
+                    .hideNav()
                     .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
                         store.send(.viewEvent(.tappedDeleteButton))
                     }

@@ -16,6 +16,7 @@ struct MyPageView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
+                .hideNav()
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }

@@ -30,7 +30,7 @@ struct SearchResultView: View {
     var body: some View {
         WithPerceptionTracking {
             contentView
-                .navigationBarHidden(true)
+                .hideNav()
                 .presentBottomSheet(isPresented: $store.filterIsvalid.sending(\.bindingFilterIsValid)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"], selectedIndex: $selectedIndex) { item in
                         store.send(.viewEvent(.dismissFilter(item)))

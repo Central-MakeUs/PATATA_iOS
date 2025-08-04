@@ -35,7 +35,7 @@ struct SpotEditorView: View {
             if store.viewState == .add || store.viewState == .edit {
                 contentView
                     .hideTabBar(true)
-                    .navigationBarBackButtonHidden()
+                    .hideNav()
                     .background(
                         Color.clear
                             .contentShape(Rectangle())

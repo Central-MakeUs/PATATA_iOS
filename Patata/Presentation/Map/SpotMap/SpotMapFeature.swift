@@ -55,7 +55,6 @@ struct SpotMapFeature {
             case tappedSpotDetail(Int)
             case succesReport
             case moveCamera
-            case noSpotData(String)
         }
     }
     
@@ -99,6 +98,7 @@ struct SpotMapFeature {
         case successAddSpot
         case detailBack
         case deleteSpot
+        case noSpotData(String)
     }
     
     enum MapAction {
@@ -188,7 +188,7 @@ extension SpotMapFeature {
             case .viewEvent(.dismiss):
                 state.alertPresent = false
                 
-            case let .delegate(.noSpotData(msg)):
+            case let .parentsAction(.noSpotData(msg)):
                 state.errorMSG = msg
                 state.alertPresent = true
                 state.isPresented = false

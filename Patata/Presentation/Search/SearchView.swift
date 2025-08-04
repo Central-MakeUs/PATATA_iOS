@@ -24,7 +24,7 @@ struct SearchView: View {
                 switch store.viewState {
                 case .search:
                     contentView
-                        .navigationBarBackButtonHidden(true)
+                        .hideNav()
                         .background(
                             Color.gray10
                                 .contentShape(Rectangle())

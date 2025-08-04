@@ -35,7 +35,7 @@ extension OnboardingView {
                     .padding(.bottom, 10)
             }
             .background(.blue10)
-            .navigationBarBackButtonHidden(true)
+            .hideNav()
         }
         
     }

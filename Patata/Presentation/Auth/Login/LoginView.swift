@@ -103,7 +103,7 @@ struct LoginView: View {
             .customAlert(isPresented: $store.isPresent.sending(\.bindingIsPresent), message: store.errorMSG, onConfirm: {
                 store.send(.viewEvent(.dismiss))
             })
-            .navigationBarBackButtonHidden()
+            .hideNav()
             .onAppear {
                 startAnimation()
             }
