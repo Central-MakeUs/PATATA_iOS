@@ -6,3 +6,17 @@
 //
 
 import Foundation
+import ComposableArchitecture
+
+@Reducer(state: .equatable)
+enum MapCoordPath {
+//    case spotMap(SpotMapFeature)
+    case mySpotList(MySpotListFeature)
+    case spotEditorView(SpotEditorFeature)
+    case search(SearchFeature)
+    case searchMap(SearchMapFeature)
+    case addSpotMap(AddSpotMapFeature)
+    case successView(SuccessFeature)
+    case spotDetail(SpotDetailFeature)
+    case report(ReportFeature)
+}
