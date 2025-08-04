@@ -53,8 +53,8 @@ struct LoginNavigationFeature {
             case .routes(.element(id: _, action: .profileEdit(.delegate(.successChangeNickname)))):
                 state.routes.append(.success(SuccessFeature.State(viewState: .first)))
                 
-            case let .routes(.element(id: id, action: .profileEdit(.delegate(.tappedBackButton(viewState))))):
-                state.routes.pop(to: id)
+            case .routes(.element(id: _, action: .profileEdit(.delegate(.tappedBackButton(_))))):
+                _ = state.routes.popLast()
                 
             case .routes(.element(id: _, action: .success(.delegate(.tappedConfirmButton)))):
                 return .send(.delegate(.successChangeNickname))
