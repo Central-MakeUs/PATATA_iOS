@@ -114,20 +114,18 @@ extension SpotDetailView {
                     )
             }
             .background(.gray10)
+            .overlay(alignment: .bottom) {
+                ShadowView(opacity: 0.3, start: .bottom, end: .top, height: 8)
+            }
             
             VStack(spacing: 0) {
-                Color.black
-                    .opacity(0.3)
-                    .frame(height: 0.8)
-                    .blur(radius: 3)
-                    .offset(y: -6)
+                Spacer()
+                    .frame(height: 10)
                 
                 commentTextField
-                    .padding(.top, 5)
                     .padding(.horizontal, 15)
                     .padding(.bottom, 10)
             }
-
         }
         .onTapGesture {
             hideKeyboard()
@@ -315,18 +313,6 @@ extension SpotDetailView {
     
     private var commentTextField: some View {
         HStack {
-//            TextField(
-//                "comment",
-//                text: $store.commentText.sending(\.bindingCommentText),
-//                prompt: Text("댓글을 입력하세요")
-//                    .foregroundColor(.textDisabled)
-//            )
-//            .onSubmit {
-//                hideKeyboard()
-//                store.send(.viewEvent(.tappedOnSubmit))
-//            }
-//            .textStyle(.bodyS)
-            
             DisablePasteTextField(
                 text: $store.commentText.sending(\.bindingCommentText),
                 isFocused: nil, // nil로 설정하여 내부 포커스 관리를 비활성화
