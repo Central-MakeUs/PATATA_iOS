@@ -57,7 +57,6 @@ struct SearchMapFeature {
             case tappedBackButton
             case tappedSearch
             case tappedSpotDetail(Int)
-            case successEdit
         }
     }
     
@@ -98,6 +97,7 @@ struct SearchMapFeature {
         case detailBack
         case deleteSpot
         case noDataSpot(String)
+        case successEdit
     }
     
     enum MapAction {
@@ -239,7 +239,7 @@ extension SearchMapFeature {
                     await send(.networkType(.searchSpot(spotName: spotName, userLocation: coord)))
                 }
                 
-            case .delegate(.successEdit):
+            case .parentsAction(.successEdit):
                 state.isPresented = false
                 
             case let .parentsAction(.noDataSpot(msg)):
