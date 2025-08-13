@@ -43,175 +43,22 @@ struct HomeCoordinator {
     }
     
     var body: some ReducerOf<Self> {
+        core()
+            .forEach(\.routes, action: \.router)
+    }
+}
+
+extension HomeCoordinator {
+    private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case .router(.element(id: _, action: .home(.delegate(.tappedSearch)))):
-                state.$isHidden.withLock { $0 = true }
-                state.routes.append(.search(SearchFeature.State(beforeViewState: .home)))
-                state.screenIds[.search] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .home(.delegate(.tappedAddButton)))):
-                state.$isHidden.withLock { $0 = true }
-                state.routes.append(.category(SpotCategoryFeature.State(initialIndex: 0)))
-                state.screenIds[.category] = state.routes.ids.last
-
-            case let .router(.element(id: _, action: .home(.delegate(.tappedSpot(spotId))))):
-                state.$isHidden.withLock { $0 = true }
-                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .home, spotId: spotId)))
-                state.screenIds[.spotDetail] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .home(.delegate(.tappedMoreButton)))):
-                state.$isHidden.withLock { $0 = true }
-                
-                state.routes.append(.mySpotList(MySpotListFeature.State(viewState: .home, mbrLocation: MBRCoordinates(northEast: Coordinate(latitude: 0, longitude: 0), southWest: Coordinate(latitude: 0, longitude: 0)), isSearch: false, searchText: "")))
-                state.screenIds[.mySpotList] = state.routes.ids.last
-                
-            case let .router(.element(id: _, action: .home(.delegate(.tappedCategoryButton(category))))):
-                state.$isHidden.withLock { $0 = true }
-                state.routes.append(.category(SpotCategoryFeature.State(initialIndex: category.rawValue)))
-                state.screenIds[.category] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .search(.delegate(.tappedBackButton(_))))):
-                state.$isHidden.withLock { $0 = false }
-                _ = state.routes.popLast()
-                
-            case let .router(.element(id: _, action: .search(.delegate(.tappedSpotDetail(spotId))))):
-                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .search, spotId: spotId)))
-                state.screenIds[.spotDetail] = state.routes.ids.last
-                
-            case  .router(.element(id: _, action: .category(.delegate(.tappedNavBackButton)))):
-                state.$isHidden.withLock { $0 = false }
-                _ = state.routes.popLast()
-
-            case let .router(.element(id: _, action: .category(.delegate(.tappedSpot(spotId))))):
-                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
-                state.screenIds[.spotDetail] = state.routes.ids.last
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.delete(viewState))))):
-                _ = state.routes.popLast()
-                state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
-                state.popupIsPresent = true
-                
-                if viewState == .home {
-                    state.$isHidden.withLock { $0 = false }
-                } else {
-                    state.$isHidden.withLock { $0 = true }
-                }
-                
-                if viewState == .search {
-                    if let searchId = state.screenIds[.search] {
-                        return .send(.router(.element(id: searchId, action: .search(.parentsAction(.deletePop)))))
-                    }
-                } else if viewState == .other {
-                    if let mySpotListId = state.screenIds[.mySpotList] {
-                        return .send(.router(.element(id: mySpotListId, action: .mySpotList(.parentsAction(.delete)))))
-                    }
-                }
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.deleteSpot(msg, viewState))))):
-                _ = state.routes.popLast()
-                state.errorMSG = msg
-                state.popupIsPresent = true
-                
-                if viewState == .home {
-                    state.$isHidden.withLock { $0 = false }
-                } else {
-                    state.$isHidden.withLock { $0 = true }
-                }
-                
-                if viewState == .search {
-                    if let searchId = state.screenIds[.search] {
-                        return .send(.router(.element(id: searchId, action: .search(.parentsAction(.deletePop)))))
-                    }
-                } else if viewState == .other {
-                    if let mySpotListId = state.screenIds[.mySpotList] {
-                        return .send(.router(.element(id: mySpotListId, action: .mySpotList(.parentsAction(.delete)))))
-                    }
-                }
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.tappedNavBackButton(archive, viewState))))):
-                _ = state.routes.popLast()
-                
-                if viewState == .home {
-                    state.$isHidden.withLock { $0 = false }
-                }
-                
-                if viewState == .search {
-                    if let searchId = state.screenIds[.search] {
-                        return .send(.router(.element(id: searchId, action: .search(.delegate(.detailBack(archive))))))
-                    }
-                }
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.report(type, id))))):
-                if type == "Post" {
-                    state.routes.append(.report(ReportFeature.State(viewState: .post, id: id)))
-                    state.screenIds[.report] = state.routes.ids.last
-                } else {
-                    state.routes.append(.report(ReportFeature.State(viewState: .post, id: id)))
-                    state.screenIds[.report] = state.routes.ids.last
-                }
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.reviewReport(id))))):
-                state.routes.append(.report(ReportFeature.State(viewState: .review, id: id)))
-                state.screenIds[.report] = state.routes.ids.last
-                
-            case let .router(.element(id: _, action: .spotDetail(.delegate(.editSpotDetail(spotDetail, _))))):
-                state.routes.append(.spotedit(SpotEditorFeature.State(viewState: .edit, spotDetail: spotDetail, spotLocation: spotDetail.spotCoord, spotAddress: spotDetail.spotAddress, imageDatas: [], beforeViewState: .other)))
-                state.screenIds[.spotedit] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .mySpotList(.delegate(.tappedBackButton(_))))):
-                _ = state.routes.popLast()
-                state.$isHidden.withLock { $0 = false }
-                
-            case let .router(.element(id: _, action: .mySpotList(.delegate(.tappedSpot(spotId))))):
-                state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
-                state.screenIds[.spotDetail] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .spotedit(.delegate(.tappedBackButton)))):
-                _ = state.routes.popLast()
-                state.$isHidden.withLock { $0 = true }
-                
-            case .router(.element(id: _, action: .spotedit(.delegate(.tappedXButton)))):
-                if let rootId = state.routes.ids.first {
-                    state.routes.pop(to: rootId)
-                    state.$isHidden.withLock { $0 = false }
-                }
-                
-            case let .router(.element(id: _, action: .spotedit(.delegate(.tappedLocation(coord, _, spotDetail, _))))):
-                state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .edit, spotDetailEntity: spotDetail, datas: [], spotCoord: coord)))
-                state.screenIds[.addSpotMap] = state.routes.ids.last
-                
-            case .router(.element(id: _, action: .spotedit(.delegate(.successSpotEdit(_))))):
-                state.errorMSG = "게시물이 수정되었습니다."
-                _ = state.routes.popLast()
-                state.popupIsPresent = true
-                
-            case let .router(.element(id: _, action: .addSpotMap(.delegate(.tappedAddConfirmButton(coord, spotAddress, _, _, _))))):
-                _ = state.routes.popLast()
-                
-                if let spotEditId = state.screenIds[.spotedit] {
-                    return .run { send in
-                        await send(.router(.element(id: spotEditId, action: .spotedit(.parentsAction(.changeAddress(coord, spotAddress))))))
-                    }
-                }
-                
-            case .router(.element(id: _, action: .addSpotMap(.delegate(.tappedBackButton(_))))):
-                _ = state.routes.popLast()
-                
-            case .router(.element(id: _, action: .report(.delegate(.tappedBackButton)))):
-                _ = state.routes.popLast()
-                
-            case .router(.element(id: _, action: .report(.delegate(.tappedConfirmButton)))):
-                state.alertIsPresent = true
-                
-                if let rootId = state.routes.ids.first {
-                    state.routes.pop(to: rootId)
-                }
-                
-                if state.routes.count == 1 {
-                    state.$isHidden.withLock { $0 = false }
-                } else {
-                    state.$isHidden.withLock { $0 = true }
+            case let .router(action):
+                switch action {
+                case let .element(id: _, action: action):
+                    return self.routerAction(state: &state, action: action)
+                    
+                default:
+                    break
                 }
                 
             case .viewEvent(.dismissPopup):
@@ -225,17 +72,305 @@ struct HomeCoordinator {
 
             case let .bindingAlertIsPrenset(isPresent):
                 state.alertIsPresent = isPresent
-                
-            default:
-                break
             }
-            
             
             return .none
         }
-            .forEach(\.routes, action: \.router)
-
     }
+    
+    private func routerAction(state: inout HomeCoordinator.State, action: HomeCoordPath.Action) -> Effect<Action> {
+        switch action {
+        case let .home(.delegate(action)):
+            return homeAction(state: &state, action: action)
+            
+        case let .search(.delegate(action)):
+            return searchAction(state: &state, action: action)
+            
+        case let .category(.delegate(action)):
+            return categoryAction(state: &state, action: action)
+            
+        case let .spotDetail(.delegate(action)):
+            return spotDetailAction(state: &state, action: action)
+            
+        case let .mySpotList(.delegate(action)):
+            return mySpotListAction(state: &state, action: action)
+        case let .spotedit(.delegate(action)):
+            return spotEditAction(state: &state, action: action)
+            
+        case let .addSpotMap(.delegate(action)):
+            return addSpotAction(state: &state, action: action)
+            
+        case let .report(.delegate(action)):
+            return reportAction(state: &state, action: action)
+            
+        default:
+            break
+        }
+        
+        return .none
+    }
+    
+    private func homeAction(state: inout HomeCoordinator.State, action: PatataMainFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedSearch:
+            state.$isHidden.withLock { $0 = true }
+            state.routes.append(.search(SearchFeature.State(beforeViewState: .home)))
+            state.screenIds[.search] = state.routes.ids.last
+            
+        case .tappedAddButton:
+            state.$isHidden.withLock { $0 = true }
+            state.routes.append(.category(SpotCategoryFeature.State(initialIndex: 0)))
+            state.screenIds[.category] = state.routes.ids.last
+            
+        case let .tappedSpot(spotId):
+            state.$isHidden.withLock { $0 = true }
+            state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .home, spotId: spotId)))
+            state.screenIds[.spotDetail] = state.routes.ids.last
+            
+        case .tappedMoreButton:
+            state.$isHidden.withLock { $0 = true }
+            state.routes.append(
+                .mySpotList(
+                    MySpotListFeature.State(
+                        viewState: .home,
+                        mbrLocation: MBRCoordinates(
+                            northEast: Coordinate(
+                                latitude: 0,
+                                longitude: 0
+                            ),
+                            southWest: Coordinate(latitude: 0, longitude: 0)
+                        ),
+                        isSearch: false,
+                        searchText: ""
+                    )
+                )
+            )
+            state.screenIds[.mySpotList] = state.routes.ids.last
+            
+        case let .tappedCategoryButton(category):
+            state.$isHidden.withLock { $0 = true }
+            state.routes.append(.category(SpotCategoryFeature.State(initialIndex: category.rawValue)))
+            state.screenIds[.category] = state.routes.ids.last
+            
+        }
+        
+        return .none
+    }
+    
+    private func searchAction(state: inout HomeCoordinator.State, action: SearchFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedBackButton(_):
+            state.$isHidden.withLock { $0 = false }
+            _ = state.routes.popLast()
+            
+        case let .tappedSpotDetail(spotId):
+            state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .search, spotId: spotId)))
+            state.screenIds[.spotDetail] = state.routes.ids.last
+            
+        default:
+            break
+        }
+        
+        return .none
+    }
+    
+    private func categoryAction(state: inout HomeCoordinator.State, action: SpotCategoryFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedNavBackButton:
+            state.$isHidden.withLock { $0 = false }
+            _ = state.routes.popLast()
+            
+        case let .tappedSpot(spotId):
+            state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
+        }
+        
+        return .none
+    }
+    
+    private func spotDetailAction(state: inout HomeCoordinator.State, action: SpotDetailFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case let .tappedNavBackButton(archive, viewState):
+            _ = state.routes.popLast()
+            
+            if viewState == .home {
+                state.$isHidden.withLock { $0 = false }
+            }
+            
+            if viewState == .search {
+                if let searchId = state.screenIds[.search] {
+                    return .send(.router(.element(id: searchId, action: .search(.delegate(.detailBack(archive))))))
+                }
+            }
+            
+        case let .delete(viewState):
+            _ = state.routes.popLast()
+            state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
+            state.popupIsPresent = true
+            
+            if viewState == .home {
+                state.$isHidden.withLock { $0 = false }
+            } else {
+                state.$isHidden.withLock { $0 = true }
+            }
+            
+            if viewState == .search {
+                if let searchId = state.screenIds[.search] {
+                    return .send(.router(.element(id: searchId, action: .search(.parentsAction(.deletePop)))))
+                }
+            } else if viewState == .other {
+                if let mySpotListId = state.screenIds[.mySpotList] {
+                    return .send(.router(.element(id: mySpotListId, action: .mySpotList(.parentsAction(.delete)))))
+                }
+            }
+            
+        case let .editSpotDetail(spotDetail, _):
+            state.routes.append(
+                .spotedit(
+                    SpotEditorFeature.State(
+                        viewState: .edit,
+                        spotDetail: spotDetail,
+                        spotLocation: spotDetail.spotCoord,
+                        spotAddress: spotDetail.spotAddress,
+                        imageDatas: [],
+                        beforeViewState: .other
+                    )
+                )
+            )
+            state.screenIds[.spotedit] = state.routes.ids.last
+            
+        case let .report(type, id):
+            if type == "Post" {
+                state.routes.append(.report(ReportFeature.State(viewState: .post, id: id)))
+                state.screenIds[.report] = state.routes.ids.last
+            } else {
+                state.routes.append(.report(ReportFeature.State(viewState: .post, id: id)))
+                state.screenIds[.report] = state.routes.ids.last
+            }
+            
+        case let .reviewReport(id):
+            state.routes.append(.report(ReportFeature.State(viewState: .review, id: id)))
+            state.screenIds[.report] = state.routes.ids.last
+            
+        case let .deleteSpot(msg, viewState):
+            _ = state.routes.popLast()
+            state.errorMSG = msg
+            state.popupIsPresent = true
+            
+            if viewState == .home {
+                state.$isHidden.withLock { $0 = false }
+            } else {
+                state.$isHidden.withLock { $0 = true }
+            }
+            
+            if viewState == .search {
+                if let searchId = state.screenIds[.search] {
+                    return .send(.router(.element(id: searchId, action: .search(.parentsAction(.deletePop)))))
+                }
+            } else if viewState == .other {
+                if let mySpotListId = state.screenIds[.mySpotList] {
+                    return .send(.router(.element(id: mySpotListId, action: .mySpotList(.parentsAction(.delete)))))
+                }
+            }
+            
+        }
+        
+        return .none
+    }
+    
+    private func mySpotListAction(state: inout HomeCoordinator.State, action: MySpotListFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedBackButton(_):
+            _ = state.routes.popLast()
+            state.$isHidden.withLock { $0 = false }
+            
+        case let .tappedSpot(spotId):
+            state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
+            state.screenIds[.spotDetail] = state.routes.ids.last
+            
+        default:
+            break
+        }
+        
+        return .none
+    }
+    
+    private func spotEditAction(state: inout HomeCoordinator.State, action: SpotEditorFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedBackButton:
+            _ = state.routes.popLast()
+            state.$isHidden.withLock { $0 = true }
+            
+        case .tappedXButton:
+            if let rootId = state.routes.ids.first {
+                state.routes.pop(to: rootId)
+                state.$isHidden.withLock { $0 = false }
+            }
+            
+        case let .tappedLocation(coord, _, spotDetail, _):
+            state.routes.append(
+                .addSpotMap(
+                    AddSpotMapFeature.State(
+                        viewState: .edit,
+                        spotDetailEntity: spotDetail,
+                        datas: [],
+                        spotCoord: coord
+                    )
+                )
+            )
+            state.screenIds[.addSpotMap] = state.routes.ids.last
+            
+        case .successSpotEdit(_):
+            state.errorMSG = "게시물이 수정되었습니다."
+            _ = state.routes.popLast()
+            state.popupIsPresent = true
+            
+        default:
+            break
+        }
+        
+        return .none
+    }
+    
+    private func addSpotAction(state: inout HomeCoordinator.State, action: AddSpotMapFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedBackButton(_):
+            _ = state.routes.popLast()
+            
+        case let .tappedAddConfirmButton(coord, spotAddress, _, _, _):
+            _ = state.routes.popLast()
+            
+            if let spotEditId = state.screenIds[.spotedit] {
+                return .run { send in
+                    await send(.router(.element(id: spotEditId, action: .spotedit(.parentsAction(.changeAddress(coord, spotAddress))))))
+                }
+            }
+        }
+        
+        return .none
+    }
+    
+    private func reportAction(state: inout HomeCoordinator.State, action: ReportFeature.Action.Delegate) -> Effect<Action> {
+        switch action {
+        case .tappedConfirmButton:
+            state.alertIsPresent = true
+            
+            if let rootId = state.routes.ids.first {
+                state.routes.pop(to: rootId)
+            }
+            
+            if state.routes.count == 1 {
+                state.$isHidden.withLock { $0 = false }
+            } else {
+                state.$isHidden.withLock { $0 = true }
+            }
+            
+        case .tappedBackButton:
+            _ = state.routes.popLast()
+        }
+        
+        return .none
+    }
+    
 }
 
 extension HomeCoordinator.State {
