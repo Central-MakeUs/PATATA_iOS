@@ -63,14 +63,9 @@ extension MapCoordinator {
             switch action {
             case let .root(.delegate(root)):
                 return rootAction(state: &state, action: root)
-            case let .router(router):
-                switch router {
-                case let .element(id: _, action: action):
-                    return routerAction(state: &state, action: action)
-                    
-                default:
-                    break
-                }
+                
+            case let .router(.element(_, action)):
+                return routerAction(state: &state, action: action)
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

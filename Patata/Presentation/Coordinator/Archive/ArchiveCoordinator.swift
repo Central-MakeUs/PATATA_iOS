@@ -61,14 +61,8 @@ extension ArchiveCoordinator {
             case let .root(.delegate(action)):
                 return rootAction(state: &state, action: action)
                 
-            case let .router(action):
-                switch action {
-                case let .element(id: _, action: action):
-                    return routerAction(state: &state, action: action)
-                    
-                default:
-                    break
-                }
+            case let .router(.element(_, action)):
+                return routerAction(state: &state, action: action)
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false

@@ -52,14 +52,8 @@ extension HomeCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
-            case let .router(action):
-                switch action {
-                case let .element(id: _, action: action):
-                    return self.routerAction(state: &state, action: action)
-                    
-                default:
-                    break
-                }
+            case let .router(.element(_, action)):
+                return routerAction(state: &state, action: action)
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
