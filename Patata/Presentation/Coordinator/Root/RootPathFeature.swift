@@ -16,6 +16,7 @@ struct RootPathFeature {
         case onboarding(OnboardingFeature.State)
         case login(LoginNavigationFeature.State)
         case tabBar(TabCoordinator.State)
+        case networkError(NetworkErrorFeature.State)
         
         init() { self = .splash() }
     }
@@ -28,6 +29,7 @@ struct RootPathFeature {
         case onboarding(OnboardingFeature.Action)
         case login(LoginNavigationFeature.Action)
         case tabBar(TabCoordinator.Action)
+        case networkError(NetworkErrorFeature.Action)
     }
     
     var body: some Reducer<State, Action> {
@@ -70,6 +72,9 @@ struct RootPathFeature {
         }
         .ifCaseLet(\.tabBar, action: \.tabBar) {
             TabCoordinator()
+        }
+        .ifCaseLet(\.networkError, action: \.networkError) {
+            NetworkErrorFeature()
         }
     }
 }

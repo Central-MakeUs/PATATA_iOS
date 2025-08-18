@@ -34,6 +34,11 @@ struct RootCoordinatorView: View {
                     if let store = store.scope(state: \.rootPath.tabBar, action: \.rootPath.tabBar) {
                         TabCoordinatorView(store: store)
                     }
+                    
+                case .networkError:
+                    if let store = store.scope(state: \.rootPath.networkError, action: \.rootPath.networkError) {
+                        NetworkErrorView(store: store)
+                    }
                 }
             }
             .onAppear {

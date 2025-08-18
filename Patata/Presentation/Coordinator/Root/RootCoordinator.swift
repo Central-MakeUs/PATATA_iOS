@@ -18,6 +18,7 @@ struct RootCoordinator {
         
         var networkIsValid: Bool = false
         var beforeViewState: RootPathFeature.State = .splash(SplashFeature.State())
+        var networkChangeFirst: Bool = true
     }
     
     enum Action {
@@ -168,6 +169,38 @@ struct RootCoordinator {
                 
             case .tokenExpired:
                 return .send(.rootPath(._sceneChange(.login(LoginNavigationFeature.State()))))
+                
+            case let .checkNetworkValid(valid):
+                state.networkIsValid = valid
+                
+            case let .changeViewState(isValid):
+                state.networkIsValid = isValid
+                
+                if state.networkChangeFirst {
+                    state.beforeViewState = state.rootPath
+                }
+                
+                state.networkChangeFirst = false
+                
+                return .send(.rootPath(._sceneChange(.networkError(NetworkErrorFeature.State()))))
+                
+            case .rootPath(.networkError(.delegate(.tappedButton))):
+                if state.networkIsValid {
+                    state.networkChangeFirst = true
+                    
+                    switch state.beforeViewState {
+                    case let .splash(state):
+                        return .send(.rootPath(._sceneChange(.splash(state))))
+                    case let .onboarding(state):
+                        return .send(.rootPath(._sceneChange(.onboarding(state))))
+                    case let .login(state):
+                        return .send(.rootPath(._sceneChange(.login(state))))
+                    case let .tabBar(state):
+                        return .send(.rootPath(._sceneChange(.tabBar(state))))
+                    case let .networkError(state):
+                        return .send(.rootPath(._sceneChange(.networkError(state))))
+                    }
+                }
                 
             default :
                 break
