@@ -66,6 +66,9 @@ extension HomeCoordinator {
 
             case let .bindingAlertIsPrenset(isPresent):
                 state.alertIsPresent = isPresent
+                
+            default:
+                break
             }
             
             return .none
