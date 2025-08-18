@@ -15,6 +15,9 @@ struct RootCoordinator {
         
         var currentNetworkState: Bool = true
         var isPresent: Bool = false
+        
+        var networkIsValid: Bool = false
+        var beforeViewState: RootPathFeature.State = .splash(SplashFeature.State())
     }
     
     enum Action {
@@ -162,6 +165,9 @@ struct RootCoordinator {
                         locationManager.stopUpdatingLocation()
                     }
                 }
+                
+            case .tokenExpired:
+                return .send(.rootPath(._sceneChange(.login(LoginNavigationFeature.State()))))
                 
             default :
                 break
