@@ -10,7 +10,8 @@ import Alamofire
 
 final class PARequestInterceptor: RequestInterceptor {
     
-    private let retryCount = AnyValueActor(3)
+    private let gate = RefreshGate()
+    private let maxRetryPerRequest = 1
     
     func adapt(_ urlRequest: URLRequest, for session: Session, completion: @escaping (Result<URLRequest, any Error>) -> Void) {
         var urlRequest = urlRequest
@@ -19,54 +20,53 @@ final class PARequestInterceptor: RequestInterceptor {
     }
     
     func retry(_ request: Request, for session: Session, dueTo error: any Error, completion: @escaping (RetryResult) -> Void) {
-        Task {
-            
-            // 상태
-            guard let statusCode = request.response?.statusCode else {
-                completion(.doNotRetry)
-                return
+        guard request.retryCount < maxRetryPerRequest else {
+            completion(.doNotRetry)
+            return
+        }
+        
+        guard let statusCode = request.response?.statusCode else {
+            completion(.doNotRetry)
+            return
+        }
+        
+        if statusCode == 401, !UserDefaultsManager.refreshToken.isEmpty {
+            Task {
+                let isValid = await requestRefresh()
+                completion(isValid ? .retry : .doNotRetry)
             }
-            
-            if statusCode == 401 && !UserDefaultsManager.refreshToken.isEmpty {
-                print("heheheheheheh")
-                if await requestRefresh() {
-                    completion(.retry)
-                } else {
-                    completion(.doNotRetry)
-                }
-            } else {
-                print("statuscode", statusCode)
-                print("hereh?")
-                completion(.doNotRetry)
-            }
-
+            return
         }
     }
     
     private func requestRefresh() async -> Bool {
-        
-        let retryCurrent = await retryCount.withValue {
-           return $0 > 0
-        }
-        
-        if !retryCurrent { return false }
-        
-        let result = try? await NetworkManager.shared.requestNetwork(
-            dto: LoginDTO.self,
-            router: LoginRouter.refresh(
-                refreshToken: UserDefaultsManager.refreshToken
+        return await gate.run {
+            let dto = try? await NetworkManager.shared.requestNetwork(
+                dto: LoginDTO.self,
+                router: LoginRouter.refresh(refreshToken: UserDefaultsManager.refreshToken)
             )
-        )
-        
-        guard let result else { return false }
-        print("successAccess", result.result.accessToken)
-        print("successRefresh", result.result.refreshToken)
-        UserDefaultsManager.accessToken = result.result.accessToken
-        UserDefaultsManager.refreshToken = result.result.refreshToken
-        await retryCount.withValue { num in
-            num -= 1
+            guard let dto else { return false }
+            
+            UserDefaultsManager.accessToken  = dto.result.accessToken
+            UserDefaultsManager.refreshToken = dto.result.refreshToken
+            return true
         }
-        return true
     }
-    
 }
+
+actor RefreshGate {
+    private var task: Task<Bool, Never>?
+    
+    func run(_ operation: @escaping () async -> Bool) async -> Bool {
+        if let existingTask = task {
+            return await existingTask.value     // 이미 진행 중이면 결과만 기다림
+        }
+        
+        let newTask = Task { await operation() }
+        task = newTask
+        let result = await newTask.value
+        task = nil
+        return result
+    }
+}
+
