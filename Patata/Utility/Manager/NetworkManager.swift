@@ -18,7 +18,7 @@ import Logging
 final class NetworkManager: Sendable {
     
     private let networkError = PassthroughSubject<PAError, Never>()
-    
+    private let interceptor = PARequestInterceptor()
     private let cancelStoreActor = AnyValueActor(Set<AnyCancellable>())
     private let retryActor = AnyValueActor(3)
     
@@ -26,9 +26,6 @@ final class NetworkManager: Sendable {
     
     func requestNetwork<T: DTO, R: Router>(dto: T.Type, router: R) async throws(PAError) -> T {
         let request = try router.asURLRequest()
-        
-        //            Logger.debug(request)
-        //            Logger.debug(request.url)
         
         let response = await getRequest(dto: dto, router: router, request: request)
         let result = try await getResponse(dto: dto, router: router, response: response)
@@ -78,7 +75,7 @@ extension NetworkManager {
             if ifRefreshMode {
                 
                 if case let .multiPart(multipartformData) = router.encodingType {
-                    let requestResponse = await AF.upload(multipartFormData: multipartformData, with: request, interceptor: PARequestInterceptor())
+                    let requestResponse = await AF.upload(multipartFormData: multipartformData, with: request, interceptor: interceptor)
                         .validate(statusCode: 200..<300)
                         .cURLDescription { curl in
                             print("🚀 Upload cURL:", curl)
@@ -91,7 +88,7 @@ extension NetworkManager {
                     
                     return requestResponse
                 } else {
-                    let requestResponse = await AF.request(request, interceptor: PARequestInterceptor())
+                    let requestResponse = await AF.request(request, interceptor: interceptor)
                         .validate(statusCode: 200..<300)
                         .cURLDescription { curl in  // 여기 추가
                             print("🚀 cURL:", curl)
@@ -134,45 +131,45 @@ extension NetworkManager {
     }
     
     private func getResponse<T:DTO>(dto: T.Type, router: Router, response: DataResponse<T, AFError>, ifRefreshMode: Bool = false) async throws(PAError) -> T {
-//            Logger.warning(response.response)
-//            Logger.warning(response.response ?? "")
+        //            Logger.warning(response.response)
+        //            Logger.warning(response.response ?? "")
         print("🔍 Response Data:", String(data: response.data ?? Data(), encoding: .utf8) ?? "No data")
-           print("📝 Response Status Code:", response.response?.statusCode ?? -1)
-            switch response.result {
-            case let .success(data):
-//                Logger.info(data)
-                await retryActor.resetValue()
-                
-                return data
-            case let .failure(patataError):
-//                Logger.error(response.data?.base64EncodedString() ?? "")
-//                Logger.error(GBError)
-                print("❌ Error Response Data:", String(data: response.data ?? Data(), encoding: .utf8) ?? "No data")
-                    print("❌ Error Status Code:", response.response?.statusCode ?? -1)
-                    print("❌ Error Details:", patataError)
-                
-                if dto == AddSpotDTO.self {
-                    if let data = response.data {
-                        if let addFail = try? CodableManager.shared.jsonDecoding(model: AddFailDTO.self, from: data) {
-                            throw .checkAddSpot(addFail)
-                        }
+        print("📝 Response Status Code:", response.response?.statusCode ?? -1)
+        switch response.result {
+        case let .success(data):
+            //                Logger.info(data)
+            await retryActor.resetValue()
+            
+            return data
+        case let .failure(patataError):
+            //                Logger.error(response.data?.base64EncodedString() ?? "")
+            //                Logger.error(GBError)
+            print("❌ Error Response Data:", String(data: response.data ?? Data(), encoding: .utf8) ?? "No data")
+            print("❌ Error Status Code:", response.response?.statusCode ?? -1)
+            print("❌ Error Details:", patataError)
+            
+            if dto == AddSpotDTO.self {
+                if let data = response.data {
+                    if let addFail = try? CodableManager.shared.jsonDecoding(model: AddFailDTO.self, from: data) {
+                        throw .checkAddSpot(addFail)
                     }
                 }
+            }
+            
+            do {
+                let retryResult = try await retryNetwork(dto: dto, router: router, ifRefresh: ifRefreshMode)
                 
-                do {
-                    let retryResult = try await retryNetwork(dto: dto, router: router, ifRefresh: ifRefreshMode)
-                    
-                    // 성공시 초기화
-                    await retryActor.resetValue()
-                    
-                    return retryResult
-                } catch {
-                    let check = checkResponseData(response.data, patataError)
-                    networkError.send(check)
-                    throw check
-                }
+                // 성공시 초기화
+                await retryActor.resetValue()
+                
+                return retryResult
+            } catch {
+                let check = checkResponseData(response.data, patataError)
+                networkError.send(check)
+                throw check
             }
         }
+    }
     
     private func retryNetwork<T: DTO, R: Router>(dto: T.Type, router: R, ifRefresh: Bool) async throws(PAError) -> T {
         let ifRetry = await retryActor.withValue { value in
@@ -201,10 +198,10 @@ extension NetworkManager {
     }
     
     private func downRetryCount() async {
-            await retryActor.withValue { value in
-                value -= 1
-            }
+        await retryActor.withValue { value in
+            value -= 1
         }
+    }
     
 
     
