@@ -17,11 +17,61 @@ import PopupView
 struct SpotMapView: View {
     
     @Perception.Bindable var store: StoreOf<SpotMapFeature>
+    
+    @State var dragOffset: CGFloat = 0
+    @State var bottomSheetSize: CGSize = .zero
 
     var body: some View {
         WithPerceptionTracking {
             contentView
                 .hideNav()
+                .overlay(alignment: .bottom) {
+                    if store.isPresented {
+                        VStack {
+                            mapBottomView
+                            
+                            VStack {
+                                spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
+                                    
+                                
+//                                Rectangle()
+//                                    .fill(.white)
+//                                    .frame(height: 0)
+//                                    .ignoresSafeArea(edges: .bottom)
+                            }
+                            .cornerRadius(20, corners: [.topLeft, .topRight])
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
+                            }
+                            .transition(.move(edge: .bottom))
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        if value.translation.height > 0 {
+                                            dragOffset += value.translation.height
+                                        }
+                                    }
+                                    .onEnded { value in
+                                        print("sheet", value.translation.height)
+                                        if value.translation.height > 0 {
+                                            withAnimation(.easeInOut(duration: 0.25)) {
+                                                store.send(.viewEvent(.bottomSheetDismiss))
+                                                dragOffset = 0
+                                            }
+                                        } else {
+                                            withAnimation(.spring()) {
+                                                dragOffset = 0
+                                            }
+                                        }
+                                    }
+                            )
+                            .background(.white, ignoresSafeAreaEdges: .bottom)
+                        }
+                        
+                        .offset(y: dragOffset)
+                    }
+                }
                 .popup(isPresented: $store.alertPresent.sending(\.bindingAlertPresent), view: {
                     HStack {
                         Spacer()
@@ -59,20 +109,20 @@ struct SpotMapView: View {
                         }
                     
                 })
-                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
-                    AnyView(mapBottomView)
-                }, content: {
-                    AnyView(
-                        WithPerceptionTracking(content: {
-                            spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
-                                .onTapGesture {
-                                    store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
-                                }
-                        })
-                    )
-                }, onDismiss: {
-                    store.send(.viewEvent(.bottomSheetDismiss))
-                })
+//                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
+//                    AnyView(mapBottomView)
+//                }, content: {
+//                    AnyView(
+//                        WithPerceptionTracking(content: {
+//                            spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
+//                                .onTapGesture {
+//                                    store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
+//                                }
+//                        })
+//                    )
+//                }, onDismiss: {
+//                    store.send(.viewEvent(.bottomSheetDismiss))
+//                })
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }
@@ -330,7 +380,7 @@ extension SpotMapView {
                 .padding(.top, 10)
         }
         .padding(.horizontal, 15)
-        .padding(.vertical, 12)
+        .padding(.vertical, 30)
     }
 }
 
