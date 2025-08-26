@@ -25,53 +25,22 @@ struct SpotMapView: View {
         WithPerceptionTracking {
             contentView
                 .hideNav()
-                .overlay(alignment: .bottom) {
-                    if store.isPresented {
-                        VStack {
-                            mapBottomView
-                            
-                            VStack {
-                                spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
-                                    
-                                
-//                                Rectangle()
-//                                    .fill(.white)
-//                                    .frame(height: 0)
-//                                    .ignoresSafeArea(edges: .bottom)
-                            }
-                            .cornerRadius(20, corners: [.topLeft, .topRight])
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
-                            }
-                            .transition(.move(edge: .bottom))
-                            .simultaneousGesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { value in
-                                        if value.translation.height > 0 {
-                                            dragOffset += value.translation.height
-                                        }
-                                    }
-                                    .onEnded { value in
-                                        print("sheet", value.translation.height)
-                                        if value.translation.height > 0 {
-                                            withAnimation(.easeInOut(duration: 0.25)) {
-                                                store.send(.viewEvent(.bottomSheetDismiss))
-                                                dragOffset = 0
-                                            }
-                                        } else {
-                                            withAnimation(.spring()) {
-                                                dragOffset = 0
-                                            }
-                                        }
-                                    }
-                            )
-                            .background(.white, ignoresSafeAreaEdges: .bottom)
+                .bottomSheet(
+                    isPresented: $store.isPresented.sending(\.bindingIsPresented),
+                    dismiss: {
+                        store.send(.viewEvent(.bottomSheetDismiss))
+                    },
+                    content: {
+                        spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
+                    },
+                    overlay: {
+                        SpotArchiveButton(height: 24, width: 24, isSaved: store.mapSpotEntity[safe: store.selectIndex]?.isScraped ?? false) {
+                            store.send(.viewEvent(.tappedArchiveButton))
                         }
-                        
-                        .offset(y: dragOffset)
+                    }, topContent: {
+                        mapBottomView
                     }
-                }
+                )
                 .popup(isPresented: $store.alertPresent.sending(\.bindingAlertPresent), view: {
                     HStack {
                         Spacer()
@@ -109,20 +78,6 @@ struct SpotMapView: View {
                         }
                     
                 })
-//                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
-//                    AnyView(mapBottomView)
-//                }, content: {
-//                    AnyView(
-//                        WithPerceptionTracking(content: {
-//                            spotDetailSheet(spot: store.mapSpotEntity.isEmpty ? MapSpotEntity() : store.mapSpotEntity[safe: store.selectIndex] ?? MapSpotEntity())
-//                                .onTapGesture {
-//                                    store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
-//                                }
-//                        })
-//                    )
-//                }, onDismiss: {
-//                    store.send(.viewEvent(.bottomSheetDismiss))
-//                })
                 .onAppear {
                     store.send(.viewCycle(.onAppear))
                 }
@@ -345,9 +300,6 @@ extension SpotMapView {
                 
                 Spacer()
                 
-                SpotArchiveButton(height: 24, width: 24, isSaved:  store.mapSpotEntity[safe: store.selectIndex]?.isScraped ?? false) {
-                    store.send(.viewEvent(.tappedArchiveButton))
-                }
             }
             
             HStack(spacing: 4) {
@@ -381,6 +333,9 @@ extension SpotMapView {
         }
         .padding(.horizontal, 15)
         .padding(.vertical, 30)
+        .onTapGesture {
+            store.send(.viewEvent(.tappedSpotDetail(store.mapSpotEntity[safe: store.selectIndex]?.spotId ?? 0)))
+        }
     }
 }
 
