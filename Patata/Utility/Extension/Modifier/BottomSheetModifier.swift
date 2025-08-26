@@ -7,170 +7,84 @@
 
 import SwiftUI
 
-struct BottomSheetModifier<SheetContent: View>: ViewModifier {
-    
-    let sheetContent: () -> SheetContent
-    let mapBottomView: (() -> SheetContent)?
-    let onDismiss: (() -> Void)?
-    let isMap: Bool
-    
-    private var sheetOffset: CGFloat {
-        isPresented ? (isFullSheet ? (isFull ? 0 : UIScreen.main.bounds.height / 2) : 0) : bottomSheetSize.height
-    }
-    
-    @State var dragOffset: CGFloat = 0
-    @State var bottomSheetSize: CGSize = .zero
-    @State var isFull: Bool = false // sheet의 사이즈
-    @State var isFullSheet: Bool
-    
+struct BottomSheetModifier<TopContent: View, SheetContent: View, OverlayContent: View>: ViewModifier {
     @Binding var isPresented: Bool
+    @State private var dragOffset: CGFloat = 0
+    
+    let topContent: (() -> TopContent)?
+    let sheetContent: () -> SheetContent
+    let overlayContent: (() -> OverlayContent)?
+    let dismiss: (() -> Void)?
+    
+    init(
+        isPresented: Binding<Bool>,
+        dismiss: (() -> Void)? = nil,
+        @ViewBuilder content: @escaping () -> SheetContent,
+        overlayContent: (() -> OverlayContent)? = nil,
+        topContent: (() -> TopContent)? = nil
+    ) {
+        self._isPresented = isPresented
+        self.dismiss = dismiss
+        self.sheetContent = content
+        self.overlayContent = overlayContent
+        self.topContent = topContent
+    }
     
     func body(content: Content) -> some View {
-        
-        ZStack {
-            content
-            
-            if isPresented {
-                
-                if isFull {
-                    Color.white
-                        .ignoresSafeArea()
-                } else if !isMap {
-                    Color.black
-                        .opacity(0.1)
-                        .ignoresSafeArea()
-                        .onTapGesture {
-                            if let onDismiss {
-                                onDismiss()
-                            }
-                            withAnimation {
-                                isFull = false
-                                isPresented = false
-                            }
-                        }
-                        .transition(.opacity)
-                }
-            }
-            
-            bottomSheetItem
-            
-        }
-        .frame(maxWidth: .infinity)
-        
-    }
-    
-    private var bottomSheetItem: some View {
-        VStack {
-            Spacer()
-            
-            Group {
-                if let mapBottomView {
-                    mapBottomView()
-                }
-                
-                VStack {
-                    if isFullSheet {
-                        if !isFull {
-                            Rectangle()
-                                .frame(width: 50, height: 4)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .padding(.vertical, 8)
-                                .opacity(isFull ? 0 : 1)
+        content
+            .overlay(alignment: .bottom) {
+                if isPresented {
+                    VStack {
+                        if let topContent = topContent {
+                            topContent()
                         }
                         
                         sheetContent()
-                            .environment(\.isScrollEnabled, isFull)
-                    } else if !isMap {
-                        VStack {
-                            Rectangle()
-                                .frame(width: 50, height: 4)
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .padding(.top, 8)
-                            
-                            sheetContent()
-                                .fixedSize(horizontal: false, vertical: true)
-                                .foregroundStyle(.textDefault)
-                                .padding(.top, 8)
-                                .padding(.bottom, 30)
-                        }
-                    } else {
-                        VStack {
-                            sheetContent()
-                                .fixedSize(horizontal: false, vertical: true)
-                                .foregroundStyle(.textDefault)
-                                .padding(.top, 8)
-                                .padding(.bottom, 30)
-                        }
-                    }
-                }
-                .background(.white)
-                .cornerRadius(20, corners: [.topLeft, .topRight])
-            }
-            .shadow(color: isMap ? .shadowColor.opacity(0.15) : .clear, radius: 8)
-        }
-        .frame(maxWidth: .infinity)
-        .sizeState(size: $bottomSheetSize)
-        .cornerRadius(20, corners: [.topLeft, .topRight])
-        .offset(y: sheetOffset + dragOffset)
-        .ignoresSafeArea(edges: .bottom)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: isFull ? .infinity : 0)
-                .onChanged { value in
-                    if isFullSheet && !isMap {
-                        if abs(value.translation.height) > abs(value.translation.width) {
-                            dragOffset = value.translation.height
-                        }
-                    } else {
-                        if dragOffset + value.translation.height > 0 {
-                            dragOffset = value.translation.height
-                        }
-                    }
-                }
-                .onEnded { value in
-                    withAnimation(.easeInOut(duration: 0.25)) {  // 여기에 animation 추가
-                            if isFullSheet {
-                                if abs(value.translation.height) > abs(value.translation.width) {
-                                    if value.translation.height <= -150 {
-                                        isFull = true
-                                    } else if value.translation.height > 10 {
-                                        isPresented = false
-                                    }
-                                }
-                            } else {
-                                if value.translation.height > 0 {
-                                    isPresented = false
-                                    
-                                    if isMap {
-                                        if let onDismiss {
-                                            onDismiss()
+                            .contentShape(Rectangle())
+                            .transition(.move(edge: .bottom))
+                            .simultaneousGesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        if value.translation.height > 0 {
+                                            dragOffset = value.translation.height
                                         }
                                     }
-                                } else {
-                                    isPresented = true
+                                    .onEnded { value in
+                                        if value.translation.height > 50 {
+                                            dismiss?()
+                                            
+                                            withAnimation(.easeInOut(duration: 0.25)) {
+                                                isPresented = false
+                                                dragOffset = 0
+                                            }
+                                        } else {
+                                            withAnimation(.spring()) {
+                                                dragOffset = 0
+                                            }
+                                        }
+                                    }
+                            )
+                            .background {
+                                Rectangle()
+                                    .fill(Color.white)
+                                    .cornerRadius(20, corners: [.topLeft, .topRight])
+                                    .ignoresSafeArea(edges: .bottom)
+                            }
+                            .overlay(alignment: .topTrailing) {
+                                if let overlayContent = overlayContent {
+                                    overlayContent()
+                                        .background(
+                                            Rectangle()
+                                                .fill(Color.clear)
+                                                .frame(width: 44, height: 44)
+                                        )
+                                        .padding(.top, 30)
+                                        .padding(.trailing, 15)
                                 }
                             }
-                            dragOffset = 0  // animation block 안에서 실행되도록
-                        }
+                            .offset(y: dragOffset)
+                    }
                 }
-        )
-        .animation(.easeInOut(duration: 0.25), value: isPresented)
-        .animation(.easeInOut(duration: 0.25), value: isFull)
-        .onChange(of: isPresented) { newValue in
-            if !newValue {
-                isFull = false
             }
-        }
     }
 }
-
-private struct isScrollEnabledKey: EnvironmentKey {
-    static let defaultValue: Bool = false
-}
-
-extension EnvironmentValues {
-    var isScrollEnabled: Bool {
-        get { self[isScrollEnabledKey.self] }
-        set { self[isScrollEnabledKey.self] = newValue }
-    }
-}
-
