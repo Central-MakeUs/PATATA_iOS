@@ -87,7 +87,6 @@ struct SpotMapView: View {
 
 extension SpotMapView {
     private var contentView: some View {
-        
         VStack(spacing: 0) {
             VStack {
                 fakeNavgationBar
@@ -101,12 +100,9 @@ extension SpotMapView {
             ZStack(alignment: .top) {
                 UIMapView(mapManager: store.mapManager)
                     .ignoresSafeArea(edges: .bottom)
-                
-                Color.black
-                    .opacity(0.1)
-                    .frame(height: 2)
-                    .blur(radius: 3)
-                    .offset(y: -1)
+                    .overlay(alignment: .top) {
+                        ShadowView(opacity: 0.8, start: .top, end: .bottom, height: 8)
+                    }
                 
                 VStack {
                     mapMenuView
@@ -119,7 +115,6 @@ extension SpotMapView {
                 }
             }
         }
-        
     }
     
     private var fakeNavgationBar: some View {

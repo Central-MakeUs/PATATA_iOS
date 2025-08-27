@@ -71,31 +71,31 @@ extension AddSpotMapView {
                 .padding(.bottom, 14)
             
             ZStack(alignment: .bottom) {
-                ZStack(alignment: .top) {
-                    UIMapView(mapManager: store.mapManager)
-                        .overlay(alignment: .center) {
-                            Image("ActivePin")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 48, height: 48)
-                                .offset(y: -40)
-                        }
-                    
-                    Color.black
-                        .opacity(0.1)
-                        .frame(height: 2)
-                        .blur(radius: 3)
-                        .offset(y: -1)
-                }
+                UIMapView(mapManager: store.mapManager)
+                    .overlay(alignment: .center) {
+                        Image("ActivePin")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 48, height: 48)
+                            .offset(y: -40)
+                    }
+                    .overlay(alignment: .top) {
+                        ShadowView(opacity: 0.8, start: .top, end: .bottom, height: 8)
+                    }
                 
                 VStack {
                     addressView
                         .padding(.vertical, 20)
                         .padding(.horizontal, 15)
+                    
+                    Color.white
+                        .frame(height: 20)
                 }
                 .background(.white)
                 .cornerRadius(20, corners: [.topLeft, .topRight])
+                .shadow(color: .shadowColor, radius: 20, y: -6)
             }
+            .ignoresSafeArea(edges: .bottom)
         }
     }
     
