@@ -17,20 +17,23 @@ struct SearchMapView: View {
         WithPerceptionTracking {
             contentView
                 .hideNav()
-                .presentBottomSheet(isPresented: $store.isPresented.sending(\.bindingIsPresented), isMap: true, mapBottomView: {
-                    AnyView(mapBottomView)
-                }, content: {
-                    AnyView(
-                        WithPerceptionTracking {
-                            spotDetailSheet(spot: store.searchSpotItems[safe: store.selectedIndex] ?? MapSpotEntity())
-                                .onTapGesture {
-                                    store.send(.viewEvent(.tappedSpotDetail(store.searchSpotItems[safe: store.selectedIndex]?.spotId ?? 0)))
-                                }
+                .bottomSheet(
+                    isPresented: $store.isPresented.sending(\.bindingIsPresented),
+                    dismiss: {
+                        store.send(.viewEvent(.bottomSheetDismiss))
+                    },
+                    content: {
+                        spotDetailSheet(spot: store.searchSpotItems[safe: store.selectedIndex] ?? MapSpotEntity())
+                    },
+                    overlay: {
+                        SpotArchiveButton(height: 24, width: 24, isSaved: store.searchSpotItems[safe: store.selectedIndex]?.isScraped ?? false) {
+                            store.send(.viewEvent(.tappedArchiveButton))
                         }
-                    )
-                }, onDismiss: {
-                    store.send(.viewEvent(.bottomSheetDismiss))
-                })
+                    },
+                    topContent: {
+                        mapBottomView
+                    }
+                )
                 .popup(isPresented: $store.errorIsPresented.sending(\.bindingErrorIsPresent), view: {
                     HStack {
                         Spacer()
@@ -301,10 +304,6 @@ extension SearchMapView {
                     .textStyle(.subtitleXS)
                 
                 Spacer()
-                
-                SpotArchiveButton(height: 24, width: 24, isSaved: store.searchSpotItems[safe: store.selectedIndex]?.isScraped ?? false) {
-                    store.send(.viewEvent(.tappedArchiveButton))
-                }
             }
             
             HStack(spacing: 4) {

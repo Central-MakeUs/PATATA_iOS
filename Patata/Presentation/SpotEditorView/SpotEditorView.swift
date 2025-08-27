@@ -75,7 +75,7 @@ struct SpotEditorView: View {
                             }
                         
                     })
-                    .presentBottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
+                    .bottomSheet(isPresented: $store.isPresent.sending(\.bindingPresent)) {
                         BottomSheetItem(title: "카테고리 선택", items: ["스냅스팟", "시크한 야경", "일상 속 공간", "싱그러운 자연"], selectedIndex: $selectedIndex) { category in
                             store.send(.viewEvent(.tappedBottomSheet(category)))
                             store.send(.viewEvent(.closeBottomSheet(false)))
