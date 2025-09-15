@@ -170,7 +170,6 @@ extension HomeCoordinator {
     private func searchAction(state: inout HomeCoordinator.State, action: SearchFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedBackButton(_):
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case let .tappedSpotDetail(spotId):
@@ -190,7 +189,6 @@ extension HomeCoordinator {
     private func categoryAction(state: inout HomeCoordinator.State, action: SpotCategoryFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedNavBackButton:
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case let .tappedSpot(spotId):
@@ -222,12 +220,6 @@ extension HomeCoordinator {
             _ = state.routes.popLast()
             state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
             state.popupIsPresent = true
-            
-            if viewState == .home {
-                state.$isHidden.withLock { $0 = false }
-            } else {
-                state.$isHidden.withLock { $0 = true }
-            }
             
             if viewState == .search {
                 if let searchId = state.screenIds[.search] {
@@ -272,12 +264,6 @@ extension HomeCoordinator {
             state.errorMSG = msg
             state.popupIsPresent = true
             
-            if viewState == .home {
-                state.$isHidden.withLock { $0 = false }
-            } else {
-                state.$isHidden.withLock { $0 = true }
-            }
-            
             if viewState == .search {
                 if let searchId = state.screenIds[.search] {
                     return .send(.router(.element(id: searchId, action: .search(.parentsAction(.deletePop)))))
@@ -316,7 +302,6 @@ extension HomeCoordinator {
         switch action {
         case .tappedBackButton(_):
             _ = state.routes.popLast()
-            changeIsHidden(false, &state)
             
         case let .tappedSpot(spotId):
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
@@ -340,7 +325,6 @@ extension HomeCoordinator {
         case .tappedXButton:
             if let rootId = state.routes.ids.first {
                 state.routes.pop(to: rootId)
-                changeIsHidden(false, &state)
             }
             
         case let .tappedLocation(coord, _, spotDetail, _):
@@ -393,12 +377,6 @@ extension HomeCoordinator {
             
             if let rootId = state.routes.ids.first {
                 state.routes.pop(to: rootId)
-            }
-            
-            if state.routes.count == 1 {
-                state.$isHidden.withLock { $0 = false }
-            } else {
-                state.$isHidden.withLock { $0 = true }
             }
             
         case .tappedBackButton:

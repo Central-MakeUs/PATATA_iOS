@@ -58,14 +58,20 @@ struct HomeCoordinatorView: View {
                             store.send(.changeIsHidden)
                         }
                     
-                case let .spotedit(store):
-                    SpotEditorView(store: store)
+                case let .spotedit(editStore):
+                    SpotEditorView(store: editStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
                     
                 case let .addSpotMap(store):
                     AddSpotMapView(store: store)
                     
                 case let .report(reportStore):
                     ReportView(store: reportStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
                 }
             }
             .customAlert(
