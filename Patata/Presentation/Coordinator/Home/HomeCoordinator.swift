@@ -14,11 +14,13 @@ struct HomeCoordinator {
     @ObservableState
     struct State: Equatable, Sendable {
         @Shared var isHidden: Bool
-        
         var routes: StackState<HomeCoordPath.State> = .init([
             .home(PatataMainFeature.State())
         ])
         
+        var root: PatataMainFeature.State = .init()
+        var spotArchive: Bool = false
+        var changeArchive: Bool = false
         var popupIsPresent: Bool = false
         var alertIsPresent: Bool = false
         var errorMSG: String = ""
@@ -31,8 +33,12 @@ struct HomeCoordinator {
     
     enum Action {
         case router(StackActionOf<HomeCoordPath>)
+        case root(PatataMainFeature.Action)
         
         case viewEvent(ViewEventType)
+        case onAppear // onAppear를 delegate로 받자 그래서 여기서 hidden을 처리
+        case disappear
+        case changeIsHidden
         case bindingPopupIsPresent(Bool)
         case bindingAlertIsPrenset(Bool)
     }
@@ -43,6 +49,10 @@ struct HomeCoordinator {
     }
     
     var body: some ReducerOf<Self> {
+        Scope(state: \.root, action: \.root) {
+            PatataMainFeature()
+        }
+        
         core()
             .forEach(\.routes, action: \.router)
     }
@@ -54,6 +64,14 @@ extension HomeCoordinator {
             switch action {
             case let .router(.element(_, action)):
                 return routerAction(state: &state, action: action)
+                
+            case .changeIsHidden:
+                if state.routes.count == 1 || state.routes.isEmpty {
+                    changeIsHidden(false, &state)
+                } else {
+                    changeIsHidden(true, &state)
+                }
+                
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
@@ -110,22 +128,18 @@ extension HomeCoordinator {
     private func homeAction(state: inout HomeCoordinator.State, action: PatataMainFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedSearch:
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.search(SearchFeature.State(beforeViewState: .home)))
             state.screenIds[.search] = state.routes.ids.last
             
         case .tappedAddButton:
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.category(SpotCategoryFeature.State(initialIndex: 0)))
             state.screenIds[.category] = state.routes.ids.last
             
         case let .tappedSpot(spotId):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .home, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
             
         case .tappedMoreButton:
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(
                 .mySpotList(
                     MySpotListFeature.State(
@@ -145,7 +159,6 @@ extension HomeCoordinator {
             state.screenIds[.mySpotList] = state.routes.ids.last
             
         case let .tappedCategoryButton(category):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.category(SpotCategoryFeature.State(initialIndex: category.rawValue)))
             state.screenIds[.category] = state.routes.ids.last
             
@@ -164,6 +177,9 @@ extension HomeCoordinator {
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .search, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
             
+        case .onAppear:
+            changeIsHidden(true, &state)
+            
         default:
             break
         }
@@ -179,6 +195,9 @@ extension HomeCoordinator {
             
         case let .tappedSpot(spotId):
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
@@ -269,6 +288,25 @@ extension HomeCoordinator {
                 }
             }
             
+        case .onAppear:
+            changeIsHidden(true, &state)
+            
+        case let .changeArchive(spotId, bool, viewState):
+            switch viewState {
+            case .home:
+                break
+                
+            default:
+                if let categoryId = state.screenIds[.category] {
+                    return .send(.router(.element(id: categoryId, action: .category(.parentsAction(.changeArchive(bool))))))
+                }
+            }
+            
+        case let .fetchData(isArchive, _):
+            if let categoryId = state.screenIds[.category] {
+                return .send(.router(.element(id: categoryId, action: .category(.parentsAction(.changeArchive(isArchive))))))
+            }
+            
         }
         
         return .none
@@ -278,11 +316,14 @@ extension HomeCoordinator {
         switch action {
         case .tappedBackButton(_):
             _ = state.routes.popLast()
-            state.$isHidden.withLock { $0 = false }
+            changeIsHidden(false, &state)
             
         case let .tappedSpot(spotId):
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
             
         default:
             break
@@ -295,12 +336,11 @@ extension HomeCoordinator {
         switch action {
         case .tappedBackButton:
             _ = state.routes.popLast()
-            state.$isHidden.withLock { $0 = true }
             
         case .tappedXButton:
             if let rootId = state.routes.ids.first {
                 state.routes.pop(to: rootId)
-                state.$isHidden.withLock { $0 = false }
+                changeIsHidden(false, &state)
             }
             
         case let .tappedLocation(coord, _, spotDetail, _):
@@ -368,6 +408,12 @@ extension HomeCoordinator {
         return .none
     }
     
+}
+
+extension HomeCoordinator {
+    private func changeIsHidden(_ isHidden: Bool, _ state: inout State) {
+        state.$isHidden.withLock { $0 = isHidden }
+    }
 }
 
 extension HomeCoordinator.State {
