@@ -22,6 +22,8 @@ struct ArchiveCoordinator {
         var popupIsPresent: Bool = false
         var alertIsPresent: Bool = false
         var errorMSG: String = ""
+        var spotArchive: Bool = false
+        var changeArchive: Bool = false
         
         init(isHidden: @autoclosure () -> Bool = false) {
             self._isHidden = Shared(wrappedValue: isHidden(), .inMemory("isHidden"))
@@ -33,9 +35,14 @@ struct ArchiveCoordinator {
         case root(ArchiveFeature.Action)
         
         case viewEvent(ViewEventType)
+        case viewCycle(ViewCycle)
         
         case bindingPopupIsPresent(Bool)
         case bindingAlertIsPrenset(Bool)
+        
+        enum ViewCycle {
+            case disAppear
+        }
     }
     
     enum ViewEventType {
@@ -49,14 +56,13 @@ struct ArchiveCoordinator {
         }
         
         core()
+            .forEach(\.routes, action: \.router)
     }
 }
 
 extension ArchiveCoordinator {
     private func core() -> some ReducerOf<Self> {
-        Reduce {
-            state,
-            action in
+        Reduce { state, action in
             switch action {
             case let .root(.delegate(action)):
                 return rootAction(state: &state, action: action)
@@ -70,6 +76,13 @@ extension ArchiveCoordinator {
             case .viewEvent(.dismissAlert):
                 state.alertIsPresent = false
                 
+            case .viewCycle(.disAppear):
+                if state.routes.isEmpty {
+                    changeIsHidden(false, &state)
+                } else {
+                    changeIsHidden(true, &state)
+                }
+                
             case let .bindingPopupIsPresent(isPresent):
                 state.popupIsPresent = isPresent
                 
@@ -82,18 +95,16 @@ extension ArchiveCoordinator {
             
             return .none
         }
-        .forEach(\.routes, action: \.router)
     }
     
     private func rootAction(state: inout ArchiveCoordinator.State, action: ArchiveFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedSpot(spotId):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
             
         case .tappedConfirmButton:
-            state.$isHidden.withLock { $0 = true }
+            changeIsHidden(true, &state)
             state.routes.append(.category(SpotCategoryFeature.State(initialIndex: 0)))
             state.screenIds[.category] = state.routes.ids.last
         }
@@ -131,11 +142,9 @@ extension ArchiveCoordinator {
     ) -> Effect<Action> {
         switch action {
         case .tappedNavBackButton(_, _):
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case .delete(_):
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
             state.popupIsPresent = true
@@ -171,6 +180,19 @@ extension ArchiveCoordinator {
             _ = state.routes.popLast()
             state.errorMSG = msg
             state.popupIsPresent = true
+            
+        case let .changeArchive(_, isArchive, _):
+            state.changeArchive = isArchive
+            // 여기서 archive상태를 기억하고 있다가 처음 상태랑 다르면 그때 반영
+            // 여기서 바로 반영시키지말고 pop될때쯤?
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
+            
+        case let .fetchData(isArchive, viewState):
+            if state.changeArchive != isArchive {
+                print("a")
+            }
         }
         
         return .none
@@ -207,7 +229,6 @@ extension ArchiveCoordinator {
             
         case .tappedXButton:
             state.routes.removeAll()
-            state.$isHidden.withLock { $0 = false }
             
         case let .tappedLocation(coord, _, spotDetail, _):
             state.routes.append(
@@ -240,7 +261,6 @@ extension ArchiveCoordinator {
         switch action {
         case .tappedConfirmButton:
             state.routes.removeAll()
-            state.$isHidden.withLock { $0 = false }
             state.alertIsPresent = true
             
         case .tappedBackButton:
@@ -256,17 +276,17 @@ extension ArchiveCoordinator {
     ) -> Effect<Action> {
         switch action {
         case .tappedNavBackButton:
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case let .tappedSpot(spotId):
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
     }
-    
-    
 }
 
 extension ArchiveCoordinator.State {
@@ -307,5 +327,11 @@ extension ArchiveCoordinator.State {
     var categoryId: StackElementID? {
         get { screenIds[.category] }
         set { screenIds[.category] = newValue }
+    }
+}
+
+extension ArchiveCoordinator {
+    private func changeIsHidden(_ isHidden: Bool, _ state: inout State) {
+        state.$isHidden.withLock { $0 = isHidden }
     }
 }

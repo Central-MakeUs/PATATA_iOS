@@ -74,7 +74,6 @@ extension ArchiveFeature {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
-                print("onAppear")
                 return .run { send in
                     await send(.networkType(.fetchArchiveList))
                 }

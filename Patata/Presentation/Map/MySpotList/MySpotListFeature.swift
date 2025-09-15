@@ -54,6 +54,7 @@ struct MySpotListFeature {
             case tappedBackButton(ViewState)
             case tappedSpot(Int)
             case tappedSearch(ViewState)
+            case onAppear
         }
     }
     
@@ -112,13 +113,16 @@ extension MySpotListFeature {
                 state.selectedIndex = 0
                 state.listLoadTrigger = false
                 
-                return .run { send in
-                    await send(.dataTransType(.fetchRealm))
-                    
-                    for await location in locationManager.getLocationUpdates() {
-                        await send(.dataTransType(.userLocation(location)))
-                    }
-                }
+                return .merge([
+                    .run { send in
+                        await send(.dataTransType(.fetchRealm))
+                        
+                        for await location in locationManager.getLocationUpdates() {
+                            await send(.dataTransType(.userLocation(location)))
+                        }
+                    },
+                    .send(.delegate(.onAppear))
+                ])
                 
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index

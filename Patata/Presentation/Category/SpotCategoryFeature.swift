@@ -27,6 +27,7 @@ struct SpotCategoryFeature {
         var filterText: String = "거리순"
         var spotItems: [SpotEntity] = []
         var isFirst: Bool = true
+        var tappedSpotId: Int? = nil
     }
     
     enum Action {
@@ -34,6 +35,7 @@ struct SpotCategoryFeature {
         case viewEvent(ViewEvent)
         case networkType(NetworkType)
         case dataTransType(DataTransType)
+        case parentsAction(ParentsAction)
         
         case delegate(Delegate)
         
@@ -43,6 +45,7 @@ struct SpotCategoryFeature {
         enum Delegate {
             case tappedNavBackButton
             case tappedSpot(Int)
+            case onAppear
         }
     }
     
@@ -74,6 +77,10 @@ struct SpotCategoryFeature {
         case archiveState(ArchiveEntity, Int)
     }
     
+    enum ParentsAction {
+        case changeArchive(Bool)
+    }
+    
     @Dependency(\.spotRepository) var spotRepository
     @Dependency(\.locationManager) var locationManager
     @Dependency(\.archiveRepostiory) var archiveRepository
@@ -97,13 +104,17 @@ extension SpotCategoryFeature {
                 
                 state.listLoadTrigger = false
                 
-                return .run { send in
-                    await send(.dataTransType(.fetchRealm))
+                return .merge([
+                    .run { send in
+                        await send(.dataTransType(.fetchRealm))
+                        
+                        for await location in locationManager.getLocationUpdates() {
+                            await send(.dataTransType(.userLocation(location)))
+                        }
+                    },
                     
-                    for await location in locationManager.getLocationUpdates() {
-                        await send(.dataTransType(.userLocation(location)))
-                    }
-                }
+                    .send(.delegate(.onAppear))
+                ])
                 
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
@@ -204,6 +215,7 @@ extension SpotCategoryFeature {
                 
             case let .viewEvent(.tappedSpot(index)):
                 state.initialIndex = state.selectedIndex
+                state.tappedSpotId = state.spotItems[index].spotId
                 
                 return .send(.delegate(.tappedSpot(state.spotItems[index].spotId)))
                 
@@ -299,6 +311,11 @@ extension SpotCategoryFeature {
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent
+                
+            case let .parentsAction(.changeArchive(archive)):
+                guard let spotId = state.tappedSpotId, let index = state.spotItems.firstIndex(where: { $0.spotId == spotId }) else { return .none }
+                
+                state.spotItems[index].isScraped = archive
                 
             default:
                 break
