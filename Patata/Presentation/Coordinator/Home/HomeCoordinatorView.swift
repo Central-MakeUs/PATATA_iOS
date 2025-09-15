@@ -16,23 +16,47 @@ struct HomeCoordinatorView: View {
     var body: some View {
         WithPerceptionTracking {
             NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
-                EmptyView()
-            } destination: { store in
-                switch store.case {
-                case let .home(store):
-                    PatataMainView(store: store)
+                ZStack(alignment: .bottom) {
+                    PatataMainView(store: store.scope(state: \.root, action: \.root))
                     
-                case let .search(store):
-                    SearchView(store: store)
+                    FakeTabView(selectedCase: .home)
+                        .opacity(store.isHidden ? 1 : 0)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            } destination: { childStore in
+                switch childStore.case {
+                case let .home(homeStore):
+                    ZStack(alignment: .bottom) {
+                        PatataMainView(store: homeStore)
+                        
+                        FakeTabView(selectedCase: .home)
+                            .opacity(store.isHidden ? 1 : 0)
+                            .ignoresSafeArea(edges: .bottom)
+                    }
                     
-                case let .category(store):
-                    SpotCategoryView(store: store)
+                case let .search(searchStore):
+                    SearchView(store: searchStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
                     
-                case let .spotDetail(store):
-                    SpotDetailView(store: store)
+                case let .category(categoryStore):
+                    SpotCategoryView(store: categoryStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
                     
-                case let .mySpotList(store):
-                    MySpotListView(store: store)
+                case let .spotDetail(detailStore):
+                    SpotDetailView(store: detailStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
+                    
+                case let .mySpotList(mySpotStore):
+                    MySpotListView(store: mySpotStore)
+                        .onDisappear {
+                            store.send(.changeIsHidden)
+                        }
                     
                 case let .spotedit(store):
                     SpotEditorView(store: store)
@@ -40,8 +64,8 @@ struct HomeCoordinatorView: View {
                 case let .addSpotMap(store):
                     AddSpotMapView(store: store)
                     
-                case let .report(store):
-                    ReportView(store: store)
+                case let .report(reportStore):
+                    ReportView(store: reportStore)
                 }
             }
             .customAlert(
