@@ -16,11 +16,20 @@ struct ArchiveCoordinatorView: View {
     var body: some View {
         WithPerceptionTracking {
             NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
-                ArchiveView(store: store.scope(state: \.root, action: \.root))
-            } destination: { store in
-                switch store.case {
+                ZStack(alignment: .bottom) {
+                    ArchiveView(store: store.scope(state: \.root, action: \.root))
+                    
+                    FakeTabView(selectedCase: .archive)
+                        .opacity(store.isHidden ? 1 : 0)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            } destination: { childStore in
+                switch childStore.case {
                 case let .spotDetail(detailStore):
                     SpotDetailView(store: detailStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .spotedit(spotEditStore):
                     SpotEditorView(store: spotEditStore)
@@ -30,9 +39,15 @@ struct ArchiveCoordinatorView: View {
                     
                 case let .report(reportStore):
                     ReportView(store: reportStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .category(categoryStore):
                     SpotCategoryView(store: categoryStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                 }
             }
             .customAlert(
