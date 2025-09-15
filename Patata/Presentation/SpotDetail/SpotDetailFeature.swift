@@ -13,7 +13,7 @@ struct SpotDetailFeature {
     @ObservableState
     struct State: Equatable {
         let viewState: ViewState
-        var spotId: Int
+        let spotId: Int
         var spotDetailData: SpotDetailEntity = SpotDetailEntity()
         var reviewData: [SpotDetailReviewEntity] = []
         
@@ -54,6 +54,9 @@ struct SpotDetailFeature {
             case report(String, id: Int?)
             case reviewReport(id: Int?)
             case deleteSpot(String, ViewState)
+            case onAppear
+            case changeArchive(Int, Bool, ViewState)
+            case fetchData(Bool, ViewState)
         }
     }
     
@@ -104,9 +107,12 @@ extension SpotDetailFeature {
             action in
             switch action {
             case .viewCycle(.onAppear):
-                return .run { [state = state] send in
-                    await send(.networkType(.fetchSpotDetail(state.spotId)))
-                }
+                return .merge([
+                    .run { [state = state] send in
+                        await send(.networkType(.fetchSpotDetail(state.spotId)))
+                    },
+                    .send(.delegate(.onAppear))
+                ])
                 
             case .viewEvent(.tappedNavBackButton):
                 return .send(.delegate(.tappedNavBackButton(state.spotDetailData.isScraped, state.viewState)))
@@ -240,6 +246,9 @@ extension SpotDetailFeature {
                 state.spotDetailData = data
                 state.reviewData = data.reviews
                 
+                return .send(.delegate(.fetchData(data.isScraped, state.viewState)))
+//                return .send(.delegate(.onAppear))
+                
             case let .dataTransType(.archiveState(data)):
                 state.spotDetailData = SpotDetailEntity(
                     spotId: state.spotDetailData.spotId,
@@ -256,6 +265,8 @@ extension SpotDetailFeature {
                     tags: state.spotDetailData.tags,
                     reviews: state.spotDetailData.reviews
                 )
+                
+                return .send(.delegate(.changeArchive(state.spotId, data.isArchive, state.viewState)))
                 
             case let .dataTransType(.reviewData(review)):
                 state.commentText = ""

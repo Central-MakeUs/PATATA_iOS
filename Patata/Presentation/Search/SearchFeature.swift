@@ -60,6 +60,7 @@ struct SearchFeature {
             case successSearch(String, BeforeViewState)
             case tappedSpotDetail(Int)
             case detailBack(Bool)
+            case onAppear
         }
     }
     
@@ -120,13 +121,16 @@ extension SearchFeature {
             case .viewCycle(.onAppear):
                 state.listLoadTrigger = false
                 
-                return .run { send in
-                    await send(.dataTransType(.fetchRealm))
-                    
-                    for await location in locationManager.getLocationUpdates() {
-                        await send(.dataTransType(.userLocation(location)))
-                    }
-                }
+                return .merge([
+                    .run { send in
+                        await send(.dataTransType(.fetchRealm))
+                        
+                        for await location in locationManager.getLocationUpdates() {
+                            await send(.dataTransType(.userLocation(location)))
+                        }
+                    },
+                    .send(.delegate(.onAppear))
+                ])
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton(state.beforeViewState)))

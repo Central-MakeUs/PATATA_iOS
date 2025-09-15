@@ -72,9 +72,7 @@ struct PatataMainFeature {
 
 extension PatataMainFeature {
     private func core() -> some ReducerOf<Self> {
-        Reduce {
-            state,
-            action in
+        Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
                 let categoryIndex = state.selectedIndex
