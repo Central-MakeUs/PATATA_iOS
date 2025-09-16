@@ -112,6 +112,9 @@ extension SpotMapView {
                     Spacer()
                     
                     mapBottomView
+                        
+                    Spacer()
+                        .frame(height: 60)
                 }
             }
         }
