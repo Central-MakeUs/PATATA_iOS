@@ -10,38 +10,65 @@ import ComposableArchitecture
 import PopupView
 
 struct MapCoordinatorView: View {
-    
+    // spot이 선택 되어있지 않아야하고 hidden상태도 false여야함
     @Perception.Bindable var store: StoreOf<MapCoordinator>
     
     var body: some View {
         WithPerceptionTracking {
             NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
-                SpotMapView(store: store.scope(state: \.root, action: \.root))
-            } destination: { store in
-                switch store.case {
+                ZStack(alignment: .bottom) {
+                    SpotMapView(store: store.scope(state: \.root, action: \.root))
+                    
+                    FakeTabView(selectedCase: .map)
+                        .opacity((store.isHidden && !store.isPresent) ? 1 : 0)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            } destination: { otherStore in
+                switch otherStore.case {
                 case let .mySpotList(mySpotListStore):
                     MySpotListView(store: mySpotListStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .spotEditorView(spotEditorStore):
                     SpotEditorView(store: spotEditorStore)
                     
                 case let .search(searchStore):
                     SearchView(store: searchStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .searchMap(searchMapStore):
                     SearchMapView(store: searchMapStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .addSpotMap(addSpotMapStore):
                     AddSpotMapView(store: addSpotMapStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .successView(successStore):
                     SuccessView(store: successStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .spotDetail(detailStore):
                     SpotDetailView(store: detailStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .report(reportStore):
                     ReportView(store: reportStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                 }
             }
                 .customAlert(
