@@ -27,6 +27,7 @@ struct MapCoordinator {
         var popupIsPresent: Bool = false
         var errorMSG: String = ""
         var alertIsPresent: Bool = false
+        var isPresent: Bool = false
         
         init(isHidden: @autoclosure () -> Bool = false) {
             self._isHidden = Shared(wrappedValue: isHidden(), .inMemory("isHidden"))
@@ -37,10 +38,15 @@ struct MapCoordinator {
         case router(StackActionOf<MapCoordPath>)
         case root(SpotMapFeature.Action)
         
+        case viewCycle(ViewCycle)
         case viewEvent(ViewEventType)
         
         case bindingPopupIsPresent(Bool)
         case bindingAlertIsPrenset(Bool)
+        
+        enum ViewCycle {
+            case disAppear
+        }
     }
     
     enum ViewEventType {
@@ -67,6 +73,19 @@ extension MapCoordinator {
             case let .router(.element(_, action)):
                 return routerAction(state: &state, action: action)
                 
+            case .viewCycle(.disAppear):
+                if !state.isPresent {
+                    if let id = state.screenIds[.searchMap] {
+                        if state.routes.ids.last == id {
+                            changeIsHidden(false, &state)
+                        }
+                    }
+                    
+                    if state.routes.isEmpty {
+                        changeIsHidden(false, &state)
+                    }
+                }
+                
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
                 
@@ -91,33 +110,37 @@ extension MapCoordinator {
 extension MapCoordinator {
     private func rootAction(state: inout State, action: SpotMapFeature.Action.Delegate) -> Effect<Action> {
         switch action {
-        case let .tappedSideButton(mbrLocation):
-            state.$isHidden.withLock { $0 = true }
+        case let .tappedSideButton(mbrLocation, isPresent):
+            state.isPresent = isPresent
             state.routes.append(.mySpotList(MySpotListFeature.State(viewState: .map, mbrLocation: mbrLocation, isSearch: false, searchText: "")))
             state.screenIds[.mySpotList] = state.routes.ids.last
             
-        case let .tappedSpotAddButton(coord):
-            state.$isHidden.withLock { $0 = true }
+        case let .tappedSpotAddButton(coord, isPresent):
+            state.isPresent = isPresent
             state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
             state.screenIds[.addSpotMap] = state.routes.ids.last
             
         case .tappedMarker:
-            state.$isHidden.withLock { $0 = true }
+            state.isPresent = true
+            changeIsHidden(true, &state)
             
         case .bottomSheetDismiss:
-            state.$isHidden.withLock { $0 = false }
+            state.isPresent = false
+            changeIsHidden(false, &state)
             
         case .tappedSearch:
-            state.$isHidden.withLock { $0 = true }
+            changeIsHidden(true, &state)
             state.routes.append(.search(SearchFeature.State(beforeViewState: .map)))
             state.screenIds[.search] = state.routes.ids.last
             
-        case let .tappedSpotDetail(spotId):
+        case let .tappedSpotDetail(spotId, isPresent):
+            state.isPresent = isPresent
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .map, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
             
         case .moveCamera:
-            state.$isHidden.withLock { $0 = false }
+            changeIsHidden(false, &state)
+            
         default:
             break
         }
@@ -165,13 +188,7 @@ extension MapCoordinator {
     private func mySpotListAction(state: inout State, action: MySpotListFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedBackButton(viewState):
-            
-            if viewState == .map {
-                state.$isHidden.withLock { $0 = false }
-            } else if viewState == .mapSearch {
-                state.$isHidden.withLock { $0 = true }
-                _ = state.routes.popLast()
-                
+            if viewState == .mapSearch {
                 if let id = state.screenIds[.searchMap] {
                     return .send(.router(.element(id: id, action: .searchMap(.parentsAction(.detailBack)))))
                 }
@@ -193,6 +210,9 @@ extension MapCoordinator {
             } else {
                 state.routes.append(.search(SearchFeature.State(beforeViewState: .mySpotList)))
             }
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
@@ -201,7 +221,6 @@ extension MapCoordinator {
     private func spotEditorAction(state: inout State, action: SpotEditorFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedBackButton:
-            state.$isHidden.withLock { $0 = true }
             _ = state.routes.popLast()
             
             if let id = state.screenIds[.addSpotMap] {
@@ -209,11 +228,9 @@ extension MapCoordinator {
             }
             
         case .successSpotAdd:
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.successView(SuccessFeature.State(viewState: .spot)))
             
         case .tappedXButton:
-            state.$isHidden.withLock { $0 = false }
             state.routes.removeAll()
             
         case let .tappedLocation(coord, viewState, spotDetail, imageData):
@@ -247,17 +264,9 @@ extension MapCoordinator {
     private func searchAction(state: inout State, action: SearchFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let.tappedBackButton(viewState):
-            if viewState == .mySpotList {
-                state.$isHidden.withLock { $0 = true }
-            } else {
-                state.$isHidden.withLock { $0 = false }
-            }
-            
             _ = state.routes.popLast()
             
         case let .successSearch(searchText, viewState):
-            state.$isHidden.withLock { $0 = true }
-            
             if viewState == .searchMap {
                 
                 if let id = state.screenIds[.searchMap] {
@@ -285,26 +294,22 @@ extension MapCoordinator {
     
     private func searchMapAction(state: inout State, action: SearchMapFeature.Action.Delegate) -> Effect<Action> {
         switch action {
-        case let .tappedSideButton(mbrCoord, searchText, isSearch):
-            state.$isHidden.withLock { $0 = true }
+        case let .tappedSideButton(mbrCoord, searchText, isSearch, isPresented):
             state.routes.append(.mySpotList(MySpotListFeature.State(viewState: .mapSearch, mbrLocation: mbrCoord, isSearch: isSearch, searchText: searchText)))
             
         case .tappedMarker:
-            state.$isHidden.withLock { $0 = true }
+            print("")
             
         case .bottomSheetDismiss:
-            state.$isHidden.withLock { $0 = true }
+            print("")
             
         case let .tappedSpotAddButton(coord):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .searchMap, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
             
         case .tappedBackButton:
-            state.$isHidden.withLock { $0 = false }
-            state.routes.removeAll()
+            _ = state.routes.popLast()
             
         case .tappedSearch:
-            state.$isHidden.withLock { $0 = true }
             _ = state.routes.popLast()
             
         case let .tappedSpotDetail(spotId):
@@ -317,12 +322,6 @@ extension MapCoordinator {
     private func addSpotMapAction(state: inout State, action: AddSpotMapFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedBackButton(viewState):
-            if viewState == .map {
-                state.$isHidden.withLock { $0 = false }
-            } else {
-                state.$isHidden.withLock { $0 = true }
-            }
-            
             _ = state.routes.popLast()
             
         case let .tappedAddConfirmButton(spotCoord, spotAddress, viewState, spotDetail, imageData):
@@ -337,6 +336,9 @@ extension MapCoordinator {
                     }
                 }
             }
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
@@ -345,7 +347,7 @@ extension MapCoordinator {
     private func successAction(state: inout State, action: SuccessFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedConfirmButton:
-            state.$isHidden.withLock { $0 = false }
+//            state.$isHidden.withLock { $0 = false }
             state.routes.removeAll()
             
             return .send(.root(.parentsAction(.successAddSpot)))
@@ -355,7 +357,6 @@ extension MapCoordinator {
     private func spotDetailAction(state: inout State, action: SpotDetailFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedNavBackButton(_, viewState):
-            state.$isHidden.withLock { $0 = true }
             _ = state.routes.popLast()
             
             if viewState == .mapSearch {
@@ -367,12 +368,6 @@ extension MapCoordinator {
             }
             
         case let .delete(viewState):
-            if viewState == .map {
-                state.$isHidden.withLock { $0 = false }
-            } else {
-                state.$isHidden.withLock { $0 = true }
-            }
-            
             state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
             state.popupIsPresent = true
             
@@ -463,6 +458,15 @@ extension MapCoordinator {
                     return .send(.router(.element(id: id, action: .mySpotList(.parentsAction(.delete)))))
                 }
             }
+            
+        case .onAppear:
+            print("a")
+            
+        case let .changeArchive(spotId, isArchive, viewState):
+            print("dd")
+            
+        case .fetchData(_, _):
+            print("a")
         }
         
         return .none
@@ -537,5 +541,11 @@ extension MapCoordinator.State {
     var reportId: StackElementID? {
         get { screenIds[.report] }
         set { screenIds[.report] = newValue }
+    }
+}
+
+extension MapCoordinator {
+    private func changeIsHidden(_ isHidden: Bool, _ state: inout State) {
+        state.$isHidden.withLock { $0 = isHidden }
     }
 }

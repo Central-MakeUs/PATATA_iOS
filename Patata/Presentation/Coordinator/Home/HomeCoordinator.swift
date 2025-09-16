@@ -365,6 +365,9 @@ extension HomeCoordinator {
                     await send(.router(.element(id: spotEditId, action: .spotedit(.parentsAction(.changeAddress(coord, spotAddress))))))
                 }
             }
+            
+        default:
+            break
         }
         
         return .none

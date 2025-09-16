@@ -50,7 +50,7 @@ struct SearchMapFeature {
         case bindingErrorIsPresent(Bool)
         
         enum Delegate {
-            case tappedSideButton(MBRCoordinates, searchText: String, isSearch: Bool)
+            case tappedSideButton(MBRCoordinates, searchText: String, isSearch: Bool, isPresent: Bool)
             case tappedMarker
             case bottomSheetDismiss
             case tappedSpotAddButton(Coordinate)
@@ -168,7 +168,7 @@ extension SearchMapFeature {
                 let searchText = state.searchText
                 let isSearch = state.isTappedReload
                 
-                return .send(.delegate(.tappedSideButton(mbrLocation, searchText: searchText, isSearch: isSearch)))
+                return .send(.delegate(.tappedSideButton(mbrLocation, searchText: searchText, isSearch: isSearch, isPresent: state.isPresented)))
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))

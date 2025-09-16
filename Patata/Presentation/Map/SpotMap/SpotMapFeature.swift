@@ -47,12 +47,12 @@ struct SpotMapFeature {
         case bindingAlertPresent(Bool)
         
         enum Delegate {
-            case tappedSideButton(MBRCoordinates)
+            case tappedSideButton(MBRCoordinates, isPresent: Bool)
             case tappedMarker
             case bottomSheetDismiss
-            case tappedSpotAddButton(Coordinate)
+            case tappedSpotAddButton(Coordinate, Bool)
             case tappedSearch
-            case tappedSpotDetail(Int)
+            case tappedSpotDetail(Int, isPresent: Bool)
             case succesReport
             case moveCamera
         }
@@ -151,13 +151,14 @@ extension SpotMapFeature {
                 
             case .viewEvent(.tappedSpotAddButton):
                 state.isPresented = false
-                return .send(.delegate(.tappedSpotAddButton(state.cameraLocation)))
+                return .send(.delegate(.tappedSpotAddButton(state.cameraLocation, state.isPresented)))
                 
             case .viewEvent(.tappedSideButton):
                 let mbrLocation = state.mbrLocation
-                return .send(.delegate(.tappedSideButton(mbrLocation)))
+                return .send(.delegate(.tappedSideButton(mbrLocation, isPresent: state.isPresented)))
                 
             case .viewEvent(.bottomSheetDismiss):
+                state.isPresented = false
                 return .send(.delegate(.bottomSheetDismiss))
                 
             case .viewEvent(.tappedSearch):
@@ -183,7 +184,7 @@ extension SpotMapFeature {
                 }
                 
             case let .viewEvent(.tappedSpotDetail(spotId)):
-                return .send(.delegate(.tappedSpotDetail(spotId)))
+                return .send(.delegate(.tappedSpotDetail(spotId, isPresent: state.isPresented)))
                 
             case .viewEvent(.dismiss):
                 state.alertPresent = false

@@ -48,6 +48,7 @@ struct AddSpotMapFeature {
         enum Delegate {
             case tappedBackButton(ViewState)
             case tappedAddConfirmButton(Coordinate, String, ViewState, SpotDetailEntity, datas: [Data])
+            case onAppear
         }
     }
     
@@ -107,7 +108,8 @@ extension AddSpotMapFeature {
                     .run(operation: { send in
                         await send(.dataTransType(.fetchRealm))
                     }),
-                    .merge(registerPublisher(state: &state))
+                    .merge(registerPublisher(state: &state)),
+                    .send(.delegate(.onAppear))
                 )
                 
             case .viewEvent(.tappedBackButton):
