@@ -214,6 +214,9 @@ extension ArchiveCoordinator {
                     await send(.router(.element(id: id, action: .spotedit(.parentsAction(.changeAddress(coord, spotAddresss))))))
                 }
             }
+            
+        default:
+            break
         }
         
         return .none
