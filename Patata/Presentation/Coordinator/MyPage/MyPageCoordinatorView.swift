@@ -16,29 +16,53 @@ struct MyPageCoordinatorView: View {
     var body: some View {
         WithPerceptionTracking {
             NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
-                MyPageView(store: store.scope(state: \.root, action: \.root))
-            } destination: { store in
-                switch store.case {
+                ZStack(alignment: .bottom) {
+                    MyPageView(store: store.scope(state: \.root, action: \.root))
+                    
+                    FakeTabView(selectedCase: .myPage)
+                        .opacity(store.isHidden ? 1 : 0)
+                        .ignoresSafeArea(edges: .bottom)
+                }
+            } destination: { otherStore in
+                switch otherStore.case {
                 case let .setting(settingStore):
                     SettingView(store: settingStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .deleteID(deleteIDStore):
                     DeleteIDView(store: deleteIDStore)
                     
                 case let .profileEdit(profileStore):
                     ProfileEditView(store: profileStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .success(successStore):
                     SuccessView(store: successStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .spotDetail(spotDetailStore):
                     SpotDetailView(store: spotDetailStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .spotedit(spotEditStore):
                     SpotEditorView(store: spotEditStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .addSpotMap(addSpotMapStore):
                     AddSpotMapView(store: addSpotMapStore)
+                        .onDisappear {
+                            store.send(.viewCycle(.disAppear))
+                        }
                     
                 case let .openSource(openSource):
                     OpenSourceView(store: openSource)
