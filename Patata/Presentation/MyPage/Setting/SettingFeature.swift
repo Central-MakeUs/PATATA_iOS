@@ -27,6 +27,7 @@ struct SettingFeature {
             case tappedLogout
             case tappedDeleteID
             case tappedOpenSource
+            case onAppear
         }
     }
     
@@ -56,6 +57,8 @@ extension SettingFeature {
                 let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
                 
                 state.appVersion = appVersion
+                
+                return .send(.delegate(.onAppear))
                 
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton))

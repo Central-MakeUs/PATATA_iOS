@@ -49,6 +49,7 @@ struct ProfileEditFeature {
         enum Delegate {
             case tappedBackButton(ViewState)
             case successChangeNickname
+            case onAppear
         }
     }
     
@@ -89,6 +90,8 @@ extension ProfileEditFeature {
             case .viewCycle(.onAppear):
                 state.dataState = .data
                 state.nickname = state.profileData.nickName
+                
+                return .send(.delegate(.onAppear))
                 
             case .viewEvent(.tappedClearNickName):
                 state.nickname = ""

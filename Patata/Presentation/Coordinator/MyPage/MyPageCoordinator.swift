@@ -31,10 +31,15 @@ struct MyPageCoordinator {
         case router(StackActionOf<MyPageCoordPath>)
         case root(MyPageFeature.Action)
         
+        case viewCycle(ViewCycle)
         case viewEvent(ViewEventType)
         case delegate(Delegate)
         
         case bindingPopupIsPresent(Bool)
+        
+        enum ViewCycle {
+            case disAppear
+        }
         
         enum Delegate {
             case tappedLogout
@@ -66,6 +71,13 @@ extension MyPageCoordinator {
                 
             case let .router(.element(_, action)):
                 return routerAction(state: &state, action: action)
+                
+            case .viewCycle(.disAppear):
+                if state.routes.isEmpty {
+                    changeIsHidden(false, &state)
+                } else {
+                    changeIsHidden(true, &state)
+                }
                 
             case .viewEvent(.dismissPopup):
                 state.popupIsPresent = false
@@ -111,22 +123,18 @@ extension MyPageCoordinator {
     private func rootAction(state: inout MyPageCoordinator.State, action: MyPageFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedSpot(spotId):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.spotDetail(SpotDetailFeature.State(viewState: .other, spotId: spotId)))
             state.screenIds[.spotDetail] = state.routes.ids.last
             
         case let .tappedProfileEdit(data):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.profileEdit(ProfileEditFeature.State(viewState: .edit, profileData: data)))
             state.screenIds[.profileEdit] = state.routes.ids.last
             
         case .tappedSetting:
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.setting(SettingFeature.State()))
             state.screenIds[.setting] = state.routes.ids.last
             
         case let .tappedAddSpotButton(coord):
-            state.$isHidden.withLock { $0 = true }
             state.routes.append(.addSpotMap(AddSpotMapFeature.State(viewState: .map, spotDetailEntity: SpotDetailEntity(), datas: [], spotCoord: coord)))
             state.screenIds[.addSpotMap] = state.routes.ids.last
             
@@ -138,12 +146,10 @@ extension MyPageCoordinator {
     private func spotDetailAction(state: inout MyPageCoordinator.State, action: SpotDetailFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedNavBackButton(_, _):
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case .delete(_):
             _ = state.routes.popLast()
-            state.$isHidden.withLock { $0 = false }
             state.errorMSG = "게시물이 정상적으로 삭제되었습니다."
             state.popupIsPresent = true
             
@@ -163,6 +169,9 @@ extension MyPageCoordinator {
             )
             state.screenIds[.spotedit] = state.routes.ids.last
             
+        case .onAppear:
+            changeIsHidden(true, &state)
+            
         default:
             break
         }
@@ -173,7 +182,6 @@ extension MyPageCoordinator {
     private func settingAction(state: inout MyPageCoordinator.State, action: SettingFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedBackButton:
-            state.$isHidden.withLock { $0 = false }
             _ = state.routes.popLast()
             
         case .tappedLogout:
@@ -185,6 +193,9 @@ extension MyPageCoordinator {
             
         case .tappedOpenSource:
             state.routes.append(.openSource(OpenSourceFeature.State()))
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
             
         default:
             break
@@ -212,13 +223,14 @@ extension MyPageCoordinator {
         switch action {
         case let .tappedBackButton(viewState):
             if viewState == .edit {
-                state.$isHidden.withLock { $0 = false }
                 _ = state.routes.popLast()
             }
             
         case .successChangeNickname:
-            state.$isHidden.withLock { $0 = false }
             state.routes.removeAll()
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
@@ -227,7 +239,6 @@ extension MyPageCoordinator {
     private func successAction(state: inout MyPageCoordinator.State, action: SuccessFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case .tappedConfirmButton:
-            state.$isHidden.withLock { $0 = false }
             state.routes.removeAll()
         }
         
@@ -237,10 +248,6 @@ extension MyPageCoordinator {
     private func addSpotMapAction(state: inout MyPageCoordinator.State, action: AddSpotMapFeature.Action.Delegate) -> Effect<Action> {
         switch action {
         case let .tappedBackButton(viewState):
-            if viewState == .map {
-                state.$isHidden.withLock { $0 = false }
-            }
-            
             _ = state.routes.popLast()
             
         case let .tappedAddConfirmButton(coord, spotAddress, viewState, spotDetail, datas: imageData):
@@ -268,6 +275,9 @@ extension MyPageCoordinator {
                     }
                 }
             }
+            
+        case .onAppear:
+            changeIsHidden(true, &state)
         }
         
         return .none
@@ -287,7 +297,6 @@ extension MyPageCoordinator {
             
         case .tappedXButton:
             state.routes.removeAll()
-            state.$isHidden.withLock { $0 = false }
             
         case let .tappedLocation(coord, viewState, spotDetail, imageData):
             if viewState == .add {
@@ -372,4 +381,10 @@ extension MyPageCoordinator.State {
         set { screenIds[.openSource] = newValue }
     }
 
+}
+
+extension MyPageCoordinator {
+    private func changeIsHidden(_ isHidden: Bool, _ state: inout State) {
+        state.$isHidden.withLock { $0 = isHidden }
+    }
 }
