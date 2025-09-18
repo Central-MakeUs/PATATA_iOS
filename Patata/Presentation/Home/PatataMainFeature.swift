@@ -26,6 +26,7 @@ struct PatataMainFeature {
         case networkType(NetworkType)
         case dataTransType(DataTransType)
         case delegate(Delegate)
+        case parentsAction(ParentsAction)
         
         enum Delegate {
             case tappedSearch
@@ -62,6 +63,10 @@ struct PatataMainFeature {
         case archiveState(ArchiveEntity, Int, card: Bool)
     }
     
+    enum ParentsAction {
+        case archiveSpot(Int, Bool)
+    }
+    
     @Dependency(\.spotRepository) var spotRepository
     @Dependency(\.archiveRepostiory) var archiveRepository
     @Dependency(\.errorManager) var errorManager
@@ -73,7 +78,9 @@ struct PatataMainFeature {
 
 extension PatataMainFeature {
     private func core() -> some ReducerOf<Self> {
-        Reduce { state, action in
+        Reduce {
+            state,
+            action in
             switch action {
             case .viewCycle(.onAppear):
                 if state.first {
@@ -224,6 +231,41 @@ extension PatataMainFeature {
                             category: state.todaySpotItems[index].category,
                             imageUrl: state.todaySpotItems[index].imageUrl,
                             isScraped: data.isArchive,
+                            tags: state.todaySpotItems[index].tags
+                        )
+                    }
+                }
+                
+            case let .parentsAction(.archiveSpot(spotId, archive)):
+                if let index = state.spotItems.firstIndex(where: { $0.spotId == spotId }) {
+                    
+                    if state.spotItems[index].isScraped != archive {
+                        let archiveCount = archive ? state.spotItems[index].spotScraps + 1 : state.spotItems[index].spotScraps - 1
+                        
+                        state.spotItems[index] = SpotEntity(
+                            spotId: spotId,
+                            spotAddress: state.spotItems[index].spotAddress,
+                            spotName: state.spotItems[index].spotName,
+                            category: state.spotItems[index].category,
+                            imageUrl: state.spotItems[index].imageUrl,
+                            reviews: state.spotItems[index].reviews,
+                            spotScraps: archiveCount,
+                            isScraped: archive,
+                            tags: state.spotItems[index].tags
+                        )
+                    }
+                }
+                
+                if let index = state.todaySpotItems.firstIndex(where: { $0.spotId == spotId }) {
+                    
+                    if state.todaySpotItems[index].isScraped != archive {
+                        state.todaySpotItems[index] = TodaySpotEntity(
+                            spotId: spotId,
+                            spotAddress: state.todaySpotItems[index].spotAddress,
+                            spotName: state.todaySpotItems[index].spotName,
+                            category: state.todaySpotItems[index].category,
+                            imageUrl: state.todaySpotItems[index].imageUrl,
+                            isScraped: archive,
                             tags: state.todaySpotItems[index].tags
                         )
                     }

@@ -36,8 +36,7 @@ struct HomeCoordinator {
         case root(PatataMainFeature.Action)
         
         case viewEvent(ViewEventType)
-        case onAppear // onAppear를 delegate로 받자 그래서 여기서 hidden을 처리
-        case disappear
+        case onAppear
         case changeIsHidden
         case bindingPopupIsPresent(Bool)
         case bindingAlertIsPrenset(Bool)
@@ -62,6 +61,9 @@ extension HomeCoordinator {
     private func core() -> some ReducerOf<Self> {
         Reduce { state, action in
             switch action {
+            case .onAppear:
+                state.screenIds[.home] = state.routes.ids.last
+                
             case let .router(.element(_, action)):
                 return routerAction(state: &state, action: action)
                 
@@ -196,6 +198,11 @@ extension HomeCoordinator {
             
         case .onAppear:
             changeIsHidden(true, &state)
+            
+        case let .tappedArchive(spotId, archive):
+            if let homeId = state.screenIds[.home] {
+                return .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, archive))))))
+            }
         }
         
         return .none
@@ -278,14 +285,15 @@ extension HomeCoordinator {
             changeIsHidden(true, &state)
             
         case let .changeArchive(spotId, bool, viewState):
-            switch viewState {
-            case .home:
-                break
-                
-            default:
+            if let homeId = state.screenIds[.home] {
                 if let categoryId = state.screenIds[.category] {
-                    return .send(.router(.element(id: categoryId, action: .category(.parentsAction(.changeArchive(bool))))))
+                    return .merge([
+                        .send(.router(.element(id: categoryId, action: .category(.parentsAction(.changeArchive(bool)))))),
+                        .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, bool))))))
+                    ])
                 }
+                
+                return .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, bool))))))
             }
             
         case let .fetchData(isArchive, _):
