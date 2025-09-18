@@ -17,6 +17,7 @@ struct PatataMainFeature {
         var categorySelect: Bool = false
         var selectedIndex: Int = 0
         var spotCategorySelected: CategoryCase = .all
+        var first: Bool = true
     }
     
     enum Action {
@@ -75,12 +76,14 @@ extension PatataMainFeature {
         Reduce { state, action in
             switch action {
             case .viewCycle(.onAppear):
-                let categoryIndex = state.selectedIndex
-                state.spotCategorySelected = .all
-                
-                return .run { send in
-                    await send(.networkType(.fetchCategorySpot(categoryIndex)))
-                    await send(.networkType(.fetchTodaySpot))
+                if state.first {
+                    let categoryIndex = state.selectedIndex
+                    state.spotCategorySelected = .all
+                    
+                    return .run { send in
+                        await send(.networkType(.fetchCategorySpot(categoryIndex)))
+                        await send(.networkType(.fetchTodaySpot))
+                    }
                 }
                 
             case let .viewEvent(.selectCategory(index)):
@@ -167,9 +170,11 @@ extension PatataMainFeature {
                 
             case let .dataTransType(.todaySpot(data)):
                 state.todaySpotItems = data
+                state.first = (!state.todaySpotItems.isEmpty && !state.spotItems.isEmpty) ? false : true
                 
             case let .dataTransType(.categorySpot(data)):
                 state.spotItems = Array(data.prefix(3))
+                state.first = (!state.todaySpotItems.isEmpty && !state.spotItems.isEmpty) ? false : true
                 
             case let .dataTransType(.archiveState(data, index, isCard)):
                 if isCard {
