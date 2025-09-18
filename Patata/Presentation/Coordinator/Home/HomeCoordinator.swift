@@ -293,6 +293,13 @@ extension HomeCoordinator {
                     ])
                 }
                 
+                if let searchId = state.screenIds[.search] {
+                    return .merge([
+                        .send(.router(.element(id: searchId, action: .search(.parentsAction(.changeArchive(spotId, bool)))))),
+                        .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, bool))))))
+                    ])
+                }
+                
                 return .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, bool))))))
             }
             

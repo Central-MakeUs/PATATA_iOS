@@ -61,11 +61,13 @@ struct SearchFeature {
             case tappedSpotDetail(Int)
             case detailBack(Bool)
             case onAppear
+            case changeArchive(Int, Bool)
         }
     }
     
     enum ParentsAction {
         case deletePop
+        case changeArchive(Int, Bool)
     }
     
     enum ViewCycle {
@@ -310,8 +312,28 @@ extension SearchFeature {
                     distance: state.searchSpotItems[index].distance
                 )
                 
+                return .send(.delegate(.changeArchive(state.searchSpotItems[index].spotId, data.isArchive)))
+                
             case .dataTransType(.error):
                 state.viewState = .search
+                
+            case let .parentsAction(.changeArchive(spotId, archive)):
+                if let index = state.searchSpotItems.firstIndex(where: { $0.spotId == spotId }) {
+                    
+                    if state.searchSpotItems[index].isScraped != archive {
+                        let archiveCount = archive ? state.searchSpotItems[index].spotScraps + 1 : state.searchSpotItems[index].spotScraps - 1
+                        
+                        state.searchSpotItems[index] = SearchSpotEntity(
+                            spotId: spotId,
+                            spotName: state.searchSpotItems[index].spotName,
+                            imageUrl: state.searchSpotItems[index].imageUrl,
+                            spotScraps: archiveCount,
+                            isScraped: archive,
+                            reviews: state.searchSpotItems[index].reviews,
+                            distance: state.searchSpotItems[index].distance
+                        )
+                    }
+                }
                 
             case let .bindingSearchText(text):
                 state.searchText = text
