@@ -336,6 +336,9 @@ extension SearchMapView {
                 .padding(.top, 10)
         }
         .padding(.horizontal, 15)
-        .padding(.vertical, 12)
+        .padding(.vertical, 30)
+        .onTapGesture {
+            store.send(.viewEvent(.tappedSpotDetail(spot.spotId)))
+        }
     }
 }
