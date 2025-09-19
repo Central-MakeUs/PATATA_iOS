@@ -46,6 +46,7 @@ struct SpotCategoryFeature {
             case tappedNavBackButton
             case tappedSpot(Int)
             case onAppear
+            case tappedArchive(Int, Bool)
         }
     }
     
@@ -308,6 +309,8 @@ extension SpotCategoryFeature {
                     isScraped: data.isArchive,
                     tags: state.spotItems[index].tags
                 )
+                
+                return .send(.delegate(.tappedArchive(state.spotItems[index].spotId, data.isArchive)))
                 
             case let .bindingIsPresent(isPresent):
                 state.isPresent = isPresent
