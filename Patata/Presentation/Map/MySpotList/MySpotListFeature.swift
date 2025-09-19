@@ -55,6 +55,7 @@ struct MySpotListFeature {
             case tappedSpot(Int)
             case tappedSearch(ViewState)
             case onAppear
+            case changeArchive
         }
     }
     
@@ -68,7 +69,7 @@ struct MySpotListFeature {
     
     enum NetworkType {
         case fetchSpotList(Coordinate)
-        case patchArchiveState(Int)
+        case patchArchiveState(Int, Int)
         case fetchSpot(MBRCoordinates, Coordinate, CategoryCase, isSearch: Bool, page: Int, isScroll: Bool)
         case fetchSearchSpot(MBRCoordinates?, Coordinate, String)
     }
@@ -85,7 +86,7 @@ struct MySpotListFeature {
     enum ViewEvent {
         case selectedMenu(Int)
         case tappedBackButton
-        case tappedArchiveButton(Int)
+        case tappedArchiveButton(Int, Int)
         case tappedSpot(Int)
         case tappedSearch
         case nextPage
@@ -146,9 +147,9 @@ extension MySpotListFeature {
             case .viewEvent(.tappedBackButton):
                 return .send(.delegate(.tappedBackButton(state.viewState)))
                 
-            case let .viewEvent(.tappedArchiveButton(index)):
+            case let .viewEvent(.tappedArchiveButton(index, spotId)):
                 return .run { send in
-                    await send(.networkType(.patchArchiveState(index)))
+                    await send(.networkType(.patchArchiveState(index, spotId)))
                 }
                 
             case let .viewEvent(.tappedSpot(spotId)):
@@ -232,12 +233,10 @@ extension MySpotListFeature {
                     }
                 }
                 
-            case let .networkType(.patchArchiveState(index)):
-                let spotId = [state.spotListEntity[index].spotId]
-                
+            case let .networkType(.patchArchiveState(index, spotId)):
                 return .run { send in
                     do {
-                        let data = try await archiveRepository.toggleArchive(spotId: spotId)
+                        let data = try await archiveRepository.toggleArchive(spotId: [spotId])
                         
                         await send(.dataTransType(.archiveState(data, index)))
                     } catch {
@@ -274,7 +273,6 @@ extension MySpotListFeature {
                 }
                 
             case let .dataTransType(.fetchSpot(data, isScroll)):
-                print("data", data)
                 if state.viewState == .map {
                     if isScroll {
                         state.listLoadTrigger = true
@@ -292,7 +290,6 @@ extension MySpotListFeature {
                         state.totalCount = data.totalCount
                     }
                 } else {
-                    print("fetch", data.spots)
                     state.listLoadTrigger = true
                     state.initialSpotEntity.append(contentsOf: data.spots)
                     state.mapSpotEntity.append(contentsOf: data.spots)
@@ -349,17 +346,32 @@ extension MySpotListFeature {
                 }
                 
             case let .dataTransType(.archiveState(data, index)):
-                state.spotListEntity[index] = TodaySpotListEntity(
-                    spotId: state.spotListEntity[index].spotId,
-                    spotAddress: state.spotListEntity[index].spotAddress,
-                    spotAddressDetail: state.spotListEntity[index].spotAddressDetail,
-                    spotName: state.spotListEntity[index].spotName,
-                    categoryId: state.spotListEntity[index].categoryId,
-                    images: state.spotListEntity[index].images,
-                    isScraped: data.isArchive,
-                    distance: state.spotListEntity[index].distance,
-                    tags: state.spotListEntity[index].tags
-                )
+                if state.viewState == .home {
+                    state.spotListEntity[index] = TodaySpotListEntity(
+                        spotId: state.spotListEntity[index].spotId,
+                        spotAddress: state.spotListEntity[index].spotAddress,
+                        spotAddressDetail: state.spotListEntity[index].spotAddressDetail,
+                        spotName: state.spotListEntity[index].spotName,
+                        categoryId: state.spotListEntity[index].categoryId,
+                        images: state.spotListEntity[index].images,
+                        isScraped: data.isArchive,
+                        distance: state.spotListEntity[index].distance,
+                        tags: state.spotListEntity[index].tags
+                    )
+                } else {
+                    state.mapSpotEntity[index] = MapSpotEntity(
+                        spotId: state.mapSpotEntity[index].spotId,
+                        spotName: state.mapSpotEntity[index].spotName,
+                        spotAddress: state.mapSpotEntity[index].spotAddress,
+                        spotAddressDetail: state.mapSpotEntity[index].spotAddressDetail,
+                        coordinate: state.mapSpotEntity[index].coordinate,
+                        category: state.mapSpotEntity[index].category,
+                        tags: state.mapSpotEntity[index].tags,
+                        images: state.mapSpotEntity[index].images,
+                        isScraped: data.isArchive,
+                        distance: state.mapSpotEntity[index].distance
+                    )
+                }
                 
             case let .bindingArchive(archive):
                 state.archive = archive
