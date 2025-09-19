@@ -17,7 +17,7 @@ struct MapSpotEntity: Entity {
     let category: CategoryCase
     let tags: [String]
     let images: [URL?]
-    let isScraped: Bool
+    var isScraped: Bool
     let distance: String
     
     init(spotId: Int = 0, spotName: String = "", spotAddress: String = "", spotAddressDetail: String = "", coordinate: Coordinate = Coordinate(latitude: 0, longitude: 0), category: CategoryCase = .all, tags: [String] = [], images: [URL?] = [], isScraped: Bool = false, distance: String = "") {

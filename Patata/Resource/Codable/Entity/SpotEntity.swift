@@ -29,7 +29,7 @@ struct SpotEntity: Entity {
     let imageUrl: String?
     let reviews: Int
     let spotScraps: Int
-    let isScraped: Bool
+    var isScraped: Bool
     let tags: [String]
     
     init(spotId: Int = 0, spotAddress: String = "", spotName: String = "", category: CategoryCase = .all, imageUrl: String? = nil, reviews: Int = 0, spotScraps: Int = 0, isScraped: Bool = false, tags: [String] = []) {
