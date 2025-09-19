@@ -470,7 +470,14 @@ extension MapCoordinator {
             print("a")
             
         case let .changeArchive(spotId, isArchive, viewState):
-            print("dd")
+            if let searchMapId = state.screenIds[.searchMap] {
+                return .merge([
+                    .send(.root(.parentsAction(.changeArchive(spotId, isArchive)))),
+                    .send(.router(.element(id: searchMapId, action: .searchMap(.parentsAction(.changeArchive(spotId, isArchive))))))
+                ])
+            }
+            
+            return .send(.root(.parentsAction(.changeArchive(spotId, isArchive))))
             
         case .fetchData(_, _):
             print("a")
