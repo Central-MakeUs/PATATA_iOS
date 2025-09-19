@@ -55,7 +55,7 @@ struct MySpotListFeature {
             case tappedSpot(Int)
             case tappedSearch(ViewState)
             case onAppear
-            case changeArchive
+            case changeArchive(Int, Bool)
         }
     }
     
@@ -358,6 +358,8 @@ extension MySpotListFeature {
                         distance: state.spotListEntity[index].distance,
                         tags: state.spotListEntity[index].tags
                     )
+                    
+                    return .send(.delegate(.changeArchive(state.spotListEntity[index].spotId, data.isArchive)))
                 } else {
                     state.mapSpotEntity[index] = MapSpotEntity(
                         spotId: state.mapSpotEntity[index].spotId,
@@ -371,6 +373,8 @@ extension MySpotListFeature {
                         isScraped: data.isArchive,
                         distance: state.mapSpotEntity[index].distance
                     )
+                    
+                    return .send(.delegate(.changeArchive(state.mapSpotEntity[index].spotId, data.isArchive)))
                 }
                 
             case let .bindingArchive(archive):

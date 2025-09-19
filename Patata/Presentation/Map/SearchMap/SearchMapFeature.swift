@@ -98,6 +98,7 @@ struct SearchMapFeature {
         case deleteSpot
         case noDataSpot(String)
         case successEdit
+        case changeArchive(Int, Bool)
     }
     
     enum MapAction {
@@ -268,6 +269,11 @@ extension SearchMapFeature {
             case .parentsAction(.detailBack):
                 state.isFirst = false
                 state.isOtherFirst = false
+                
+            case let .parentsAction(.changeArchive(spotId, archive)):
+                if let index = state.searchSpotItems.firstIndex(where: { $0.spotId == spotId }) {
+                    state.searchSpotItems[index].isScraped = archive
+                }
                 
             case let .networkType(.searchSpot(spotName, userLocation, mbrLocation, reload)):
                 return .run { send in

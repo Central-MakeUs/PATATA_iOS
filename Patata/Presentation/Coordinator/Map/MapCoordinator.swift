@@ -213,6 +213,13 @@ extension MapCoordinator {
             
         case .onAppear:
             changeIsHidden(true, &state)
+            
+        case let .changeArchive(spotId, archive):
+            if let searchMapId = state.screenIds[.searchMap] {
+                return .send(.router(.element(id: searchMapId, action: .searchMap(.parentsAction(.changeArchive(spotId, archive))))))
+            }
+            
+            return .send(.root(.parentsAction(.changeArchive(spotId, archive))))
         }
         
         return .none

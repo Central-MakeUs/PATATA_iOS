@@ -99,6 +99,7 @@ struct SpotMapFeature {
         case detailBack
         case deleteSpot
         case noSpotData(String)
+        case changeArchive(Int, Bool)
     }
     
     enum MapAction {
@@ -329,6 +330,11 @@ extension SpotMapFeature {
                 
             case let .bindingAlertPresent(isPresent):
                 state.alertPresent = isPresent
+                
+            case let .parentsAction(.changeArchive(spotId, archive)):
+                if let index = state.mapSpotEntity.firstIndex(where: { $0.spotId == spotId }) {
+                    state.mapSpotEntity[index].isScraped = archive
+                }
                 
             default:
                 break

@@ -325,6 +325,11 @@ extension HomeCoordinator {
         case .onAppear:
             changeIsHidden(true, &state)
             
+        case let .changeArchive(spotId, archive):
+            if let homeId = state.screenIds[.home] {
+                return .send(.router(.element(id: homeId, action: .home(.parentsAction(.archiveSpot(spotId, archive))))))
+            }
+            
         default:
             break
         }
