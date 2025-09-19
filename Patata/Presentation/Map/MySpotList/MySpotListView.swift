@@ -59,13 +59,21 @@ extension MySpotListView {
                                 ForEach(Array(store.mapSpotEntity.enumerated()), id: \.element.id) { index, item in
                                     mapSpotView(spot: item, index: index)
                                         .background(.white)
-                                        .asButton {
+                                        .onTapGesture {
                                             store.send(.viewEvent(.tappedSpot(item.spotId)))
                                         }
                                         .onAppear {
                                             if store.totalpages != store.currentPage && index >= store.mapSpotEntity.count - 6 && store.listLoadTrigger && store.totalCount != store.mapSpotEntity.count {
                                                 store.send(.viewEvent(.nextPage))
                                             }
+                                        }
+                                        .overlay(alignment: .topTrailing) {
+                                            SpotArchiveButton(height: 24, width: 24, isSaved: item.isScraped) {
+                                                store.send(.viewEvent(.tappedArchiveButton(index, item.spotId)))
+                                            }
+                                            .padding(.top, 16)
+                                            .padding(.trailing, 16)
+                                            .contentShape(Rectangle())
                                         }
                                 }
                             }
@@ -89,8 +97,16 @@ extension MySpotListView {
                             ForEach(Array(store.spotListEntity.enumerated()), id: \.element.id) { index, item in
                                 spotListView(spot: item, index: index)
                                     .background(.white)
-                                    .asButton {
+                                    .onTapGesture {
                                         store.send(.viewEvent(.tappedSpot(item.spotId)))
+                                    }
+                                    .overlay(alignment: .topTrailing) {
+                                        SpotArchiveButton(height: 24, width: 24, isSaved: item.isScraped) {
+                                            store.send(.viewEvent(.tappedArchiveButton(index, item.spotId)))
+                                        }
+                                        .padding(.top, 16)
+                                        .padding(.trailing, 16)
+                                        .contentShape(Rectangle())
                                     }
                             }
                         }
@@ -264,10 +280,6 @@ extension MySpotListView {
                 }
                 
                 Spacer()
-
-                SpotArchiveButton(height: 24, width: 24, isSaved: spot.isScraped) {
-                    store.send(.viewEvent(.tappedArchiveButton(index)))
-                }
             }
             .padding(.top, 16)
             
@@ -334,10 +346,6 @@ extension MySpotListView {
                     .textStyle(.captionS)
                 
                 Spacer()
-
-                SpotArchiveButton(height: 24, width: 24, isSaved: spot.isScraped) {
-                    store.send(.viewEvent(.tappedArchiveButton(index)))
-                }
             }
             .padding(.top, 16)
             
