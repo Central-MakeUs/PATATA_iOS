@@ -286,6 +286,9 @@ extension ArchiveCoordinator {
             
         case .onAppear:
             changeIsHidden(true, &state)
+            
+        default:
+            break
         }
         
         return .none

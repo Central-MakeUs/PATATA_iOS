@@ -16,13 +16,7 @@ struct HomeCoordinatorView: View {
     var body: some View {
         WithPerceptionTracking {
             NavigationStack(path: $store.scope(state: \.routes, action: \.router)) {
-                ZStack(alignment: .bottom) {
-                    PatataMainView(store: store.scope(state: \.root, action: \.root))
-                    
-                    FakeTabView(selectedCase: .home)
-                        .opacity(store.isHidden ? 1 : 0)
-                        .ignoresSafeArea(edges: .bottom)
-                }
+                EmptyView()
             } destination: { childStore in
                 switch childStore.case {
                 case let .home(homeStore):
@@ -113,6 +107,9 @@ struct HomeCoordinatorView: View {
                         store.send(.viewEvent(.dismissPopup))
                     }
             })
+            .onAppear {
+                store.send(.onAppear)
+            }
         }
     }
 }
