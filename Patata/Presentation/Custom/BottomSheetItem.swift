@@ -12,7 +12,9 @@ struct BottomSheetItem: View {
     let delete: Bool
     let items: [String]
     let tapChange: Bool
-    @Binding var selectedIndex: Int
+    
+    @Binding
+    var selectedIndex: Int
     
     let tappedItem: (String) -> Void
     
@@ -39,10 +41,15 @@ extension BottomSheetItem {
         VStack {
             
             if let title {
-                Text(title)
-                    .textStyle(.subtitleM)
-                    .padding(.top, 2)
-                    .padding(.bottom, 8)
+                HStack {
+                    Spacer()
+                    
+                    Text(title)
+                        .textStyle(.subtitleM)
+                    
+                    Spacer()
+                }
+                .frame(height: 35)
                 
                 Divider()
                     .padding(.horizontal, 15)
@@ -72,6 +79,5 @@ extension BottomSheetItem {
                 
             }
         }
-        .background(.white)
     }
 }

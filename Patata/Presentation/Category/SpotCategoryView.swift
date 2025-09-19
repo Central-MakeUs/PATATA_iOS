@@ -28,7 +28,7 @@ struct SpotCategoryView: View {
         WithPerceptionTracking {
             contentView
                 .hideNav()
-                .bottomSheet(isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
+                .bottomSheet(isMap: false, isPresented: $store.isPresent.sending(\.bindingIsPresent)) {
                     BottomSheetItem(title: "정렬", items: ["거리순", "추천순"], selectedIndex: $selectedIndex) { item in
                         store.send(.viewEvent(.tappedBottomSheetItem(item)))
                     }

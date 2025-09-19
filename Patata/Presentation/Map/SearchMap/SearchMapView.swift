@@ -18,7 +18,7 @@ struct SearchMapView: View {
             contentView
                 .hideNav()
                 .bottomSheet(
-                    isPresented: $store.isPresented.sending(\.bindingIsPresented),
+                    isMap: true, isPresented: $store.isPresented.sending(\.bindingIsPresented),
                     dismiss: {
                         store.send(.viewEvent(.bottomSheetDismiss))
                     },

@@ -30,7 +30,7 @@ struct SpotDetailView: View {
                     .customAlert(isPresented: $store.alertIsPresent.sending(\.bindingAlertIsPresent), title: "게시물을 삭제하시겠습니까?", message: "한 번 삭제된 게시물은 복원할 수 없습니다.", cancelText: "취소", confirmText: "삭제") {
                         store.send(.viewEvent(.tappedDeleteButton))
                     }
-                    .bottomSheet(isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
+                    .bottomSheet(isMap: false, isPresented: $store.bottomSheetIsPresent.sending(\.bindingBottomSheetIsPresent)) {
                         if !store.spotDetailData.isAuthor {
                             BottomSheetItem(items: ["게시글 신고하기", "사용자 신고하기"], tapChange: false, selectedIndex: $selectedIndex) { text in
                                 store.send(.viewEvent(.bottomSheetClose(text)))
