@@ -16,7 +16,6 @@
 		DFA57A802D3527E4001E785A /* Alamofire in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A7F2D3527E4001E785A /* Alamofire */; };
 		DFA57A832D3527F4001E785A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A822D3527F4001E785A /* Kingfisher */; };
 		DFA57A862D35282C001E785A /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A852D35282C001E785A /* ComposableArchitecture */; };
-		DFA57A892D352840001E785A /* TCACoordinators in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A882D352840001E785A /* TCACoordinators */; };
 		DFA57A912D355A13001E785A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A902D355A13001E785A /* GoogleSignIn */; };
 		DFA57A932D355A13001E785A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DFA57A922D355A13001E785A /* GoogleSignInSwift */; };
 /* End PBXBuildFile section */
@@ -46,7 +45,6 @@
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
-				Presentation/ErrorView/NetworkErrorView.swift,
 				"Preview Content/Preview Assets.xcassets",
 			);
 			target = DFA57A5F2D35214B001E785A /* Patata */;
@@ -76,7 +74,6 @@
 				DFA57A802D3527E4001E785A /* Alamofire in Frameworks */,
 				DF9D5F772D42572F00042314 /* NMapsMap in Frameworks */,
 				DFA57A932D355A13001E785A /* GoogleSignInSwift in Frameworks */,
-				DFA57A892D352840001E785A /* TCACoordinators in Frameworks */,
 				DF0715722D5B77B0001CFF31 /* RealmSwift in Frameworks */,
 				DFA57A862D35282C001E785A /* ComposableArchitecture in Frameworks */,
 			);
@@ -93,7 +90,9 @@
 				DFA57A622D35214B001E785A /* Patata */,
 				DFA57A612D35214B001E785A /* Products */,
 			);
+			indentWidth = 2;
 			sourceTree = "<group>";
+			tabWidth = 2;
 		};
 		DFA57A612D35214B001E785A /* Products */ = {
 			isa = PBXGroup;
@@ -127,7 +126,6 @@
 				DFA57A7F2D3527E4001E785A /* Alamofire */,
 				DFA57A822D3527F4001E785A /* Kingfisher */,
 				DFA57A852D35282C001E785A /* ComposableArchitecture */,
-				DFA57A882D352840001E785A /* TCACoordinators */,
 				DFA57A902D355A13001E785A /* GoogleSignIn */,
 				DFA57A922D355A13001E785A /* GoogleSignInSwift */,
 				DF9D5F762D42572F00042314 /* NMapsMap */,
@@ -167,7 +165,6 @@
 				DFA57A7E2D3527E4001E785A /* XCRemoteSwiftPackageReference "Alamofire" */,
 				DFA57A812D3527F4001E785A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				DFA57A842D35282C001E785A /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
-				DFA57A872D352840001E785A /* XCRemoteSwiftPackageReference "TCACoordinators" */,
 				DFA57A8F2D355A13001E785A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 				DF9D5F752D42572F00042314 /* XCRemoteSwiftPackageReference "SPM-NMapsMap" */,
 				DF17648F2D5139F9003FA3B3 /* XCRemoteSwiftPackageReference "PopupView" */,
@@ -489,14 +486,6 @@
 				minimumVersion = 1.17.1;
 			};
 		};
-		DFA57A872D352840001E785A /* XCRemoteSwiftPackageReference "TCACoordinators" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/johnpatrickmorgan/TCACoordinators";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.10.1;
-			};
-		};
 		DFA57A8F2D355A13001E785A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
@@ -542,11 +531,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = DFA57A842D35282C001E785A /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
 			productName = ComposableArchitecture;
-		};
-		DFA57A882D352840001E785A /* TCACoordinators */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = DFA57A872D352840001E785A /* XCRemoteSwiftPackageReference "TCACoordinators" */;
-			productName = TCACoordinators;
 		};
 		DFA57A902D355A13001E785A /* GoogleSignIn */ = {
 			isa = XCSwiftPackageProductDependency;

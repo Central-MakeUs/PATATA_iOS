@@ -85,6 +85,7 @@ extension BottomSheetModifier {
         VStack {
             if let topContent = topContent {
                 topContent()
+                    .offset(y: dragOffset)
             }
             
             sheetContent()
@@ -94,11 +95,11 @@ extension BottomSheetModifier {
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
                             if value.translation.height > 0 {
-                                dragOffset = value.translation.height
+                                dragOffset += value.translation.height
                             }
                         }
                         .onEnded { value in
-                            if value.translation.height > 50 {
+                            if value.translation.height > 10 {
                                 dismiss?()
                                 
                                 withAnimation(.easeInOut(duration: 0.25)) {
