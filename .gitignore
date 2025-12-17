@@ -112,3 +112,6 @@ xcuserdata
 APIKey.swift
 Info.plist
 GoogleService-Info.plist
+
+# Claude Code
+.claude/
