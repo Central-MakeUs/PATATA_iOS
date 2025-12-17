@@ -37,37 +37,44 @@ struct BottomSheetModifier<TopContent: View, SheetContent: View, OverlayContent:
         ZStack(alignment: .bottom) {
             content
             
-            if isPresented {
-                
-                if !isMap {
-                    backgroundView
-                }
-                
-                VStack {
-                    if !isMap {
-                        Rectangle()
-                            .frame(width: 50, height: 4)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .padding(.top, 8)
-                    }
-                    
-                    bottomView
-                    
-                }
-                .background {
-                    if !isMap {
-                        Rectangle()
-                            .fill(Color.white)
-                            .cornerRadius(20, corners: [.topLeft, .topRight])
-                            .ignoresSafeArea(edges: .bottom)
-                    }
-                }
-            }
+            contentView
         }
     }
 }
 
 extension BottomSheetModifier {
+  private var contentView: some View {
+    ZStack(alignment: .bottom) {
+      if isPresented {
+          
+          if !isMap {
+              backgroundView
+          }
+          
+          VStack {
+              if !isMap {
+                  Rectangle()
+                      .frame(width: 50, height: 4)
+                      .clipShape(RoundedRectangle(cornerRadius: 8))
+                      .padding(.top, 8)
+              }
+              
+              bottomView
+              
+          }
+          .background {
+              if !isMap {
+                  Rectangle()
+                      .fill(Color.white)
+                      .cornerRadius(20, corners: [.topLeft, .topRight])
+                      .ignoresSafeArea(edges: .bottom)
+              }
+          }
+          .offset(y: dragOffset)
+      }
+    }
+  }
+  
     private var backgroundView: some View {
         Color.black
             .opacity(0.5)
@@ -85,21 +92,21 @@ extension BottomSheetModifier {
         VStack {
             if let topContent = topContent {
                 topContent()
-                    .offset(y: dragOffset)
             }
             
             sheetContent()
                 .contentShape(Rectangle())
-                .transition(.move(edge: .bottom))
-                .simultaneousGesture(
+                .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
                             if value.translation.height > 0 {
                                 dragOffset += value.translation.height
+                            } else {
+                              dragOffset += dragOffset + value.translation.height <= 0 ? 0 : value.translation.height
                             }
                         }
                         .onEnded { value in
-                            if value.translation.height > 10 {
+                            if value.translation.height > -2 {
                                 dismiss?()
                                 
                                 withAnimation(.easeInOut(duration: 0.25)) {
@@ -131,7 +138,6 @@ extension BottomSheetModifier {
                             .padding(.trailing, 15)
                     }
                 }
-                .offset(y: dragOffset)
         }
     }
 }
