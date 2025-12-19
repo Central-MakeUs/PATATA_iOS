@@ -34,6 +34,21 @@ struct RootPathFeature {
     
     var body: some Reducer<State, Action> {
         Reduce { state, action in
+          switch action {
+          case .tabBar:
+            guard case .tabBar = state else { return .none }
+          case .splash:
+            guard case .splash = state else { return .none }
+          case .onboarding:
+            guard case .onboarding = state else { return .none }
+          case .login:
+            guard case .login = state else { return .none }
+          case .networkError:
+            guard case .networkError = state else { return .none }
+          default:
+            break
+          }
+          
             switch action {
             case let .splash(.delegate(.isFirstUser(isFirst))):
                 if isFirst {
