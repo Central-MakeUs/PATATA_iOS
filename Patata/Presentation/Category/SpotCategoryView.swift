@@ -51,60 +51,33 @@ extension SpotCategoryView {
             }
             .background(.white)
             
-            if store.spotItems.isEmpty {
-                
-                ScrollView {
-                    skeletonFilterView
-                        .padding(.top, 12)
-                        .padding(.horizontal, 20)
-                        .shimmering(
-                            gradient: Gradient(
-                                colors:
-                                    [
-                                        Color.black.opacity(0.3),
-                                        Color.black.opacity(0.1),
-                                        Color.black.opacity(0.3)
-                                    ]),
-                            mode: .mask
-                        )
-                    
-                    skeletonView(count: 1)
-                }
-                .background(.gray10)
-                .scrollDisabled(true)
-            } else {
-                ScrollView(.vertical) {
-                    filterView
-                        .padding(.top, 12)
-                        .padding(.horizontal, 15)
-                    
-                    LazyVStack {
-                        ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
-                            CategoryRecommendView(spotItem: item) {
-                                store.send(.viewEvent(.tappedArchiveButton(index)))
-                            }
-                            .background(.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 10))
-                            .padding(.horizontal, 15)
-                            .padding(.bottom, 4)
-                            .onAppear {
-                                print(index, store.totalPages, store.spotItems.count, store.listLoadTrigger)
-                                if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger && store.spotItems.count != store.totalCount {
-                                    store.send(.viewEvent(.nextPage))
-                                }
-                            }
-                            .asButton {
-                                store.send(.viewEvent(.tappedSpot(index)))
-                            }
-                        }
-                    }
-                    
-                }
-                .background(.gray10)
-                .refreshable {
-                    store.send(.viewEvent(.refresh))
-                }
+          if store.isLoading {
+            ScrollView {
+              skeletonFilterView
+                .padding(.top, 12)
+                .padding(.horizontal, 20)
+                .shimmering(
+                  gradient: Gradient(
+                    colors:
+                      [
+                        Color.black.opacity(0.3),
+                        Color.black.opacity(0.1),
+                        Color.black.opacity(0.3)
+                      ]),
+                  mode: .mask
+                )
+              
+              skeletonView(count: 1)
             }
+            .background(.gray10)
+            .scrollDisabled(true)
+          } else {
+            if store.spotItems.isEmpty {
+              noDataView
+            } else {
+              dataView
+            }
+          }
         }
     }
     
@@ -193,6 +166,59 @@ extension SpotCategoryView {
             
         }
     }
+  
+  private var dataView: some View {
+    ScrollView(.vertical) {
+        filterView
+            .padding(.top, 12)
+            .padding(.horizontal, 15)
+        
+        LazyVStack {
+            ForEach(Array(store.spotItems.enumerated()), id: \.element.spotId) { index, item in
+                CategoryRecommendView(spotItem: item) {
+                    store.send(.viewEvent(.tappedArchiveButton(index)))
+                }
+                .background(.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .padding(.horizontal, 15)
+                .padding(.bottom, 4)
+                .onAppear {
+                    print(index, store.totalPages, store.spotItems.count, store.listLoadTrigger)
+                    if store.totalPages != 1 && index >= store.spotItems.count - 6 && store.listLoadTrigger && store.spotItems.count != store.totalCount {
+                        store.send(.viewEvent(.nextPage))
+                    }
+                }
+                .asButton {
+                    store.send(.viewEvent(.tappedSpot(index)))
+                }
+            }
+        }
+        
+    }
+    .background(.gray10)
+    .refreshable {
+        store.send(.viewEvent(.refresh))
+    }
+  }
+  
+  private var noDataView: some View {
+    VStack {
+      Spacer()
+      
+        Image("SearchFail")
+            .resizable()
+            .aspectRatio(contentMode: .fit)
+            .frame(width: 130, height: 150)
+        
+        VStack(alignment: .center) {
+            Text("타타가 스팟들을 정리하고 있어요.")
+        }
+        .textStyle(.subtitleM)
+        .foregroundStyle(.textDisabled)
+      
+      Spacer()
+    }
+  }
 }
 
 extension SpotCategoryView {

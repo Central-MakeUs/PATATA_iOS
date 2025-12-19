@@ -28,8 +28,9 @@ struct SpotCategoryFeature {
         var spotItems: [SpotEntity] = []
         var isFirst: Bool = true
         var tappedSpotId: Int? = nil
+      var isLoading: Bool = false
     }
-    
+  
     enum Action {
         case viewCycle(ViewCycle)
         case viewEvent(ViewEvent)
@@ -104,6 +105,7 @@ extension SpotCategoryFeature {
                 state.selectedIndex = state.initialIndex
                 
                 state.listLoadTrigger = false
+              state.isLoading = true
                 
                 return .merge([
                     .run { send in
@@ -120,6 +122,7 @@ extension SpotCategoryFeature {
             case let .viewEvent(.selectedMenu(index)):
                 state.selectedIndex = index
                 state.listLoadTrigger = false
+              state.isLoading = true
                 state.currentPage = 0
                 state.totalPages = 0
                 state.spotItems = []
@@ -152,6 +155,8 @@ extension SpotCategoryFeature {
                 
                 state.currentPage = 0
                 state.totalPages = 0
+              
+              state.isLoading = true
                 
                 let currentPage = state.currentPage
                 let filter = state.filter
@@ -174,6 +179,8 @@ extension SpotCategoryFeature {
             case .viewEvent(.refresh):
                 state.currentPage = 0
                 state.totalPages = 0
+              
+              state.isLoading = true
                 
                 let currentPage = state.currentPage
                 let filter = state.filter
@@ -270,6 +277,8 @@ extension SpotCategoryFeature {
                     state.spotItems = data.spots
                     state.listLoadTrigger = true
                 }
+              
+              state.isLoading = false
                 
             case .dataTransType(.fetchRealm):
                 return .run { send in
