@@ -105,7 +105,10 @@ extension SpotCategoryFeature {
                 state.selectedIndex = state.initialIndex
                 
                 state.listLoadTrigger = false
-              state.isLoading = true
+              
+              if state.spotItems.isEmpty {
+                state.isLoading = true
+              }
                 
                 return .merge([
                     .run { send in
