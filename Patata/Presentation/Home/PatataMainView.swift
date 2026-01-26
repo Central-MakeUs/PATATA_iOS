@@ -277,122 +277,122 @@ extension PatataMainView {
     
     private func setSizeRecommendSpots(sideCardWidth: CGFloat) -> some View {
         VStack(spacing: 0) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: spacing) {
-                    if !store.todaySpotItems.isEmpty {
-                        ForEach(-1..<store.todaySpotItems.count + 1, id: \.self) { i in
-                            let adjustedIndex = i < 0 ? store.todaySpotItems.count - 1 : (i >= store.todaySpotItems.count ? 0 : i)
-                            
-                            let progress = -dragOffset / (cardWidth + spacing)
-                            
-                            let scale: CGFloat = {
-                                let totalCount = store.todaySpotItems.count
-                                let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
-                                let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
-                                
-                                let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
-                                let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
-                                let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
-                                
-                                if isCurrentCard {
-                                    return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
-                                } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
-                                    return 1.0 + (abs(progress) * (scaleEffect - 1.0))
-                                }
-                                return 1.0
-                            }()
-                            
-                            TodayRecommendView(item: store.todaySpotItems[adjustedIndex]) {
-                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
-                            }
-                            .frame(width: cardWidth, height: contentHeight)
-                            .shadow(color: .shadowColor, radius: 8)
-                            .scaleEffect(scale)
-                            .animation(.smooth, value: dragOffset)
-                            .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
-                            }
-                        }
-                    } else {
-                        ForEach(-1..<3 + 1, id: \.self) { i in
-                            let adjustedIndex = i < 0 ? 3 - 1 : (i >= 3 ? 0 : i)
-                            
-                            let progress = -dragOffset / (cardWidth + spacing)
-                            
-                            let scale: CGFloat = {
-                                let totalCount = 3
-                                let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
-                                let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
-                                
-                                let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
-                                let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
-                                let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
-                                
-                                if isCurrentCard {
-                                    return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
-                                } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
-                                    return 1.0 + (abs(progress) * (scaleEffect - 1.0))
-                                }
-                                return 1.0
-                            }()
-                            
-                            TodayRecommendView(item: TodaySpotEntity()) {
-                                store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
-                            }
-                            .frame(width: cardWidth, height: contentHeight)
-                            .shadow(color: .shadowColor, radius: 8)
-                            .scaleEffect(scale)
-                            .animation(.smooth, value: dragOffset)
-                            .onTapGesture {
-                                store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
-                            }
-                        }
+          ScrollView(.horizontal, showsIndicators: false) {
+              HStack(spacing: spacing) {
+                if !store.todaySpotItems.isEmpty {
+                  ForEach(-1..<store.todaySpotItems.count + 1, id: \.self) { i in
+                    let adjustedIndex = i < 0 ? store.todaySpotItems.count - 1 : (i >= store.todaySpotItems.count ? 0 : i)
+                    
+                    let progress = -dragOffset / (cardWidth + spacing)
+                    
+                    let scale: CGFloat = {
+                      let totalCount = store.todaySpotItems.count
+                      let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
+                      let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                      
+                      let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
+                      let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
+                      let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                      
+                      if isCurrentCard {
+                        return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
+                      } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
+                        return 1.0 + (abs(progress) * (scaleEffect - 1.0))
+                      }
+                      return 1.0
+                    }()
+                    
+                    TodayRecommendView(item: store.todaySpotItems[adjustedIndex]) {
+                      store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
                     }
+                    .frame(width: cardWidth, height: contentHeight)
+                    .shadow(color: .shadowColor, radius: 8)
+                    .scaleEffect(scale)
+                    .animation(.smooth, value: dragOffset)
+                    .onTapGesture {
+                      store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
+                    }
+                  }
+                } else {
+                  ForEach(-1..<3 + 1, id: \.self) { i in
+                    let adjustedIndex = i < 0 ? 3 - 1 : (i >= 3 ? 0 : i)
+                    
+                    let progress = -dragOffset / (cardWidth + spacing)
+                    
+                    let scale: CGFloat = {
+                      let totalCount = 3
+                      let normalizedCurrentIndex = ((currentIndex % totalCount) + totalCount) % totalCount
+                      let normalizedAdjustedIndex = ((adjustedIndex % totalCount) + totalCount) % totalCount
+                      
+                      let isCurrentCard = normalizedAdjustedIndex == normalizedCurrentIndex
+                      let isNextCard = normalizedAdjustedIndex == (normalizedCurrentIndex + 1) % totalCount
+                      let isPrevCard = normalizedAdjustedIndex == (normalizedCurrentIndex - 1 + totalCount) % totalCount
+                      
+                      if isCurrentCard {
+                        return scaleEffect - (abs(progress) * (scaleEffect - 1.0))
+                      } else if (isNextCard && dragOffset < 0) || (isPrevCard && dragOffset > 0) {
+                        return 1.0 + (abs(progress) * (scaleEffect - 1.0))
+                      }
+                      return 1.0
+                    }()
+                    
+                    TodayRecommendView(item: TodaySpotEntity()) {
+                      store.send(.viewEvent(.tappedArchiveButton(adjustedIndex, card: true)))
+                    }
+                    .frame(width: cardWidth, height: contentHeight)
+                    .shadow(color: .shadowColor, radius: 8)
+                    .scaleEffect(scale)
+                    .animation(.smooth, value: dragOffset)
+                    .onTapGesture {
+                      store.send(.viewEvent(.tappedSpot(store.todaySpotItems[adjustedIndex].spotId)))
+                    }
+                  }
                 }
-                .offset(x: contentOffsetX + dragOffset)
-                .padding(.horizontal, sideCardWidth)
-                .frame(height: contentHeight * scaleEffect + 50)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 20)
-                        .onChanged { value in
-                            let verticalDrag = abs(value.translation.height)
-                            let horizontalDrag = abs(value.translation.width)
-                            
-                            if verticalDrag > horizontalDrag {
-                                isScrollDisabled = false
-                                return
-                            }
-                            
-                            isScrollDisabled = true
-                            
-                            withAnimation(.linear(duration: 0.1)) {
-                                dragOffset = value.translation.width
-                            }
-                        }
-                        .onEnded { value in
-                            let verticalDrag = abs(value.translation.height)
-                            let horizontalDrag = abs(value.translation.width)
-                            
-                            if verticalDrag > horizontalDrag {
-                                withAnimation(.smooth(duration: 0.3)) {
-                                    dragOffset = 0
-                                }
-                                isScrollDisabled = false
-                                return
-                            }
-                            
-                            withAnimation(.smooth(duration: 0.3)) {
-                                dragOffset = 0
-                                if value.translation.width < -30 {
-                                    currentIndex += 1
-                                } else if value.translation.width > 30 {
-                                    currentIndex -= 1
-                                }
-                            }
-                            isScrollDisabled = false
-                        }
-                )
-            }
+              }
+              .offset(x: contentOffsetX + dragOffset)
+              .padding(.horizontal, sideCardWidth)
+              .frame(height: contentHeight * scaleEffect + 50)
+              .simultaneousGesture(
+                DragGesture(minimumDistance: 20)
+                  .onChanged { value in
+                    let verticalDrag = abs(value.translation.height)
+                    let horizontalDrag = abs(value.translation.width)
+                    
+                    if verticalDrag > horizontalDrag {
+                      isScrollDisabled = false
+                      return
+                    }
+                    
+                    isScrollDisabled = true
+                    
+                    withAnimation(.linear(duration: 0.1)) {
+                      dragOffset = value.translation.width
+                    }
+                  }
+                  .onEnded { value in
+                    let verticalDrag = abs(value.translation.height)
+                    let horizontalDrag = abs(value.translation.width)
+                    
+                    if verticalDrag > horizontalDrag {
+                      withAnimation(.smooth(duration: 0.3)) {
+                        dragOffset = 0
+                      }
+                      isScrollDisabled = false
+                      return
+                    }
+                    
+                    withAnimation(.smooth(duration: 0.3)) {
+                      dragOffset = 0
+                      if value.translation.width < -30 {
+                        currentIndex += 1
+                      } else if value.translation.width > 30 {
+                        currentIndex -= 1
+                      }
+                    }
+                    isScrollDisabled = false
+                  }
+              )
+          }
             .scrollDisabled(true)
             .frame(height: contentHeight * scaleEffect + 20)
             .padding(.vertical, 10)

@@ -82,12 +82,12 @@ struct MapCoordinatorView: View {
                     .popup(isPresented: $store.popupIsPresent.sending(\.bindingPopupIsPresent), view: {
                         HStack {
                             Spacer()
-                            
+
                             Text(store.errorMSG)
                                 .textStyle(.subtitleXS)
                                 .foregroundStyle(.blue20)
                                 .padding(.vertical, 10)
-                            
+
                             Spacer()
                         }
                         .background(.gray100)
