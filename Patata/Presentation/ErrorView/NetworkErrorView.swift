@@ -13,7 +13,9 @@ struct NetworkErrorView: View {
     @Perception.Bindable var store: StoreOf<NetworkErrorFeature>
     
     var body: some View {
+      WithPerceptionTracking {
         contentView
+      }
     }
 }
 
