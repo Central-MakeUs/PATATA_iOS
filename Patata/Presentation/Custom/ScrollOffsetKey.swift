@@ -5,7 +5,7 @@
 //  Created by 김진수 on 2/28/25.
 //
 
-import SwiftUICore
+import SwiftUI
 
 struct ScrollOffsetKey: PreferenceKey {
     static let defaultValue: CGFloat = .zero
